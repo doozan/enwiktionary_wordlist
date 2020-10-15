@@ -104,10 +104,14 @@ class DictionaryBuilder:
             return None
 
         res = []
-        for k,values in forms.items():
+        for k,values in sorted(forms.items()):
             for v in values:
                 if re.search(r"[\<\{\[]", v):
                     v = self.wiki_to_text(v)
+
+                if "'" in v:
+                    raise ValueError("' mark found in value ({v})")
+                    continue
                 res.append(f"{k}:'{v}'")
 
         return " ".join(res)

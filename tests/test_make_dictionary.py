@@ -77,7 +77,7 @@ def test_bolivariano():
     entry = builder.parse_entry(lang_entry, "bolivariano")
 
     assert "\n".join(entry) == """\
-bolivariano {meta-adj} :: f:'bolivariana' pl:'bolivarianos' fpl:'bolivarianas'
+bolivariano {meta-adj} :: f:'bolivariana' fpl:'bolivarianas' pl:'bolivarianos'
 bolivariano {adj} :: Bolivarian (Of or pertaining to Simón Bolívar.)"""
 
 def test_compeltada():
@@ -239,7 +239,7 @@ def test_meta_noun():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "youtuber")
 
-    assert entry[0] == "youtuber {meta-noun} :: f:'youtuberista' pl:'youtubers' pl:'youtuber' fpl:'youtuberistas'"
+    assert entry[0] == "youtuber {meta-noun} :: f:'youtuberista' fpl:'youtuberistas' pl:'youtubers' pl:'youtuber'"
 
 def test_meta_adj():
     orig_text="""\
@@ -255,7 +255,7 @@ def test_meta_adj():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "youtuber")
 
-    assert entry[0] == "youtuber {meta-adj} :: f:'youtuberista' pl:'youtubers' pl:'youtuber' fpl:'youtuberistas'"
+    assert entry[0] == "youtuber {meta-adj} :: f:'youtuberista' fpl:'youtuberistas' pl:'youtubers' pl:'youtuber'"
 
 def test_meta_verb():
     orig_text="""\
@@ -324,9 +324,9 @@ def test_protector():
     entry = builder.parse_entry(lang_entry, "protector")
 
     assert "\n".join(entry)=="""\
-protector {meta-adj} :: f:'protectora' f:'protectriz' pl:'protectors' fpl:'protectrices'
+protector {meta-adj} :: f:'protectora' f:'protectriz' fpl:'protectrices' pl:'protectors'
 protector {adj} :: protective
-protector {meta-noun} :: f:'protectora' f:'protectriz' pl:'protectores' fpl:'protectoras' fpl:'protectrices'
+protector {meta-noun} :: f:'protectora' f:'protectriz' fpl:'protectoras' fpl:'protectrices' pl:'protectores'
 protector {m} :: protector (someone who protects or guards)
 protector {meta-noun} :: pl:'protectores'
 protector {m} :: protector (a device or mechanism which is designed to protect)"""
@@ -491,7 +491,7 @@ def test_angla():
     entry = builder.parse_entry(lang_entry, "angla")
 
     assert "\n".join(entry)=="""\
-angla {meta-noun} :: m:'anglo' pl:'anglas' mpl:'anglos'
+angla {meta-noun} :: m:'anglo' mpl:'anglos' pl:'anglas'
 angla {f} :: female equivalent of anglo"""
 
 def test_cherry():

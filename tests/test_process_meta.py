@@ -99,4 +99,61 @@ test {m} :: test\
     assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()
 
 
+def test_tio():
+    test = """\
+tío {meta-noun} :: f:'tía' pl:'tíos' fpl:'tías'
+tío {m} :: uncle (the brother of either parent)
+tía {meta-noun} :: m:'tío' pl:'tías' mpl:'tíos'
+tía {f} :: feminine noun of tío; aunt; the sister of either parent
+"""
 
+    expected = """\
+tío {meta-noun} :: f:'tía' fpl:'tías' pl:'tíos'
+tío {m} :: uncle (the brother of either parent)
+tía {meta-noun} :: m:'tío' mpl:'tíos' pl:'tías'
+tía {f} :: feminine noun of tío; aunt; the sister of either parent
+"""
+
+    assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()
+
+
+def test_secondary_feminine():
+    test = """\
+pato {meta-noun} :: f:'pata' pl:'patos' fpl:'patas'
+pato {m} | ánade :: duck, drake
+pata {meta-noun} :: pl:'patas'
+pata {f} | pie :: paw, foot, leg (of an animal)
+pata {meta-noun} :: pl:'patas' m:'pato' mpl:'patos'
+pata {f} :: feminine noun of pato
+"""
+
+    # Because the "feminine noun of" form not in the first (main) declaration, it's masculine
+    # forms are *not* added to the main meta-noun
+
+    expected = """\
+pato {meta-noun} :: f:'pata' fpl:'patas' pl:'patos'
+pato {m} | ánade :: duck, drake
+pata {meta-noun} :: pl:'patas'
+pata {f} | pie :: paw, foot, leg (of an animal)
+pata {f} :: feminine noun of pato\
+"""
+
+    assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()
+
+def test_cuyo():
+    test = """\
+cuya {pron} :: feminine singular of cuyo
+cuyas {pron} :: feminine plural of cuyo, whose
+cuyo {pron} :: whose
+"""
+
+    # Because the "feminine noun of" form not in the first (main) declaration, it's masculine
+    # forms are *not* added to the main meta-noun
+
+    expected = """\
+cuyas {pron} :: feminine plural of cuyo, whose
+cuyo {meta-pron} :: f:'cuya' fpl:'cuyas'
+cuyo {pron} :: whose
+"""
+
+    assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()

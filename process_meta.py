@@ -202,12 +202,14 @@ class Word():
         "eye dialect": "alt",
         "feminine": "f",
         "feminine equivalent": "f",
-        "feminine plural": "fp",
+        "feminine singular": "f",
+        "feminine plural": "fpl",
         "feminine noun": "f",
         "informal form": "spell",
         "informal spelling": "spell",
         "masculine": "m",
-        "masculine plural": "mp",
+        "masculine singular": "m",
+        "masculine plural": "mpl",
         "misspelling": "spell",
         "nonstandard form": "spell",
         "nonstandard spelling": "spell",
@@ -229,16 +231,19 @@ def process_data(data):
     seen_meta = set()
 
     for word in all_words:
-        if word.lemmas and not word.has_nonform_def:
+        metakey = (word.word, word.common_pos)
+
+        # If this is the first word and it's not a lemma and has no nonform def, don't print anything
+        if metakey not in seen_meta and word.lemmas and not word.has_nonform_def:
             continue
 
-        metakey = (word.word, word.common_pos)
-        meta = all_meta.get(metakey)
-        if word.has_nonform_def:
-            if meta and metakey not in seen_meta:
-                seen_meta.add(metakey)
+        if metakey not in seen_meta:
+            seen_meta.add(metakey)
+            meta = all_meta.get(metakey)
+            if meta:
                 yield str(meta)
-            yield from word.lines
+
+        yield from word.lines
 
 def load_all_words(data):
     all_words = []
@@ -278,8 +283,7 @@ def process_meta(words):
     all_meta = {}
 
     # Build the meta for each word, common_pos
-    # For words with multiple meta declarations,
-    # consolidate all forms into a single meta line
+    # For words with multiple meta declarations, consolidate into a single meta line,
     for word in words:
         if not word.meta:
             continue
@@ -289,7 +293,15 @@ def process_meta(words):
             all_meta[key] = word.meta
         else:
             meta = all_meta[key]
+
+            # If the original meta has no masculine definitions (eg, it's a feminine lemma)
+            # do *not* add masculine forms from following definitions
+            # (eg, hamburguesa is feminine only in the sense "hamburger" but is followed
+            # by another usage "feminine of hamburgués, woman from Hamburg")
+            is_lemma = "m" in meta.forms
             for formtype, forms in word.meta.forms.items():
+                if not is_lemma and formtype in ["m", "mpl"]:
+                    continue
                 for form in forms:
                     meta.add_form(formtype, form)
 
