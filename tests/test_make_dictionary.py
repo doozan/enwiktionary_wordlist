@@ -52,7 +52,7 @@ Borrowed from {{bor|es|fr|chapeau}}, from {{der|es|VL.|*cappellus}}. Doublet of 
     assert entry == ["chapó {interj} :: Used to express appreciation; hat tip"]
 
 
-def test_illo():
+def test_bolivariano():
 
     orig_text="""\
 ==Portuguese==
@@ -76,7 +76,9 @@ def test_illo():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "bolivariano")
 
-    assert entry == ["bolivariano {adj} :: Bolivarian (Of or pertaining to Simón Bolívar.)"]
+    assert "\n".join(entry) == """\
+bolivariano {meta-adj} :: f:'bolivariana' pl:'bolivarianos' fpl:'bolivarianas'
+bolivariano {adj} :: Bolivarian (Of or pertaining to Simón Bolívar.)"""
 
 def test_compeltada():
     orig_text="""\
@@ -126,7 +128,9 @@ def test_compeltada():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "completada")
 
-    assert entry == ["completada {f} [Chile] :: party or meeting where they eat completos (hot-dogs)"]
+    assert "\n".join(entry) == """\
+completada {meta-noun} :: pl:'completadas'
+completada {f} [Chile] :: party or meeting where they eat completos (hot-dogs)"""
 
 
 def test_yero():
@@ -157,7 +161,9 @@ def test_yero():
     print(lang_entry)
     entry = builder.parse_entry(lang_entry, "yero")
 
-    assert entry == ["yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)"]
+    assert "\n".join(entry) == """\
+yero {meta-noun} :: pl:'yeros'
+yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)"""
 
 
 def test_wiki_to_text():
@@ -181,7 +187,8 @@ def test_repanoche():
     print(lang_entry)
     entry = builder.parse_entry(lang_entry, "repanoche")
 
-    assert entry == ["repanoche {f} [Spain] :: only used in ser la repanocha"]
+    assert "\n".join(entry) == """\
+repanoche {f} [Spain] :: only used in ser la repanocha"""
 
 
 def test_wiki_to_text():
@@ -230,7 +237,7 @@ def test_meta_noun():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "youtuber", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "youtuber")
 
     assert entry[0] == "youtuber {meta-noun} :: f:'youtuberista' pl:'youtubers' pl:'youtuber' fpl:'youtuberistas'"
 
@@ -246,7 +253,7 @@ def test_meta_adj():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "youtuber", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "youtuber")
 
     assert entry[0] == "youtuber {meta-adj} :: f:'youtuberista' pl:'youtubers' pl:'youtuber' fpl:'youtuberistas'"
 
@@ -265,7 +272,7 @@ def test_meta_verb():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "abstener", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "abstener")
 
     assert entry[0] == "abstener {meta-verb} :: pattern:'-tener' stem:'abs'"
 
@@ -286,7 +293,7 @@ def test_multi_meta_verb():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "adecuar", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "adecuar")
 
     assert "\n".join(entry)=="""\
 adecuar {meta-verb} :: pattern:'u-ú' stem:'adec' stem:''
@@ -314,7 +321,7 @@ def test_protector():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "protector", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "protector")
 
     assert "\n".join(entry)=="""\
 protector {meta-adj} :: f:'protectora' f:'protectriz' pl:'protectors' fpl:'protectrices'
@@ -353,7 +360,7 @@ From {{af|es|a-|terreō|lang2=la}}.
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "aterrar", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "aterrar")
 
     assert "\n".join(entry)=="""\
 aterrar {meta-verb} :: pattern:'e-ie' stem:'at' stem:'rr'
@@ -388,7 +395,7 @@ From {{der|es|la|attentō}}.
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "atentar", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "atentar")
 
     assert "\n".join(entry)=="""\
 atentar {meta-verb} :: pattern:'e-ie' stem:'at' stem:'nt'
@@ -411,7 +418,7 @@ def test_billon():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "billón", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "billón")
 
     assert "\n".join(entry)=="""\
 billón {meta-noun} :: pl:'billones'
@@ -439,7 +446,7 @@ def test_aquestos():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "aquestos", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "aquestos")
 
     assert "\n".join(entry)==""
 
@@ -455,27 +462,52 @@ def test_robot():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "robot", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "robot")
 
     assert "\n".join(entry)=="""\
 robot {meta-noun} :: pl:'robots'
 robot {m} :: robot"""
 
-def xtest_bad_section_headers():
+def test_angla():
     orig_text="""\
-== Spanish ==
+==Spanish==
 
-=== Etymology ===
-Literally, ''to have two [[newscasts]] left.''
+===Pronunciation===
+* {{es-IPA}}
 
-=== Noun ===
-{{head|es|verb}}
+===Adjective===
+{{head|es|adjective form|g=f-s}}
 
-# {{lb|es|idiomatic|Spain}} [[one's days are numbered]], to be [[on borrowed time]]
+# {{adj form of|es|anglo||f|s}}
+
+===Noun===
+{{es-noun|f|m=anglo}}
+
+# {{female equivalent of|es|anglo}}
 """
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "test", include_meta=True)
+    entry = builder.parse_entry(lang_entry, "angla")
 
-    assert "\n".join(entry)==""
+    assert "\n".join(entry)=="""\
+angla {meta-noun} :: m:'anglo' pl:'anglas' mpl:'anglos'
+angla {f} :: female equivalent of anglo"""
+
+def test_cherry():
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|m|+|pl2=cherries}}
+
+# {{l|en|cherry tomato}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+    entry = builder.parse_entry(lang_entry, "cherry")
+
+    assert "\n".join(entry)=="""\
+cherry {meta-noun} :: pl:'cherrys' pl:'cherries'
+cherry {m} :: cherry tomato"""

@@ -29,7 +29,7 @@ import enwiktionary_parser as wtparser
 
 
 class DictionaryBuilder:
-    def __init__(self, lang_name, lang_id, debug=(), baseline=None, start=None):
+    def __init__(self, lang_name, lang_id):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
         self._problems = {}
@@ -38,37 +38,16 @@ class DictionaryBuilder:
         self.title = None
 
     def flag_problem(self, problem, *data, from_child=False):
-        """ Add *problem* to the internal list of problems
-
-        Return value is a Bool whether the problem is unhandled (True) or handled (False)
         """
-
+        Add *problem* to the internal list of problems
+        """
         self._problems[problem] = self._problems.get(problem, []) + [data]
-
-        if "all" in self.fixes:
-            return False
-
-        return problem not in self.fixes
-
-    def clear_problems(self):
-        self._problems = {}
-
-    def can_handle(self, problems):
-        if "all" in self.fixes:
-            return True
-
-        if isinstance(problems, dict):
-            res = len(set(problems.keys()).difference(self.fixes)) == 0
-        else:
-            res = problems in self.fixes
-
-        return res
+        # TODO: do something with the errors raised
 
     def get_language_entry(self, text):
         """
         Return the body text of the language entry
         """
-
         start = fr"(^|\n)==\s*{self.LANG_SECTION}\s*==\s*\n"
         re_endings = [ r"\[\[\s*Category\s*:", r"==[^=]+==", r"----" ]
         #template_endings = [ "c", "C", "top", "topics", "categorize", "catlangname", "catlangcode", "cln", "DEFAULTSORT" ]
@@ -88,14 +67,16 @@ class DictionaryBuilder:
 
         headword = word.headword
         # Ignore forms
-        if str(headword.name) in { "es-adj-form", "es-verb-form" }:
+        # FIXME: put language specific stuff someplace else?
+        if str(headword.name) in { "es-adj-form", "es-verb-form", "es-past participle" }:
             return True
 
         # Ignore feminine forms
+        # FIXME: put language specific stuff someplace else?
         if str(headword.name) == "es-adj" and headword.has("m") or headword.has("masculine"):
             return True
 
-        if str(headword.name) == "head" and headword.has(2) and str(headword.get(2)) in {
+        headword_forms = {
             "participle form",
             "past participle form",
             "present participle",
@@ -103,9 +84,12 @@ class DictionaryBuilder:
             "noun form",
             "adjective form",
             "verb form",
-            "misspelling",
-            "obsolete",
-            }:
+            "determiner form",
+            "pronoun form",
+#            "misspelling",
+#            "obsolete",
+        }
+        if str(headword.name) == "head" and headword.has(2) and " form" in str(headword.get(2)):
             return True
 
         return False
@@ -132,11 +116,13 @@ class DictionaryBuilder:
         meta = self.build_meta(title, "noun", self.forms_to_meta(word.forms))
         if meta:
             return [meta]
+        return []
 
     def get_adj_meta(self, title, word):
         meta = self.build_meta(title, "adj", self.forms_to_meta(word.forms))
         if meta:
             return [meta]
+        return []
 
     def conj_to_forms(self, template):
         forms = {}
@@ -167,55 +153,54 @@ class DictionaryBuilder:
         elif word.shortpos in ["adj"]:
             return self.get_adj_meta(title, word)
 
-    def parse_entry(self, text, title, include_meta=False):
+        return []
+
+    def parse_entry(self, text, title):
         self.title = title
         #print("#",title)
         wikt = wtparser.parse_page(text, title, parent=self)
 
         entry = []
 
-        if include_meta:
-            verb_meta = []
-            for conjugation in wikt.ifilter_sections(lambda x: x.matches("Conjugation")):
-                verb_meta += self.get_verb_meta(title, conjugation)
-            if any("pattern:" in meta for meta in verb_meta):
-                for meta in verb_meta:
-                    if meta not in entry:
-                        entry.append(meta)
+        verb_meta = []
+        for conjugation in wikt.ifilter_sections(lambda x: x.matches("Conjugation")):
+            verb_meta += self.get_verb_meta(title, conjugation)
+        if any("pattern:" in meta for meta in verb_meta):
+            for meta in verb_meta:
+                if meta not in entry:
+                    entry.append(meta)
 
         for word in wikt.ifilter_words():
             #print("-----", word.shortpos)
             #print(word)
-            if include_meta:
-                all_meta = self.get_meta(title, word)
-                if all_meta:
-                    for meta in all_meta:
-                        if meta not in entry:
-                            entry.append(meta)
+            all_meta = self.get_meta(title, word)
+            for meta in all_meta:
+                entry.append(meta)
 
             if self.exclude_word(word):
                 continue
             for sense in word.ifilter_wordsenses():
-                if "{{es-verb form of" in sense.gloss:
-                    continue
                 if "{{rfdef" in sense.gloss:
                     continue
                 if "{{defn" in sense.gloss:
                     continue
-                if "{{form of" in sense.gloss:
-                    continue
-                if "{{inflection of" in sense.gloss:
-                    continue
-                if "{{archaic form of" in sense.gloss:
-                    continue
-                if "{{misspelling of" in sense.gloss:
-                    continue
-                if "{{es-compound of" in sense.gloss:
-                    continue
-                if "{{infl of" in sense.gloss:
-                    continue
-                if "plural form" in word.pos_category:
-                    continue
+#                if "{{archaic form of" in sense.gloss:
+#                    continue
+#                if "{{misspelling of" in sense.gloss:
+#                    continue
+
+#                if "{{es-verb form of" in sense.gloss:
+#                    continue
+#                if "{{form of" in sense.gloss:
+#                    continue
+#                if "{{inflection of" in sense.gloss:
+#                    continue
+#                if "{{es-compound of" in sense.gloss:
+#                    continue
+#                if "{{infl of" in sense.gloss:
+#                    continue
+#                if "plural form" in word.pos_category:
+#                    continue
 
                 gloss_text = self.gloss_to_text(sense.gloss)
                 if gloss_text.strip() == "":
@@ -309,10 +294,10 @@ class DictionaryBuilder:
         pos = word.shortpos
         gendertag = self.make_gendertag(word.genders)
 
-        if pos == "n" and gendertag:
+        if pos in ["n","prop"] and gendertag:
             return "{" + gendertag + "}"
-        if pos == "prop" and gendertag:
-            return "{" + pos + "} {" + gendertag + "}"
+#        if pos == "prop" and gendertag:
+#            return "{" + pos + "} {" + gendertag + "}"
         if pos == "v":
             for q in qualifiers:
                 if q in self.q_verbs:
@@ -341,96 +326,26 @@ def main():
     parser.add_argument("--xml", help="XML file to load", required=True)
     parser.add_argument("--lang-id", help="Language id", required=True)
     parser.add_argument("--lang-section", help="Language name", required=True)
-    parser.add_argument("--ignore", help="List of articles to ignore")
-    parser.add_argument(
-        "--pre-file",
-        help="Destination file for unchanged articles (default: pre.txt)",
-        default="pre.txt",
-    )
-    parser.add_argument(
-        "--post-file",
-        help="Destination file for changed articles (default: post.txt)",
-        default="post.txt",
-    )
-    parser.add_argument(
-        "--fix-debug",
-        action="append",
-        help="Print debug info for issues with the specified flag (Can be specified multiple times)",
-        default=[],
-    )
-    parser.add_argument(
-        "--section",
-        action="append",
-        help="Process specified nym section (Can be specified multiple times) (default: Synonyms, Antonyms)",
-        default=["Synonyms", "Antonyms"],
-    )
-    parser.add_argument(
-        "--fix",
-        action="append",
-        help="Fix issues with the specified flag (Can be specified multiple times)",
-        default=[],
-    )
-    parser.add_argument(
-        "--article-limit",
-        type=int,
-        help="Limit processing to first N articles",
-        default=[],
-    )
-    parser.add_argument(
-        "--fix-limit",
-        type=int,
-        help="Limit processing to first N fixable articles",
-        default=[],
-    )
-    parser.add_argument(
-        "--baseline",
-        help="Use the specified file as a baseline dictionary",
-        default=None
-    )
-    parser.add_argument(
-        "--start",
-        help="Start at a specific word",
-        default=None
-    )
-
     args = parser.parse_args()
 
     if not os.path.isfile(args.xml):
         raise FileNotFoundError(f"Cannot open: {args.xml}")
 
+    # TODO: get lang-section from lang-id
+    # or, use --lang param and take either lang-id or language name
+
     dump = xmlreader.XmlDump(args.xml)
     parser = dump.parse()
 
-    builder = DictionaryBuilder(args.lang_section, args.lang_id, debug=args.fix_debug, baseline=args.baseline, start=args.start)
-
-    prefile = open(args.pre_file, "w")
-    postfile = open(args.post_file, "w")
+    builder = DictionaryBuilder(args.lang_section, args.lang_id)
 
     count = 0
     lang_count = 0
-    fixable = 0
 
-    ignore = set()
-    if args.ignore:
-        with open(args.ignore) as infile:
-            ignore = set(infile.read().splitlines())
-
-    started=not args.start
     for entry in parser:
-        if not started and args.start:
-            if entry.title == args.start:
-                started=True
-            else:
-                continue
-
-        if args.article_limit and count > args.article_limit:
-            break
         count += 1
 
         if ":" in entry.title:
-            continue
-
-        if entry.title in ignore:
             continue
 
         lang_entry = builder.get_language_entry(entry.text)
@@ -440,14 +355,13 @@ def main():
 
         lang_count += 1
 
-        entry = builder.parse_entry(lang_entry, entry.title, include_meta=True)
+        entry = builder.parse_entry(lang_entry, entry.title)
         for line in entry:
             if line.strip() != "":
                 print(line)
 
 #    print(f"Total articles: {count}")
 #    print(f"Total in {args.lang_section}: {lang_count}")
-#    print(f"Total fixable: {fixable}")
 
 #    for k, v in sorted(fixer._stats.items(), key=lambda item: item[1], reverse=True):
 #        print(f"{k}: {v}")
