@@ -46,7 +46,7 @@ class Meta():
             res = re.match(r"(.*?) {meta-(.*?)} :: (.*)", line)
             self.word = res.group(1)
             self.common_pos = res.group(2)
-            for match in re.finditer(r"\s*(.*?):'(.*?)'", res.group(3)):
+            for match in re.finditer(r"\s*(.*?)=(.*?)(; |$)", res.group(3)):
                 self.add_form(match.group(1), match.group(2))
 
     def add_form(self, formtype, value):
@@ -67,9 +67,8 @@ class Meta():
     def __str__(self):
         line = [self.word, "{meta-" + self.common_pos + "}", "::"]
 
-        for k, values in sorted(self.forms.items()):
-            for v in values:
-                line.append(f"{k}:'{v}'")
+        forms = [ f"{k}={v}" for k, values in sorted(self.forms.items()) for v in values ]
+        line.append("; ".join(forms))
 
         return(" ".join(line))
 

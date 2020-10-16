@@ -77,7 +77,7 @@ def test_bolivariano():
     entry = builder.parse_entry(lang_entry, "bolivariano")
 
     assert "\n".join(entry) == """\
-bolivariano {meta-adj} :: f:'bolivariana' fpl:'bolivarianas' pl:'bolivarianos'
+bolivariano {meta-adj} :: f=bolivariana; fpl=bolivarianas; pl=bolivarianos
 bolivariano {adj} :: Bolivarian (Of or pertaining to Simón Bolívar.)"""
 
 def test_compeltada():
@@ -129,7 +129,7 @@ def test_compeltada():
     entry = builder.parse_entry(lang_entry, "completada")
 
     assert "\n".join(entry) == """\
-completada {meta-noun} :: pl:'completadas'
+completada {meta-noun} :: pl=completadas
 completada {f} [Chile] :: party or meeting where they eat completos (hot-dogs)"""
 
 
@@ -162,7 +162,7 @@ def test_yero():
     entry = builder.parse_entry(lang_entry, "yero")
 
     assert "\n".join(entry) == """\
-yero {meta-noun} :: pl:'yeros'
+yero {meta-noun} :: pl=yeros
 yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)"""
 
 
@@ -239,7 +239,7 @@ def test_meta_noun():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "youtuber")
 
-    assert entry[0] == "youtuber {meta-noun} :: f:'youtuberista' fpl:'youtuberistas' pl:'youtubers' pl:'youtuber'"
+    assert entry[0] == "youtuber {meta-noun} :: f=youtuberista; fpl=youtuberistas; pl=youtubers; pl=youtuber"
 
 def test_meta_adj():
     orig_text="""\
@@ -255,7 +255,7 @@ def test_meta_adj():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "youtuber")
 
-    assert entry[0] == "youtuber {meta-adj} :: f:'youtuberista' fpl:'youtuberistas' pl:'youtubers' pl:'youtuber'"
+    assert entry[0] == "youtuber {meta-adj} :: f=youtuberista; fpl=youtuberistas; pl=youtubers; pl=youtuber"
 
 def test_meta_verb():
     orig_text="""\
@@ -274,7 +274,7 @@ def test_meta_verb():
     assert lang_entry != ""
     entry = builder.parse_entry(lang_entry, "abstener")
 
-    assert entry[0] == "abstener {meta-verb} :: pattern:'-tener' stem:'abs'"
+    assert entry[0] == "abstener {meta-verb} :: pattern=-tener; stem=abs"
 
 def test_multi_meta_verb():
     orig_text="""\
@@ -296,8 +296,8 @@ def test_multi_meta_verb():
     entry = builder.parse_entry(lang_entry, "adecuar")
 
     assert "\n".join(entry)=="""\
-adecuar {meta-verb} :: pattern:'u-ú' stem:'adec' stem:''
-adecuar {meta-verb} :: stem:'adecu'
+adecuar {meta-verb} :: pattern=u-ú; stem=adec; stem=
+adecuar {meta-verb} :: stem=adecu
 adecuar {vt} :: to adapt, adjust"""
 
 def test_protector():
@@ -324,11 +324,11 @@ def test_protector():
     entry = builder.parse_entry(lang_entry, "protector")
 
     assert "\n".join(entry)=="""\
-protector {meta-adj} :: f:'protectora' f:'protectriz' fpl:'protectrices' pl:'protectors'
+protector {meta-adj} :: f=protectora; f=protectriz; fpl=protectrices; pl=protectores
 protector {adj} :: protective
-protector {meta-noun} :: f:'protectora' f:'protectriz' fpl:'protectoras' fpl:'protectrices' pl:'protectores'
+protector {meta-noun} :: f=protectora; f=protectriz; fpl=protectoras; fpl=protectrices; pl=protectores
 protector {m} :: protector (someone who protects or guards)
-protector {meta-noun} :: pl:'protectores'
+protector {meta-noun} :: pl=protectores
 protector {m} :: protector (a device or mechanism which is designed to protect)"""
 
 def test_aterrar():
@@ -363,8 +363,8 @@ From {{af|es|a-|terreō|lang2=la}}.
     entry = builder.parse_entry(lang_entry, "aterrar")
 
     assert "\n".join(entry)=="""\
-aterrar {meta-verb} :: pattern:'e-ie' stem:'at' stem:'rr'
-aterrar {meta-verb} :: stem:'aterr'
+aterrar {meta-verb} :: pattern=e-ie; stem=at; stem=rr
+aterrar {meta-verb} :: stem=aterr
 aterrar {vt} :: to bring down, to ground
 aterrar {vt} :: to scare"""
 
@@ -398,7 +398,7 @@ From {{der|es|la|attentō}}.
     entry = builder.parse_entry(lang_entry, "atentar")
 
     assert "\n".join(entry)=="""\
-atentar {meta-verb} :: pattern:'e-ie' stem:'at' stem:'nt'
+atentar {meta-verb} :: pattern=e-ie; stem=at; stem=nt
 atentar {vi} :: to commit a violent or criminal attack, to strike
 atentar {vt} [obsolete] :: to touch
 atentar {v} :: synonym of tentar"""
@@ -421,7 +421,7 @@ def test_billon():
     entry = builder.parse_entry(lang_entry, "billón")
 
     assert "\n".join(entry)=="""\
-billón {meta-noun} :: pl:'billones'
+billón {meta-noun} :: pl=billones
 billón {num} :: 10^12; a trillion (short system)
 billón {num} [obsolete] :: 10^9: a billion (long system)"""
 
@@ -465,7 +465,7 @@ def test_robot():
     entry = builder.parse_entry(lang_entry, "robot")
 
     assert "\n".join(entry)=="""\
-robot {meta-noun} :: pl:'robots'
+robot {meta-noun} :: pl=robots
 robot {m} :: robot"""
 
 def test_angla():
@@ -491,7 +491,7 @@ def test_angla():
     entry = builder.parse_entry(lang_entry, "angla")
 
     assert "\n".join(entry)=="""\
-angla {meta-noun} :: m:'anglo' mpl:'anglos' pl:'anglas'
+angla {meta-noun} :: m=anglo; mpl=anglos; pl=anglas
 angla {f} :: female equivalent of anglo"""
 
 def test_cherry():
@@ -509,5 +509,25 @@ def test_cherry():
     entry = builder.parse_entry(lang_entry, "cherry")
 
     assert "\n".join(entry)=="""\
-cherry {meta-noun} :: pl:'cherrys' pl:'cherries'
+cherry {meta-noun} :: pl=cherrys; pl=cherries
 cherry {m} :: cherry tomato"""
+
+
+def test_torpon():
+    orig_text="""\
+==Spanish==
+
+===Adjective===
+{{es-adj|f=torpona|mpl=torpones}}
+
+# [[clumsy]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+    entry = builder.parse_entry(lang_entry, "torpón")
+
+    assert "\n".join(entry)=="""\
+torpón {meta-adj} :: f=torpona; fpl=torponas; pl=torpones
+torpón {adj} :: clumsy\
+"""

@@ -24,6 +24,7 @@ os.environ["PYWIKIBOT_NO_USER_CONFIG"]="2"
 from pywikibot import xmlreader
 from enwiktionary_templates import expand_templates
 import re
+import sys
 
 import enwiktionary_parser as wtparser
 
@@ -109,12 +110,12 @@ class DictionaryBuilder:
                 if re.search(r"[\<\{\[]", v):
                     v = self.wiki_to_text(v)
 
-                if "'" in v:
-                    raise ValueError("' mark found in value ({v})")
-                    continue
-                res.append(f"{k}:'{v}'")
+                if ";" in v:
+                    raise ValueError(f"ERROR: ; found in value ({v})")
 
-        return " ".join(res)
+                res.append(f"{k}={v}")
+
+        return "; ".join(res)
 
     def get_noun_meta(self, title, word):
         meta = self.build_meta(title, "noun", self.forms_to_meta(word.forms))
@@ -161,7 +162,6 @@ class DictionaryBuilder:
 
     def parse_entry(self, text, title):
         self.title = title
-        #print("#",title)
         wikt = wtparser.parse_page(text, title, parent=self)
 
         entry = []
@@ -169,14 +169,12 @@ class DictionaryBuilder:
         verb_meta = []
         for conjugation in wikt.ifilter_sections(lambda x: x.matches("Conjugation")):
             verb_meta += self.get_verb_meta(title, conjugation)
-        if any("pattern:" in meta for meta in verb_meta):
+        if any("pattern=" in meta for meta in verb_meta):
             for meta in verb_meta:
                 if meta not in entry:
                     entry.append(meta)
 
         for word in wikt.ifilter_words():
-            #print("-----", word.shortpos)
-            #print(word)
             all_meta = self.get_meta(title, word)
             for meta in all_meta:
                 entry.append(meta)

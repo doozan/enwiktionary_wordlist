@@ -1,12 +1,12 @@
 import process_meta
 
 def test_meta():
-    meta = process_meta.Meta("testo {meta-noun} :: pl:'testos' f:'testa' fpl:'testas'")
+    meta = process_meta.Meta("testo {meta-noun} :: pl=testos; f=testa; fpl=testas")
 
-    assert str(meta) == "testo {meta-noun} :: f:'testa' fpl:'testas' pl:'testos'"
+    assert str(meta) == "testo {meta-noun} :: f=testa; fpl=testas; pl=testos"
 
     meta.add_form("old", "tezto")
-    assert str(meta) == "testo {meta-noun} :: f:'testa' fpl:'testas' old:'tezto' pl:'testos'"
+    assert str(meta) == "testo {meta-noun} :: f=testa; fpl=testas; old=tezto; pl=testos"
 
 
 def test_get_form():
@@ -40,29 +40,29 @@ def test_word():
 
 def test_process_meta():
     test = """\
-testo {meta-noun} :: pl:'testos'
+testo {meta-noun} :: pl=testos
 testo {m} :: test
-testo {meta-noun} :: pl:'testoz'
+testo {meta-noun} :: pl=testoz
 testo {m} :: test2
-testa {meta-noun} :: pl:'testas'
+testa {meta-noun} :: pl=testas
 testa {f} :: feminine noun of testo
-testoo {meta-noun} :: pl:'testoos'
+testoo {meta-noun} :: pl=testoos
 testoo {m} :: misspelling of testo
 test2 {m} :: misspelling of testo
 test2 {m} :: testing
-test3 {meta-noun} :: pl:'test3s'
+test3 {meta-noun} :: pl=test3s
 test3 {m} :: test3 one
-test3 {meta-noun} :: pl:'test3z'
+test3 {meta-noun} :: pl=test3z
 test3 {m} :: test3 two
 """
 
     expected = """\
-testo {meta-noun} :: f:'testa' fpl:'testas' pl:'testos' pl:'testoz' spell:'testoo' spell:'testoos' spell:'test2'
+testo {meta-noun} :: f=testa; fpl=testas; pl=testos; pl=testoz; spell=testoo; spell=testoos; spell=test2
 testo {m} :: test
 testo {m} :: test2
 test2 {m} :: misspelling of testo
 test2 {m} :: testing
-test3 {meta-noun} :: pl:'test3s' pl:'test3z'
+test3 {meta-noun} :: pl=test3s; pl=test3z
 test3 {m} :: test3 one
 test3 {m} :: test3 two
 """
@@ -76,7 +76,7 @@ y {conj} :: and
 """
 
     expected = """\
-y {meta-conj} :: old:'i'
+y {meta-conj} :: old=i
 y {conj} :: and\
 """
 
@@ -86,13 +86,13 @@ y {conj} :: and\
 
 def test_duplicate_meta():
     test = """\
-test {meta-noun} :: pl:'testz'
-test {meta-noun} :: pl:'tests'
+test {meta-noun} :: pl=testz
+test {meta-noun} :: pl=tests
 test {m} :: test
 """
 
     expected = """\
-test {meta-noun} :: pl:'tests'
+test {meta-noun} :: pl=tests
 test {m} :: test\
 """
 
@@ -101,16 +101,16 @@ test {m} :: test\
 
 def test_tio():
     test = """\
-tío {meta-noun} :: f:'tía' pl:'tíos' fpl:'tías'
+tío {meta-noun} :: f=tía; pl=tíos; fpl=tías
 tío {m} :: uncle (the brother of either parent)
-tía {meta-noun} :: m:'tío' pl:'tías' mpl:'tíos'
+tía {meta-noun} :: m=tío; pl=tías; mpl=tíos
 tía {f} :: feminine noun of tío; aunt; the sister of either parent
 """
 
     expected = """\
-tío {meta-noun} :: f:'tía' fpl:'tías' pl:'tíos'
+tío {meta-noun} :: f=tía; fpl=tías; pl=tíos
 tío {m} :: uncle (the brother of either parent)
-tía {meta-noun} :: m:'tío' mpl:'tíos' pl:'tías'
+tía {meta-noun} :: m=tío; mpl=tíos; pl=tías
 tía {f} :: feminine noun of tío; aunt; the sister of either parent
 """
 
@@ -119,21 +119,21 @@ tía {f} :: feminine noun of tío; aunt; the sister of either parent
 
 def test_secondary_feminine():
     test = """\
-pato {meta-noun} :: f:'pata' pl:'patos' fpl:'patas'
+pato {meta-noun} :: f=pata; pl=patos; fpl=patas
 pato {m} | ánade :: duck, drake
-pata {meta-noun} :: pl:'patas'
+pata {meta-noun} :: pl=patas
 pata {f} | pie :: paw, foot, leg (of an animal)
-pata {meta-noun} :: pl:'patas' m:'pato' mpl:'patos'
+pata {meta-noun} :: pl=patas; m=pato; mpl=patos
 pata {f} :: feminine noun of pato
 """
 
-    # Because the "feminine noun of" form not in the first (main) declaration, it's masculine
+    # Because the "feminine noun of" form not in the first (main) declaration, its masculine
     # forms are *not* added to the main meta-noun
 
     expected = """\
-pato {meta-noun} :: f:'pata' fpl:'patas' pl:'patos'
+pato {meta-noun} :: f=pata; fpl=patas; pl=patos
 pato {m} | ánade :: duck, drake
-pata {meta-noun} :: pl:'patas'
+pata {meta-noun} :: pl=patas
 pata {f} | pie :: paw, foot, leg (of an animal)
 pata {f} :: feminine noun of pato\
 """
@@ -147,12 +147,12 @@ cuyas {pron} :: feminine plural of cuyo, whose
 cuyo {pron} :: whose
 """
 
-    # Because the "feminine noun of" form not in the first (main) declaration, it's masculine
+    # Because the "feminine noun of" form not in the first (main) declaration, its masculine
     # forms are *not* added to the main meta-noun
 
     expected = """\
 cuyas {pron} :: feminine plural of cuyo, whose
-cuyo {meta-pron} :: f:'cuya' fpl:'cuyas'
+cuyo {meta-pron} :: f=cuya; fpl=cuyas
 cuyo {pron} :: whose
 """
 
