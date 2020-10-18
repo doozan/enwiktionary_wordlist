@@ -95,7 +95,15 @@ class Word():
             self.word = word
 
         if pos.startswith("meta"):
-            self.add_meta(line)
+            # Any existing meta-verb lines are irregular definitions and not forms,
+            # just pass them through without processing
+            if pos == "meta-verb":
+                self.lines.append(line)
+                if not self.pos:
+                    self.pos = "v"
+            # All other meta lines should be processed
+            else:
+                self.add_meta(line)
             return
 
         if not self.pos:
@@ -239,7 +247,8 @@ def process_data(data):
         if metakey not in seen_meta:
             seen_meta.add(metakey)
             meta = all_meta.get(metakey)
-            if meta:
+            # Only print metadata forms for words that are lemmas
+            if meta and not word.lemmas:
                 yield str(meta)
 
         yield from word.lines
@@ -256,8 +265,7 @@ def load_all_words(data):
             # Remove the previous item from the list if it didn't contain anything
             if word_item and not word_item.lines:
                 all_words.pop()
-            prev_common_pos = pos[5:]
-            prev_word = word
+            common_pos = pos[len("meta-"):]
             word_item = Word(line)
             all_words.append(word_item)
 
@@ -267,13 +275,14 @@ def load_all_words(data):
                 # Remove the previous item from the list if it didn't contain anything
                 if word_item and not word_item.lines:
                     all_words.pop()
-                prev_common_pos = get_common_pos(pos)
-                prev_word = word
                 word_item = Word(line)
                 all_words.append(word_item)
 
             else:
                 word_item.add_line(line)
+
+        prev_common_pos = common_pos
+        prev_word = word
 
     return all_words
 
