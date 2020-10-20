@@ -1,42 +1,12 @@
 import process_meta
 
 def test_meta():
-    meta = process_meta.Meta("testo {meta-noun} :: pl=testos; f=testa; fpl=testas")
+    meta = process_meta.Meta("testo", "noun", {"pl": ["testos"], "f": ["testa"], "fpl": ["testas"]})
 
     assert str(meta) == "testo {meta-noun} :: f=testa; fpl=testas; pl=testos"
 
     meta.add_form("old", "tezto")
     assert str(meta) == "testo {meta-noun} :: f=testa; fpl=testas; old=tezto; pl=testos"
-
-
-def test_get_form():
-    form,lemma,remainder = process_meta.Word.get_form("feminine of testo")
-    assert form == "f"
-    assert lemma == "testo"
-    assert remainder == ""
-
-    form,lemma,remainder = process_meta.Word.get_form("feminine of abuelo, grandmother")
-    assert form == "f"
-    assert lemma == "abuelo"
-    assert remainder == "grandmother"
-
-
-def test_word():
-    meta = process_meta.Word("testo {m} :: test")
-    assert meta.word == "testo"
-    assert meta.has_nonform_def == True
-    assert meta.lemmas == {}
-
-    meta = process_meta.Word("testa {f} :: feminine of testo")
-    assert meta.word == "testa"
-    assert meta.has_nonform_def == False
-    assert meta.lemmas == {"testo": ["f"]}
-
-    meta = process_meta.Word("testa {f} :: feminine of testo, test")
-    assert meta.word == "testa"
-    assert meta.has_nonform_def == True
-    assert meta.lemmas == {"testo": ["f"]}
-
 
 def test_process_meta():
     test = """\
@@ -92,7 +62,7 @@ test {m} :: test
 """
 
     expected = """\
-test {meta-noun} :: pl=tests
+test {meta-noun} :: pl=testz; pl=tests
 test {m} :: test\
 """
 
@@ -159,8 +129,8 @@ cuyo {pron} :: whose
 
 def test_multi_verb():
     test = """\
-emparentar {meta-verb} :: pattern:e-ie; stem:empar; stem:nt
-emparentar {meta-verb} :: stem:emparent
+emparentar {meta-verb} :: pattern=e-ie; stem=empar; stem=nt
+emparentar {meta-verb} :: stem=emparent
 emparentar {vi} :: to become related (through marriage, etc.)
 emparentar {v} :: to discover relatedness
 """
@@ -169,8 +139,8 @@ emparentar {v} :: to discover relatedness
     # forms are *not* added to the main meta-noun
 
     expected = """\
-emparentar {meta-verb} :: pattern:e-ie; stem:empar; stem:nt
-emparentar {meta-verb} :: stem:emparent
+emparentar {meta-verb} :: pattern=e-ie; stem=empar; stem=nt
+emparentar {meta-verb} :: stem=emparent
 emparentar {vi} :: to become related (through marriage, etc.)
 emparentar {v} :: to discover relatedness\
 """

@@ -169,10 +169,6 @@ class DictionaryBuilder:
         verb_meta = []
         for conjugation in wikt.ifilter_sections(lambda x: x.matches("Conjugation")):
             verb_meta += self.get_verb_meta(title, conjugation)
-        if any("pattern=" in meta for meta in verb_meta):
-            for meta in verb_meta:
-                if meta not in entry:
-                    entry.append(meta)
 
         for word in wikt.ifilter_words():
             all_meta = self.get_meta(title, word)
@@ -181,6 +177,15 @@ class DictionaryBuilder:
 
             if self.exclude_word(word):
                 continue
+
+            # Add verb meta
+            if word.shortpos == "v" and verb_meta:
+                if any("pattern=" in meta for meta in verb_meta):
+                    while verb_meta:
+                        meta = verb_meta.pop(0)
+                        if meta not in entry:
+                            entry.append(meta)
+
             for sense in word.ifilter_wordsenses():
                 if "{{rfdef" in sense.gloss:
                     continue

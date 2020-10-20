@@ -1,9 +1,10 @@
 #!/usr/bin/python3
-# -*- python-mode -*-
 
 import os
 import re
 import sys
+
+from wordlist import Wordlist
 
 #ignore_notes = {
 #    "archaic",
@@ -17,43 +18,26 @@ import sys
 #    "rare",
 #}
 
-def get_common_pos(pos):
-    pos = pos.lower().strip()
-    if pos.startswith("v"):
-        return "verb"
-    elif pos in noun_tags:
-        return "noun"
-    return pos
 
-noun_tags = {
-    "prop", # proper noun with no gender
-    "n",    # noun with no gender (very few cases, mainly just cruft in wiktionary)
-    "f",    # feminine (casa)
-    "fp",   # feminine always plural (uncommon) (las esposas - handcuffs)
-    "m",    # masculine (frijole)
-    "mf",   # uses el/la to indicate gender of person (el/la dentista)
-    "mp",   # masculine plural, nouns that are always plural (lentes)
-}
 
 class Meta():
 
-    def __init__(self, line=None):
-        self.forms = {}
-        self.word = None
-        self.common_pos = None
+    def __init__(self, word, common_pos, forms={}):
+        self.word = word
+        self.common_pos = common_pos
+        self.forms = {**forms}
 
-        if line:
-            res = re.match(r"(.*?) {meta-(.*?)} :: (.*)", line)
-            self.word = res.group(1)
-            self.common_pos = res.group(2)
-            for match in re.finditer(r"\s*(.*?)=(.*?)(; |$)", res.group(3)):
-                self.add_form(match.group(1), match.group(2))
+        # TODO handle verb paradigms
 
-    def add_form(self, formtype, value):
+    @classmethod
+    def from_word(cls, word):
+        return cls(word.word, word.common_pos, word.forms)
+
+    def add_form(self, formtype, form):
         if formtype not in self.forms:
-            self.forms[formtype] = [value]
-        elif value not in self.forms[formtype]:
-            self.forms[formtype].append(value)
+            self.forms[formtype] = [form]
+        elif form not in self.forms[formtype]:
+            self.forms[formtype].append(form)
 
     def add_forms(self, formtype, all_forms):
         if not all_forms:
@@ -72,282 +56,151 @@ class Meta():
 
         return(" ".join(line))
 
-class Word():
-    def __init__(self, line):
-        self.word = None
-        self.pos = None
-        self.lines = []
-        self.lemmas = {}
-        self.has_nonform_def = False
-        self.meta = None
+def make_verb_meta(word, paradigm):
+    pattern,stems = paradigm
+    line = [word.word, "{meta-verb}", "::"]
 
-        self.add_line(line)
+    params = []
+    if pattern:
+        params.append(f"pattern={pattern}")
+    if stems:
+        for stem in stems:
+            params.append(f"stem={stem}")
+    line.append("; ".join(params))
+    return " ".join(line)
 
-    @property
-    def common_pos(self):
-        # TODO: FIXME sloppy, calls global function
-        return get_common_pos(self.pos)
-
-    def add_line(self, line):
-        word, pos, note, syn, definition = self.parse_line(line)
-
-        if not self.word:
-            self.word = word
-
-        if pos.startswith("meta"):
-            # Any existing meta-verb lines are irregular definitions and not forms,
-            # just pass them through without processing
-            if pos == "meta-verb":
-                self.lines.append(line)
-                if not self.pos:
-                    self.pos = "v"
-            # All other meta lines should be processed
-            else:
-                self.add_meta(line)
-            return
-
-        if not self.pos:
-            self.pos = pos
-
-        self.lines.append(line)
-        form, lemma, remainder = self.get_form(definition)
-        if form:
-            # TODO: alert if pos=f and lemma is not in meta m
-            self.add_lemma(lemma, form)
-            if remainder.strip():
-                self.has_nonform_def = True
-        else:
-            self.has_nonform_def = True
-
-    def add_meta(self, line):
-        if self.meta:
-            raise ValueError("meta is already set", str(self.meta), line)
-        self.meta = Meta(line)
-
-        # Non-binary words are their own lemmas
-        if "m" in self.meta.forms and "f" in self.meta.forms:
-            return
-
-        # If this defines masculine, assume the masculine is the lemma
-        if "m" in self.meta.forms:
-            for lemma in self.meta.forms["m"]:
-                self.add_lemma(lemma, "f")
-
-    @staticmethod
-    def parse_line(line):
-
-        pattern = r"""(?x)
-             (?P<word>[^{:]+)             # The word (anything not an opening brace)
-
-             ([ ]{                        # (optional) a space
-               (?P<pos>[^}]*)             #    and then the the part of speech, enclosed in curly braces
-             \})*                         #    (this may be specified more than once, the last one wins)
-
-             ([ ]\[                       # (optional) a space
-               (?P<note>[^\]]*)           #    and then the note, enclosed in square brackets
-             \])?
-
-             (?:[ ][|][ ]                    # (optional) a space and then a pipe | and a space
-               (?P<syn>.*?)                #    and then a list of synonyms
-             )?
-
-             (                            # this whole bit can be optional
-               [ ]*::[ ]                  #   :: optionally preceded by whitespace and followed by a mandatory space
-
-               (?P<def>.*)                #   the definition
-             )?
-             \n?$                         # an optional newline at the end
-        """
-        res = re.match(pattern, line)
-        if not res:
-            raise ValueError("Cannot parse", line)
-
-        word = res.group('word').strip()
-        pos = res.group('pos') if res.group('pos') else ''
-        note = res.group('note') if res.group('note') else ''
-        syn = res.group('syn') if res.group('syn') else ''
-        definition = res.group('def') if res.group('def') else ''
-
-        return (word, pos, note, syn, definition)
-
-    def add_lemma(self, lemma, form):
-        if lemma not in self.lemmas:
-            self.lemmas[lemma] = [form]
-        else:
-            self.lemmas[lemma].append(form)
-
-    @classmethod
-    def get_form(cls, definition):
-        """
-        Detect "form of" variations in the definition
-
-        returns tuple (form, lemma, remaining_definition)
-        """
-        res = re.search(cls.form_pattern, definition)
-
-        if res:
-            form = cls.form_of[res.group(1)]
-            lemma = res.group(2)
-            remainder = re.sub(re.escape(res.group(0)), "", definition).strip()
-            return (form, lemma, remainder)
-
-        return (None,None,None)
-
-    form_of = {
-        "alternate form": "alt",
-        "alternate spelling": "alt",
-        "alternative form": "alt",
-        "alternative form": "alt",
-        "alternative spelling": "alt",
-        "alternative typography": "alt",
-        "archaic spelling": "old",
-        "common misspelling": "spell",
-        "dated form": "old",
-        "dated spelling": "old",
-        "euphemistic form": "spell",
-        "euphemistic spelling": "spell",
-        "eye dialect": "alt",
-        "feminine": "f",
-        "feminine equivalent": "f",
-        "feminine singular": "f",
-        "feminine plural": "fpl",
-        "feminine noun": "f",
-        "informal form": "spell",
-        "informal spelling": "spell",
-        "masculine": "m",
-        "masculine singular": "m",
-        "masculine plural": "mpl",
-        "misspelling": "spell",
-        "nonstandard form": "spell",
-        "nonstandard spelling": "spell",
-        "obsolete form": "old",
-        "obsolete spelling": "old",
-        "plural": "pl",
-        "pronunciation spelling": "spell",
-        "rare form": "old",
-        "rare spelling": "old",
-        "superseded form": "old",
-        "superseded spelling": "old",
-    }
-    form_pattern = "(" + "|".join(form_of.keys()) + r") of ([^.,;:()]*)[.,;:()]?"
-
+def make_sense_line(word, sense):
+    line = [word.word, "{"+sense.pos+"}"]
+    if sense.qualifier:
+        line.append("["+sense.qualifier+"]")
+    if sense.synonyms and len(sense.synonyms):
+        line.append("|")
+        line.append("; ".join(sense.synonyms))
+    line.append("::")
+    line.append(sense.gloss)
+    return " ".join(line)
 
 def process_data(data):
-    all_words = load_all_words(data)
-    all_meta = process_meta(all_words)
-    seen_meta = set()
+    wordlist = Wordlist(data)
 
-    for word in all_words:
+    all_meta = get_all_forms(wordlist.all_words)
+    get_lemma_forms(wordlist.all_words, all_meta)
+
+    seen_meta = set()
+    for word in wordlist.all_words:
+
+        # Skip words with no definitions
+        if not word.senses:
+        # FIXME: allow verb meta lines through until new wordlist is built
+        #if not word.senses and not (word.common_pos == "verb" and word.paradigms):
+            continue
+
         metakey = (word.word, word.common_pos)
 
+        # FIXME: probabyl better to always stor metakey in seen_meta, adding a meta line to secondary words may be troublesome
+        # also, should add handling for cases where first word is a sense of and second has a definition - as is, the first sense of doesn't get printed
+        # this will require buffering
+
         # If this is the first word and it's not a lemma and has no nonform def, don't print anything
-        if metakey not in seen_meta and word.lemmas and not word.has_nonform_def:
+        if metakey not in seen_meta and word.form_of and not any(sense.formtype is None or sense.nonform for sense in word.senses):
             continue
+
+        if word.common_pos == "verb" and word.paradigms:
+            for paradigm in word.paradigms:
+                yield make_verb_meta(word, paradigm)
 
         if metakey not in seen_meta:
             seen_meta.add(metakey)
             meta = all_meta.get(metakey)
             # Only print metadata forms for words that are lemmas
-            if meta and not word.lemmas:
+            if meta and not word.form_of:
                 yield str(meta)
 
-        yield from word.lines
+        for sense in word.senses:
+            if sense.gloss:
+                yield make_sense_line(word, sense)
 
-def load_all_words(data):
-    all_words = []
-    prev_word = None
-    prev_common_pos = None
-    word_item = None
-    for line in data:
-        line = line.strip()
-        word, pos, note, syn, definition = Word.parse_line(line)
-        if pos.startswith("meta-"):
-            # Remove the previous item from the list if it didn't contain anything
-            if word_item and not word_item.lines:
-                all_words.pop()
-            common_pos = pos[len("meta-"):]
-            word_item = Word(line)
-            all_words.append(word_item)
+#        if word.word == "abrir" and word.common_pos == "verb":
+#            print(word.common_pos, word.paradigms)
+#            exit()
 
-        else:
-            common_pos = get_common_pos(pos)
-            if word != prev_word or common_pos != prev_common_pos:
-                # Remove the previous item from the list if it didn't contain anything
-                if word_item and not word_item.lines:
-                    all_words.pop()
-                word_item = Word(line)
-                all_words.append(word_item)
 
-            else:
-                word_item.add_line(line)
+def get_all_forms(words):
+    """
+    Build meta for each unique (word, common_pos) with forms
+    for word, common_pos pairs with multiple words, consolidate
+    all forms into single entry
+    """
 
-        prev_common_pos = common_pos
-        prev_word = word
-
-    return all_words
-
-def process_meta(words):
-
-    all_meta = {}
-
-    # Build the meta for each word, common_pos
-    # For words with multiple meta declarations, consolidate into a single meta line,
+    all_forms = {}
     for word in words:
-        if not word.meta:
+        if not word.forms:
             continue
 
         key = (word.word, word.common_pos)
-        if key not in all_meta:
-            all_meta[key] = word.meta
+        if key not in all_forms:
+            all_forms[key] = Meta.from_word(word)
         else:
-            meta = all_meta[key]
+            meta = all_forms[key]
 
-            # If the original meta has no masculine definitions (eg, it's a feminine lemma)
-            # do *not* add masculine forms from following definitions
-            # (eg, hamburguesa is feminine only in the sense "hamburger" but is followed
-            # by another usage "feminine of hamburgués, woman from Hamburg")
-            is_lemma = "m" in meta.forms
-            for formtype, forms in word.meta.forms.items():
-                if not is_lemma and formtype in ["m", "mpl"]:
+            for formtype, forms in word.forms.items():
+                # If the first word declaration is a feminine lemma, that is, if
+                # it's not a "feminine of" noun and has no masculine definitions,
+                # do *not* add masculine forms from following definitions
+                # eg, hamburguesa is feminine only in the sense "hamburger" but is followed
+                # by another usage "feminine of hamburgués, woman from Hamburg",
+                if formtype in ["m", "mpl"] and formtype not in meta.forms:
                     continue
                 for form in forms:
                     meta.add_form(formtype, form)
 
-    # Build meta for non-lemmas with definitions and
+    return all_forms
+
+
+def get_lemma_forms(words, all_meta):
+    """ Build dict of lemmas and their forms
+    """
+#    all_lemma_forms = {}
+
+    # Build meta for non-lemmas with "form of" definitions and
     # add all forms of non-lemma words to their lemmas
     for word in words:
-        if not word.lemmas:
+
+        if not word.form_of:
             continue
 
-        # If the word is not a lemma, add it and all of its forms to its lemma
-        for lemma, formtypes in word.lemmas.items():
+        # If the word is not a lemma, add it and all of its forms to the lemma
+        for lemma, formtypes in word.form_of.items():
             key = (lemma, word.common_pos)
             meta = all_meta.get(key)
             # If this word references a lemma without a meta, we must create an empty meta for it first
             if meta is None:
-                meta = Meta()
-                meta.word = lemma
-                meta.common_pos = word.common_pos
-                all_meta[key] = meta
+                all_meta[key] = Meta(lemma, word.common_pos)
+                meta = all_meta.get(key)
 
             for formtype in formtypes:
                 meta.add_form(formtype, word.word)
-                if not word.meta:
+                if not word.forms:
                     continue
 
                 # If this is the feminine of a masculine, add all plurals as "fpl"
                 if formtype == "f":
-                    for form in word.meta.forms.get("pl",[]):
+                    for form in word.forms.get("pl",[]):
                         meta.add_form("fpl", form)
-                    for form in word.meta.forms.get("fpl",[]):
+                    for form in word.forms.get("fpl",[]):
                         meta.add_form("fpl", form)
 
                 # Otherwise, just add all forms with the detected "form of" form
                 # (for misspellings/alt forms, etc where both singular and plural should be flagged)
-                elif word.meta:
-                    meta.add_forms(formtype, word.meta.forms)
+                elif word.forms:
+                    meta.add_forms(formtype, word.forms)
 
-    return all_meta
+#    exit()
+
+#    print(all_meta[("acaparador", "noun")])
+#    print(all_meta[("acaparadora", "noun")])
+#    exit()
+
 
 
 if __name__ == "__main__":
