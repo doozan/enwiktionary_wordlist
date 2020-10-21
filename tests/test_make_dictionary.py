@@ -531,3 +531,26 @@ def test_torpon():
 torpón {meta-adj} :: f=torpona; fpl=torponas; pl=torpones
 torpón {adj} :: clumsy\
 """
+
+def test_trailing_periods():
+    orig_text="""\
+==Spanish==
+
+===Proper noun===
+{{es-proper noun|m}}
+
+# {{lb|es|Spain}} {{alternative spelling of|es|México}}.
+# {{alternative spelling of|es|test.}}
+# [[test]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+    entry = builder.parse_entry(lang_entry, "Mejico")
+
+    print("\n".join(entry))
+    assert "\n".join(entry)=="""\
+Mejico {m} [Spain] :: alternative spelling of México
+Mejico {m} :: alternative spelling of test.
+Mejico {m} :: test\
+"""

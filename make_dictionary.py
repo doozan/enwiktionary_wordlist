@@ -210,7 +210,7 @@ class DictionaryBuilder:
 #                    continue
 
                 gloss_text = self.gloss_to_text(sense.gloss)
-                if gloss_text.strip() == "":
+                if gloss_text == "":
                     continue
 
                 synonyms = []
@@ -265,7 +265,7 @@ class DictionaryBuilder:
         return res
 
     def gloss_to_text(self, gloss):
-        return re.sub(r"\s\s+", " ", self.wiki_to_text(gloss.data).strip().rstrip(' .'))
+        return re.sub(r"\s\s+", " ", self.wiki_to_text(gloss.data.rstrip("\r\n\t .")).strip())
 
     def items_to_synonyms(self, items):
         synonyms = []
