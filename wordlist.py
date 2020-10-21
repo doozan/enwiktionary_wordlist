@@ -8,9 +8,14 @@ class Sense():
         self._syndata = syndata
         self._synonyms = None
 
-        self.formtype, self.lemma, self.nonform = self.parse_form_of(gloss)
-#        if self.formtype and not self.nonform:
-#            self.gloss = ""
+        if " of " in gloss:
+            self.formtype, self.lemma, self.nonform = self.parse_form_of(gloss)
+            if self.lemma:
+                self.lemma = self.lemma.strip()
+        else:
+            self.formtype = None
+            self.lemma = None
+            self.nonform = None
 
     @property
     def synonyms(self):
@@ -51,33 +56,33 @@ class Sense():
         "common misspelling": "spell",
         "dated form": "old",
         "dated spelling": "old",
-        "euphemistic form": "spell",
-        "euphemistic spelling": "spell",
+        "euphemistic form": "alt",
+        "euphemistic spelling": "alt",
         "eye dialect": "alt",
         "feminine": "f",
         "feminine equivalent": "f",
         "feminine singular": "f",
         "feminine plural": "fpl",
         "feminine noun": "f",
-        "informal form": "spell",
-        "informal spelling": "spell",
+        "informal form": "alt",
+        "informal spelling": "alt",
         "masculine": "m",
         "masculine singular": "m",
         "masculine plural": "mpl",
         "misspelling": "spell",
         "neuter singular": "alt",
-        "nonstandard form": "spell",
-        "nonstandard spelling": "spell",
+        "nonstandard form": "alt",
+        "nonstandard spelling": "alt",
         "obsolete form": "old",
         "obsolete spelling": "old",
         "plural": "pl",
-        "pronunciation spelling": "spell",
-        "rare form": "old",
-        "rare spelling": "old",
+        "pronunciation spelling": "alt",
+        "rare form": "rare",
+        "rare spelling": "rare",
         "superseded form": "old",
         "superseded spelling": "old",
     }
-    form_pattern = "(" + "|".join(form_of_prefix.keys()) + r") of ([^.,;:()]*)[.,;:()]?"
+    form_pattern = "(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
 
 class Word():
     def __init__(self, word, pos=None, common_pos=None):
@@ -202,7 +207,7 @@ class Verb(Word):
 
 class Wordlist():
     def __init__(self, data):
-        self.all_words = []
+        self.all_words = {}
 
         prev_word = None
         prev_pos = None
@@ -239,7 +244,11 @@ class Wordlist():
         else:
             word_item = Word(word, pos, common_pos)
 
-        self.all_words.append(word_item)
+        if word not in self.all_words:
+            self.all_words[word] = [word_item]
+        else:
+            self.all_words[word].append(word_item)
+
         return word_item
 
     @staticmethod

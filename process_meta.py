@@ -19,15 +19,12 @@ from wordlist import Wordlist
 #}
 
 
-
 class Meta():
 
     def __init__(self, word, common_pos, forms={}):
         self.word = word
         self.common_pos = common_pos
         self.forms = {**forms}
-
-        # TODO handle verb paradigms
 
     @classmethod
     def from_word(cls, word):
@@ -83,16 +80,14 @@ def make_sense_line(word, sense):
 def process_data(data):
     wordlist = Wordlist(data)
 
-    all_meta = get_all_forms(wordlist.all_words)
-    get_lemma_forms(wordlist.all_words, all_meta)
+    all_meta = get_all_word_forms(wordlist)
+    get_lemma_forms(wordlist, all_meta)
 
     seen_meta = set()
-    for word in wordlist.all_words:
+    for word in [ word for words in wordlist.all_words.values() for word in words ]:
 
         # Skip words with no definitions
         if not word.senses:
-        # FIXME: allow verb meta lines through until new wordlist is built
-        #if not word.senses and not (word.common_pos == "verb" and word.paradigms):
             continue
 
         metakey = (word.word, word.common_pos)
@@ -120,12 +115,8 @@ def process_data(data):
             if sense.gloss:
                 yield make_sense_line(word, sense)
 
-#        if word.word == "abrir" and word.common_pos == "verb":
-#            print(word.common_pos, word.paradigms)
-#            exit()
 
-
-def get_all_forms(words):
+def get_all_word_forms(wordlist):
     """
     Build meta for each unique (word, common_pos) with forms
     for word, common_pos pairs with multiple words, consolidate
@@ -133,7 +124,7 @@ def get_all_forms(words):
     """
 
     all_forms = {}
-    for word in words:
+    for word in [ word for words in wordlist.all_words.values() for word in words ]:
         if not word.forms:
             continue
 
@@ -157,14 +148,11 @@ def get_all_forms(words):
     return all_forms
 
 
-def get_lemma_forms(words, all_meta):
-    """ Build dict of lemmas and their forms
-    """
-#    all_lemma_forms = {}
+def get_lemma_forms(wordlist, all_meta):
 
     # Build meta for non-lemmas with "form of" definitions and
     # add all forms of non-lemma words to their lemmas
-    for word in words:
+    for word in [ word for words in wordlist.all_words.values() for word in words ]:
 
         if not word.form_of:
             continue
@@ -175,6 +163,13 @@ def get_lemma_forms(words, all_meta):
             meta = all_meta.get(key)
             # If this word references a lemma without a meta, we must create an empty meta for it first
             if meta is None:
+                if lemma not in wordlist.all_words:
+                    print(f"Unknown word '{lemma}' referenced by {word.word}", file=sys.stderr)
+                if lemma not in wordlist.all_words \
+                        and lemma.endswith(".") \
+                        and lemma.rstrip(".") in wordlist.all_words:
+                    print(f"stripping . from {lemma} for {word.word}", file=sys.stderr)
+                    key = (lemma.rstrip("."), word.common_pos)
                 all_meta[key] = Meta(lemma, word.common_pos)
                 meta = all_meta.get(key)
 
@@ -194,13 +189,6 @@ def get_lemma_forms(words, all_meta):
                 # (for misspellings/alt forms, etc where both singular and plural should be flagged)
                 elif word.forms:
                     meta.add_forms(formtype, word.forms)
-
-#    exit()
-
-#    print(all_meta[("acaparador", "noun")])
-#    print(all_meta[("acaparadora", "noun")])
-#    exit()
-
 
 
 if __name__ == "__main__":
