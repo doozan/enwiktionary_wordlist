@@ -1,4 +1,5 @@
 import re
+import sys
 
 class Sense():
     def __init__(self, pos, qualifier, gloss, syndata):
@@ -44,6 +45,15 @@ class Sense():
             nonform = re.sub(re.escape(res.group(0)), "", definition).strip()
             return (formtype, lemma, nonform)
 
+        res = re.search(cls.alt_form_pattern, definition)
+        if res:
+            print(f"Found non-template form of: {definition}", file=sys.stderr)
+            print(cls.form_pattern)
+            formtype = cls.form_of_prefix[res.group(1)]
+            lemma = res.group(2)
+            nonform = re.sub(re.escape(res.group(0)), "", definition).strip()
+            return (formtype, lemma, nonform)
+
         return (None,None,None)
 
     form_of_prefix = {
@@ -82,7 +92,8 @@ class Sense():
         "superseded form": "old",
         "superseded spelling": "old",
     }
-    form_pattern = "(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
+    form_pattern = "(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
+    alt_form_pattern = "(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
 
 class Word():
     def __init__(self, word, pos=None, common_pos=None):
