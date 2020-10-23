@@ -48,7 +48,6 @@ class Sense():
         res = re.search(cls.alt_form_pattern, definition)
         if res:
             print(f"Found non-template form of: {definition}", file=sys.stderr)
-            print(cls.form_pattern)
             formtype = cls.form_of_prefix[res.group(1)]
             lemma = res.group(2)
             nonform = re.sub(re.escape(res.group(0)), "", definition).strip()
@@ -101,15 +100,12 @@ class Word():
         self.pos = pos
         self._common_pos = common_pos
         self.senses = []
-        self._forms = {}   # { formtype: [form1, ..] }
+        self.forms = {}   # { formtype: [form1, ..] }
         self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
-        self._meta = []
 
     @property
-    def forms(self):
-        if self._meta:
-            self.process_meta()
-        return self._forms
+    def is_lemma(self):
+        return self.senses and not self.form_of
 
     def add_sense(self, pos, qualifier, gloss, syndata):
         sense = Sense(pos, qualifier, gloss, syndata)
@@ -118,11 +114,11 @@ class Word():
             self.add_lemma(sense.lemma, sense.formtype)
 
     def add_form(self, formtype, form):
-        if formtype not in self._forms:
-            self._forms[formtype] = [form]
+        if formtype not in self.forms:
+            self.forms[formtype] = [form]
         else:
-            if form not in self._forms[formtype]:
-                self._forms[formtype].append(form)
+            if form not in self.forms[formtype]:
+                self.forms[formtype].append(form)
 
         # Feminine nouns are a "form of" their masculine counterpart
         if formtype == "m" and self.pos == "f":
@@ -145,12 +141,7 @@ class Word():
             self.form_of[lemma].append(formtype)
 
     def add_meta(self, data):
-        self._meta.append(data)
-
-    def process_meta(self):
-        for line in self._meta:
-            self.add_forms(self.parse_list(line))
-        self._meta = []
+        self.add_forms(self.parse_list(data))
 
     @staticmethod
     def parse_list(line):
@@ -192,28 +183,20 @@ class Word():
 
 class Verb(Word):
     def __init__(self, word):
-        self._paradigms = []
+        self.paradigms = []
         super().__init__(word, pos=None, common_pos="verb")
 
-    @property
-    def paradigms(self):
-        if self._meta:
-            self.process_meta()
-        return self._paradigms
-
-    def process_meta(self):
-        while self._meta:
-            line = self._meta.pop(0)
-            items = self.parse_list(line)
-            if "pattern" in items or "stem" in items:
-                pattern = items.get("pattern", [None])[0]
-                stems = items.get("stem", None)
-                self.add_paradigm(pattern, stems)
-            else:
-                self.add_forms(items)
+    def add_meta(self, data):
+        items = self.parse_list(data)
+        if "pattern" in items or "stem" in items:
+            pattern = items.get("pattern", [None])[0]
+            stems = items.get("stem", None)
+            self.add_paradigm(pattern, stems)
+        else:
+            self.add_forms(items)
 
     def add_paradigm(self, pattern, stems):
-        self._paradigms.append((pattern, stems))
+        self.paradigms.append((pattern, stems))
 
 
 class Wordlist():
@@ -261,6 +244,16 @@ class Wordlist():
             self.all_words[word].append(word_item)
 
         return word_item
+
+    def has_lemma(self, word, common_pos):
+        """
+        Check if a given word, pos is a lemma
+        """
+        for word_obj in self.all_words.get(word, []):
+            if word_obj.common_pos == common_pos and word_obj.is_lemma:
+                return True
+
+        return False
 
     @staticmethod
     def parse_line(line):

@@ -62,3 +62,19 @@ def test_verb():
 
     assert verb.paradigms == [ ("-brir", ["o"]) ]
     assert verb.forms == { "old": ["abrir"] }
+
+def test_wordlist():
+    data="""\
+amigo {meta-noun} :: f=amiga; fpl=amigas; pl=amigos
+amigo {m} :: friend
+amiga {meta-noun} :: m=amigo; mpl=amigos; pl=amigas
+amiga {f} :: feminine noun of "amigo", friend
+"""
+
+    words = wordlist.Wordlist(data.splitlines())
+
+    assert words.has_lemma("test", "noun") == False
+    assert words.has_lemma("amigo", "noun") == True
+    assert words.has_lemma("amiga", "noun") == False
+
+

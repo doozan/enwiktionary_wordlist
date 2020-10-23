@@ -188,7 +188,8 @@ def test_repanoche():
     entry = builder.parse_entry(lang_entry, "repanoche")
 
     assert "\n".join(entry) == """\
-repanoche {f} [Spain] :: only used in ser la repanocha"""
+repanoche {f} [Spain] :: only used in "ser la repanocha"\
+"""
 
 
 def test_wiki_to_text():
@@ -401,7 +402,8 @@ From {{der|es|la|attentō}}.
 atentar {meta-verb} :: pattern=e-ie; stem=at; stem=nt
 atentar {vi} :: to commit a violent or criminal attack, to strike
 atentar {vt} [obsolete] :: to touch
-atentar {v} :: synonym of tentar"""
+atentar {v} :: synonym of "tentar"\
+"""
 
 
 def test_billon():
@@ -492,7 +494,8 @@ def test_angla():
 
     assert "\n".join(entry)=="""\
 angla {meta-noun} :: m=anglo; mpl=anglos; pl=anglas
-angla {f} :: female equivalent of anglo"""
+angla {f} :: female equivalent of "anglo"\
+"""
 
 def test_cherry():
     orig_text="""\
@@ -550,7 +553,7 @@ def test_trailing_periods():
 
     print("\n".join(entry))
     assert "\n".join(entry)=="""\
-Mejico {m} [Spain] :: alternative spelling of México
-Mejico {m} :: alternative spelling of test.
+Mejico {m} [Spain] :: alternative spelling of "México"
+Mejico {m} :: alternative spelling of "test."
 Mejico {m} :: test\
 """

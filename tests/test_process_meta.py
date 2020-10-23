@@ -15,10 +15,10 @@ testo {m} :: test
 testo {meta-noun} :: pl=testoz
 testo {m} :: test2
 testa {meta-noun} :: pl=testas
-testa {f} :: feminine noun of testo
+testa {f} :: feminine noun of "testo"
 testoo {meta-noun} :: pl=testoos
-testoo {m} :: misspelling of testo
-test2 {m} :: misspelling of testo
+testoo {m} :: misspelling of "testo"
+test2 {m} :: misspelling of "testo"
 test2 {m} :: testing
 test3 {meta-noun} :: pl=test3s
 test3 {m} :: test3 one
@@ -30,7 +30,7 @@ test3 {m} :: test3 two
 testo {meta-noun} :: f=testa; fpl=testas; pl=testos; pl=testoz; spell=testoo; spell=testoos; spell=test2
 testo {m} :: test
 testo {m} :: test2
-test2 {m} :: misspelling of testo
+test2 {m} :: misspelling of "testo"
 test2 {m} :: testing
 test3 {meta-noun} :: pl=test3s; pl=test3z
 test3 {m} :: test3 one
@@ -41,7 +41,7 @@ test3 {m} :: test3 two
 
 def test_create_meta():
     test = """\
-i {conj} :: obsolete spelling of y
+i {conj} :: obsolete spelling of "y"
 y {conj} :: and
 """
 
@@ -74,13 +74,13 @@ def test_tio():
 tío {meta-noun} :: f=tía; pl=tíos; fpl=tías
 tío {m} :: uncle (the brother of either parent)
 tía {meta-noun} :: m=tío; pl=tías; mpl=tíos
-tía {f} :: feminine noun of tío; aunt; the sister of either parent
+tía {f} :: feminine noun of "tío"; aunt; the sister of either parent
 """
 
     expected = """\
 tío {meta-noun} :: f=tía; fpl=tías; pl=tíos
 tío {m} :: uncle (the brother of either parent)
-tía {f} :: feminine noun of tío; aunt; the sister of either parent
+tía {f} :: feminine noun of "tío"; aunt; the sister of either parent
 """
 
     assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()
@@ -93,7 +93,7 @@ pato {m} | ánade :: duck, drake
 pata {meta-noun} :: pl=patas
 pata {f} | pie :: paw, foot, leg (of an animal)
 pata {meta-noun} :: pl=patas; m=pato; mpl=patos
-pata {f} :: feminine noun of pato
+pata {f} :: feminine noun of "pato"
 """
 
     # Because the "feminine noun of" form not in the first (main) declaration, its masculine
@@ -104,15 +104,15 @@ pato {meta-noun} :: f=pata; fpl=patas; pl=patos
 pato {m} | ánade :: duck, drake
 pata {meta-noun} :: pl=patas
 pata {f} | pie :: paw, foot, leg (of an animal)
-pata {f} :: feminine noun of pato\
+pata {f} :: feminine noun of "pato"\
 """
 
     assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()
 
 def test_cuyo():
     test = """\
-cuya {pron} :: feminine singular of cuyo
-cuyas {pron} :: feminine plural of cuyo, whose
+cuya {pron} :: feminine singular of "cuyo"
+cuyas {pron} :: feminine plural of "cuyo", whose
 cuyo {pron} :: whose
 """
 
@@ -120,7 +120,7 @@ cuyo {pron} :: whose
     # forms are *not* added to the main meta-noun
 
     expected = """\
-cuyas {pron} :: feminine plural of cuyo, whose
+cuyas {pron} :: feminine plural of "cuyo", whose
 cuyo {meta-pron} :: f=cuya; fpl=cuyas
 cuyo {pron} :: whose
 """
