@@ -78,3 +78,60 @@ amiga {f} :: feminine noun of "amigo", friend
     assert words.has_lemma("amiga", "noun") == False
 
 
+def test_redirection():
+    data="""\
+test1 {m} :: test
+test2 {m} :: alternate form of "test1"
+test3 {m} :: alternate form of "test2"
+test4 {m} :: misspelling of "test3"
+test5 {m} :: alternate form of "test6"
+test6 {m} :: alternate form of "test5"
+test7 {m} :: alternate form of "test-none"
+"""
+
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    assert wlist.has_lemma("test1", "noun") == True
+    assert wlist.has_lemma("test2", "noun") == False
+
+    test1 = wlist.all_words["test1"][0]
+    test2 = wlist.all_words["test2"][0]
+    test3 = wlist.all_words["test3"][0]
+    test4 = wlist.all_words["test4"][0]
+    test5 = wlist.all_words["test5"][0]
+    test6 = wlist.all_words["test6"][0]
+    test7 = wlist.all_words["test7"][0]
+
+    assert test1.word == "test1"
+    assert test1.pos == "m"
+    assert test1.common_pos == "noun"
+
+    assert wlist.get_lemmas(test1) == {'test1': ['m']}
+    assert wlist.get_lemmas(test2) == {'test1': ['alt']}
+    assert wlist.get_lemmas(test3) == {'test1': ['alt']}
+    assert wlist.get_lemmas(test4) == {'test1': ['alt']}
+    assert wlist.get_lemmas(test5) == {}
+    assert wlist.get_lemmas(test6) == {}
+    assert wlist.get_lemmas(test7) == {}
+
+
+def test_forms_redirection():
+
+    data = """\
+test1 {m} :: test
+test2 {m} :: alternate form of "test1"
+test3 {m} :: alternate form of "test2"
+test4 {m} :: alternate form of "test3"
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    assert wlist.all_forms == {
+'test1': {'noun': {'m': ['test1']}},
+'test2': {'noun': {'alt': ['test1']}},
+'test3': {'noun': {'alt': ['test1']}},
+'test4': {'noun': {'alt': ['test1']}}
+}
+
+    assert wlist.all_lemmas ==  {
+'test1': {'noun': {'alt': ['test2', 'test3', 'test4'], 'm': ['test1']}}
+}
