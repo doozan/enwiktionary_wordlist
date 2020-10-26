@@ -15,10 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-from make_dictionary import DictionaryBuilder
+from make_wordlist import WordlistBuilder
 import mwparserfromhell
 
-builder = DictionaryBuilder("Spanish", "es")
+builder = WordlistBuilder("Spanish", "es")
 
 def test_chapó():
 

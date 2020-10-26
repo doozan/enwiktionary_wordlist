@@ -29,7 +29,7 @@ import sys
 import enwiktionary_parser as wtparser
 
 
-class DictionaryBuilder:
+class WordlistBuilder:
     def __init__(self, lang_name, lang_id):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
@@ -278,7 +278,7 @@ def main():
     dump = xmlreader.XmlDump(args.xml)
     parser = dump.parse()
 
-    builder = DictionaryBuilder(args.lang_section, args.lang_id)
+    builder = WordlistBuilder(args.lang_section, args.lang_id)
 
     count = 0
     lang_count = 0
