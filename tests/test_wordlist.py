@@ -55,13 +55,13 @@ def test_word():
     word.add_meta("pl=test4s; f=test2a")
     assert word.forms == { "pl": ["tests", "test2s", "test3s", "test4s"], "f": ["testa", "test2a"] }
 
-def test_verb():
-    verb = wordlist.Verb("obrir")
-    verb.add_meta("pattern=-brir; stem=o")
-    verb.add_meta("old=abrir")
-
-    assert verb.paradigms == [ ("-brir", ["o"]) ]
-    assert verb.forms == { "old": ["abrir"] }
+#def test_verb():
+#    verb = wordlist.Verb("obrir")
+##    verb.add_meta("pattern=-brir; stem=o")
+#    verb.add_meta("old=abrir")
+#
+#    assert verb.paradigms == [ ("-brir", ["o"]) ]
+#    assert verb.forms == { "old": ["abrir"] }
 
 def test_wordlist():
     data="""\

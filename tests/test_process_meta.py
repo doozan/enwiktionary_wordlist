@@ -127,22 +127,3 @@ cuyo {pron} :: whose
 
     assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()
 
-def test_multi_verb():
-    test = """\
-emparentar {meta-verb} :: pattern=e-ie; stem=empar; stem=nt
-emparentar {meta-verb} :: stem=emparent
-emparentar {vi} :: to become related (through marriage, etc.)
-emparentar {v} :: to discover relatedness
-"""
-
-    # Because the "feminine noun of" form not in the first (main) declaration, its masculine
-    # forms are *not* added to the main meta-noun
-
-    expected = """\
-emparentar {meta-verb} :: pattern=e-ie; stem=empar; stem=nt
-emparentar {meta-verb} :: stem=emparent
-emparentar {vi} :: to become related (through marriage, etc.)
-emparentar {v} :: to discover relatedness\
-"""
-
-    assert "\n".join(process_meta.process_data(test.splitlines())) == expected.strip()

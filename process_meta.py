@@ -53,19 +53,6 @@ class Meta():
 
         return(" ".join(line))
 
-def make_verb_meta(word, paradigm):
-    pattern,stems = paradigm
-    line = [word.word, "{meta-verb}", "::"]
-
-    params = []
-    if pattern:
-        params.append(f"pattern={pattern}")
-    if stems:
-        for stem in stems:
-            params.append(f"stem={stem}")
-    line.append("; ".join(params))
-    return " ".join(line)
-
 def make_sense_line(word, sense):
     line = [word.word, "{"+sense.pos+"}"]
     if sense.qualifier:
@@ -99,10 +86,6 @@ def process_data(data):
         # If this is the first word and it's not a lemma and has no nonform def, don't print anything
         if metakey not in seen_meta and word.form_of and not any(sense.formtype is None or sense.nonform for sense in word.senses):
             continue
-
-        if word.common_pos == "verb" and word.paradigms:
-            for paradigm in word.paradigms:
-                yield make_verb_meta(word, paradigm)
 
         if metakey not in seen_meta:
             seen_meta.add(metakey)

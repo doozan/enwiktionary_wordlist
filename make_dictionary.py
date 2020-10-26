@@ -77,19 +77,6 @@ class DictionaryBuilder:
         if str(headword.name) == "es-adj" and headword.has("m") or headword.has("masculine"):
             return True
 
-        headword_forms = {
-            "participle form",
-            "past participle form",
-            "present participle",
-            "noun plural form",
-            "noun form",
-            "adjective form",
-            "verb form",
-            "determiner form",
-            "pronoun form",
-#            "misspelling",
-#            "obsolete",
-        }
         if str(headword.name) == "head" and headword.has(2) and " form" in str(headword.get(2)):
             return True
 
@@ -117,58 +104,31 @@ class DictionaryBuilder:
 
         return "; ".join(res)
 
-    def get_noun_meta(self, title, word):
-        meta = self.build_meta(title, "noun", self.forms_to_meta(word.forms))
-        if meta:
-            return [meta]
-        return []
-
-    def get_adj_meta(self, title, word):
-        meta = self.build_meta(title, "adj", self.forms_to_meta(word.forms))
-        if meta:
-            return [meta]
-        return []
-
-    def conj_to_forms(self, template):
-        forms = {}
-        # FIXME: hardcoded language
-        if template.name.strip().startswith("es-conj"):
-            if template.has("p"):
-                forms["pattern"] = [ str(template.get("p").value) ]
-            forms["stem"] = [ str(p.value) for p in template.params if str(p.name).isdigit() ]
-        return forms
-
-    def get_verb_meta(self, title, conjugation):
-        metas = []
-        # FIXME: hardcoded language
-        for t in conjugation.ifilter_templates(matches=lambda x: "es-conj" in x.name.strip()):
-            forms = self.conj_to_forms(t)
-            meta = self.forms_to_meta(forms)
-            metaline = self.build_meta(title, "verb", meta)
-            if metaline:
-                metas.append(metaline)
-
-        return metas
-
     def get_meta(self, title, word):
         """ Returns a list of meta entries or None if word has no form data"""
         if word.shortpos in ["n", "prop", "num"]:
-            return self.get_noun_meta(title, word)
+            metatype = "noun"
 
         elif word.shortpos in ["adj"]:
-            return self.get_adj_meta(title, word)
+            metatype = "adj"
 
+        elif word.shortpos.startswith("v"):
+            metatype = "verb"
+
+        else:
+            return []
+
+        meta = self.build_meta(title, metatype, self.forms_to_meta(word.forms))
+        if meta:
+            return [meta]
         return []
+
 
     def parse_entry(self, text, title):
         self.title = title
         wikt = wtparser.parse_page(text, title, parent=self)
 
         entry = []
-
-        verb_meta = []
-        for conjugation in wikt.ifilter_sections(lambda x: x.matches("Conjugation")):
-            verb_meta += self.get_verb_meta(title, conjugation)
 
         for word in wikt.ifilter_words():
             all_meta = self.get_meta(title, word)
@@ -178,36 +138,12 @@ class DictionaryBuilder:
             if self.exclude_word(word):
                 continue
 
-            # Add verb meta
-            if word.shortpos == "v" and verb_meta:
-                if any("pattern=" in meta for meta in verb_meta):
-                    while verb_meta:
-                        meta = verb_meta.pop(0)
-                        if meta not in entry:
-                            entry.append(meta)
-
             for sense in word.ifilter_wordsenses():
+                # Skip senses that are just a request for a definition
                 if "{{rfdef" in sense.gloss:
                     continue
                 if "{{defn" in sense.gloss:
                     continue
-#                if "{{archaic form of" in sense.gloss:
-#                    continue
-#                if "{{misspelling of" in sense.gloss:
-#                    continue
-
-#                if "{{es-verb form of" in sense.gloss:
-#                    continue
-#                if "{{form of" in sense.gloss:
-#                    continue
-#                if "{{inflection of" in sense.gloss:
-#                    continue
-#                if "{{es-compound of" in sense.gloss:
-#                    continue
-#                if "{{infl of" in sense.gloss:
-#                    continue
-#                if "plural form" in word.pos_category:
-#                    continue
 
                 gloss_text = self.gloss_to_text(sense.gloss)
                 if gloss_text == "":
@@ -303,8 +239,6 @@ class DictionaryBuilder:
 
         if pos in ["n","prop"] and gendertag:
             return "{" + gendertag + "}"
-#        if pos == "prop" and gendertag:
-#            return "{" + pos + "} {" + gendertag + "}"
         if pos == "v":
             for q in qualifiers:
                 if q in self.q_verbs:
@@ -366,12 +300,6 @@ def main():
         for line in entry:
             if line.strip() != "":
                 print(line)
-
-#    print(f"Total articles: {count}")
-#    print(f"Total in {args.lang_section}: {lang_count}")
-
-#    for k, v in sorted(fixer._stats.items(), key=lambda item: item[1], reverse=True):
-#        print(f"{k}: {v}")
 
 if __name__ == "__main__":
     main()

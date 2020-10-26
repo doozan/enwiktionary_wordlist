@@ -181,24 +181,6 @@ class Word():
         "mp",   # masculine plural, nouns that are always plural (lentes)
     }
 
-class Verb(Word):
-    def __init__(self, word):
-        self.paradigms = []
-        super().__init__(word, pos=None, common_pos="verb")
-
-    def add_meta(self, data):
-        items = self.parse_list(data)
-        if "pattern" in items or "stem" in items:
-            pattern = items.get("pattern", [None])[0]
-            stems = items.get("stem", None)
-            self.add_paradigm(pattern, stems)
-        else:
-            self.add_forms(items)
-
-    def add_paradigm(self, pattern, stems):
-        self.paradigms.append((pattern, stems))
-
-
 class Wordlist():
     def __init__(self, data):
         self.all_words = {}
@@ -235,10 +217,7 @@ class Wordlist():
             prev_common_pos = common_pos
 
     def add_word(self, word, pos=None, common_pos=None):
-        if common_pos and common_pos == "verb":
-            word_item = Verb(word)
-        else:
-            word_item = Word(word, pos, common_pos)
+        word_item = Word(word, pos, common_pos)
 
         if word not in self.all_words:
             self.all_words[word] = [word_item]
