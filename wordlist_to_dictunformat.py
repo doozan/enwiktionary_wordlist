@@ -75,7 +75,7 @@ def get_word_page(word, pos_match=None):
                 items.append(get_sense_data(i, sense))
             items.append("")
 
-            if not pos_match:
+            if not pos:
                 for lemma in word_obj.form_of:
                     if lemma not in wordlist.all_words:
                         continue
@@ -106,13 +106,16 @@ def export(data, langid, description):
 
     disambig = set()
     ambig_forms = 0
-    for form, types in wordlist.all_forms.items():
-        for pos, formtypes in types.items():
+    for form, pos_types in wordlist.all_forms.items():
+        form_targets = []
+        for pos, formtypes in pos_types.items():
             for formtype, targets in formtypes.items():
-                if len(targets) > 1:
-                    ambig_forms += 1
-                    disambig.add(tuple(targets))
-                add_key(form, tuple(targets))
+                form_targets += targets
+
+        if len(form_targets) > 1:
+            ambig_forms += 1
+            disambig.add(tuple(form_targets))
+        add_key(form, tuple(form_targets))
 
     name = "Wiktionary"
     if langid != "en":
@@ -123,7 +126,7 @@ _____
 00-database-info
 ##:name:{name}
 ##:url:en.wiktionary.org
-##:wordcount:{len(all_pages)}
+##:pagecount:{len(all_pages)}
 ##:formcount:{len(wordlist.all_forms)}
 ##:description:{description}\
 """
