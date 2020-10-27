@@ -3,11 +3,11 @@ import export_wordlist_forms as exporter
 def test_forms_text():
 
     test = """\
-testo {meta-noun} :: pl=testos
+testo {noun-forms} :: pl=testos
 testo {m} :: test
-testo {meta-noun} :: pl=testoz
+testo {noun-forms} :: pl=testoz
 testo {m} :: test2
-testa {meta-noun} :: pl=testas
+testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
     expected = """\
@@ -22,11 +22,11 @@ testoz {noun} pl=testo
 def notest_forms_json():
 
     test = """\
-testo {meta-noun} :: pl=testos
+testo {noun-forms} :: pl=testos
 testo {m} :: test
-testo {meta-noun} :: pl=testoz
+testo {noun-forms} :: pl=testoz
 testo {m} :: test2
-testa {meta-noun} :: pl=testas
+testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
 
@@ -44,11 +44,11 @@ testa {f} :: feminine noun of "testo"
 def test_lemmas_text():
 
     test = """\
-testo {meta-noun} :: pl=testos
+testo {noun-forms} :: pl=testos
 testo {m} :: test
-testo {meta-noun} :: pl=testoz
+testo {noun-forms} :: pl=testoz
 testo {m} :: test2
-testa {meta-noun} :: pl=testas
+testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
     expected = """\

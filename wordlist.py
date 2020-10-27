@@ -140,7 +140,7 @@ class Word():
         else:
             self.form_of[lemma].append(formtype)
 
-    def add_meta(self, data):
+    def parse_forms(self, data):
         self.add_forms(self.parse_list(data))
 
     @staticmethod
@@ -196,10 +196,10 @@ class Wordlist():
             word, pos, note, syn, data = self.parse_line(line)
             common_pos = None
 
-            if pos.startswith("meta-"):
-                common_pos = pos[len("meta-"):]
+            if pos.endswith("-forms"):
+                common_pos = pos[:-len("-forms")]
                 word_item = self.add_word(word,None,common_pos)
-                word_item.add_meta(data)
+                word_item.parse_forms(data)
 
             else:
                 common_pos = Word.get_common_pos(pos)
@@ -264,9 +264,9 @@ class Wordlist():
     @staticmethod
     def parse_line(line):
         """ Parse dictionary lines:
-        word {meta-pos} :: formtype=form; formtype2=form2
+        word {pos-forms} :: formtype=form; formtype2=form2
         word {pos} | syn1; syn2 :: [qualifiers] gloss
-        absolver {meta-verb} :: pattern=-olver; stem=abs
+        absolver {verb-forms} :: pattern=-olver; stem=abs
         """
 
         pattern = r"""(?x)

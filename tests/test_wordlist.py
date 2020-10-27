@@ -52,7 +52,7 @@ def test_word():
     word.add_forms( {"pl": ["test3s"], "f": ["testa"] } )
     assert word.forms == { "pl": ["tests", "test2s", "test3s"], "f": ["testa"] }
 
-    word.add_meta("pl=test4s; f=test2a")
+    word.parse_forms("pl=test4s; f=test2a")
     assert word.forms == { "pl": ["tests", "test2s", "test3s", "test4s"], "f": ["testa", "test2a"] }
 
 #def test_verb():
@@ -65,9 +65,9 @@ def test_word():
 
 def test_wordlist():
     data="""\
-amigo {meta-noun} :: f=amiga; fpl=amigas; pl=amigos
+amigo {noun-forms} :: f=amiga; fpl=amigas; pl=amigos
 amigo {m} :: friend
-amiga {meta-noun} :: m=amigo; mpl=amigos; pl=amigas
+amiga {noun-forms} :: m=amigo; mpl=amigos; pl=amigas
 amiga {f} :: feminine noun of "amigo", friend
 """
 
@@ -139,11 +139,11 @@ test4 {m} :: alternate form of "test3"
 def test_multiple_words():
 
     data = """\
-testo {meta-noun} :: pl=testos
+testo {noun-forms} :: pl=testos
 testo {m} :: test
-testo {meta-noun} :: pl=testoz
+testo {noun-forms} :: pl=testoz
 testo {m} :: test2
-testa {meta-noun} :: pl=testas
+testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
     wlist = wordlist.Wordlist(data.splitlines())
@@ -151,3 +151,4 @@ testa {f} :: feminine noun of "testo"
     assert len(wlist.all_words) == 2
     assert len(wlist.all_words["testo"]) == 1
     assert len(wlist.all_words["testo"]["noun"]) == 2
+

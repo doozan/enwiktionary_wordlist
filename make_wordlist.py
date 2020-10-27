@@ -82,12 +82,8 @@ class WordlistBuilder:
 
         return False
 
-    def build_meta(self, title, metatype, data):
-        if not data or not data.strip():
-            return None
-        return title + " {meta-" + metatype + "} :: " + data
 
-    def forms_to_meta(self, forms):
+    def forms_to_string(self, forms):
         if not forms:
             return None
 
@@ -104,24 +100,19 @@ class WordlistBuilder:
 
         return "; ".join(res)
 
-    def get_meta(self, title, word):
-        """ Returns a list of meta entries or None if word has no form data"""
+    def get_forms(self, title, word):
+        """ Returns a formatted form line containing the word forms """
+        if not word.forms:
+            return None
+
         if word.shortpos in ["n", "prop", "num"]:
-            metatype = "noun"
-
-        elif word.shortpos in ["adj"]:
-            metatype = "adj"
-
+            common_pos = "noun"
         elif word.shortpos.startswith("v"):
-            metatype = "verb"
-
+            common_pos = "verb"
         else:
-            return []
+            common_pos = word.shortpos
 
-        meta = self.build_meta(title, metatype, self.forms_to_meta(word.forms))
-        if meta:
-            return [meta]
-        return []
+        return title + " {" + common_pos + "-forms} :: " + self.forms_to_string(word.forms)
 
 
     def parse_entry(self, text, title):
@@ -131,9 +122,9 @@ class WordlistBuilder:
         entry = []
 
         for word in wikt.ifilter_words():
-            all_meta = self.get_meta(title, word)
-            for meta in all_meta:
-                entry.append(meta)
+            forms = self.get_forms(title, word)
+            if forms:
+                entry.append(forms)
 
             if self.exclude_word(word):
                 continue
