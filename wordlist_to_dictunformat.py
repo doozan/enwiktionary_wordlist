@@ -56,35 +56,32 @@ def get_sense_data(idx, sense):
     return "\n".join(lines)
 
 
-def get_word_page(word, pos=None):
-    words = wordlist.all_words.get(word)
-    if not words:
+def get_word_page(word, pos_match=None):
+    pos_list = wordlist.all_words.get(word)
+    if not pos_list:
         raise ValueError(f"No data for {word}")
 
     items = []
-    for word_obj in words:
-        if not word_obj.senses:
-            continue
+    for pos, words in sorted(pos_list.items()):
+        for word_obj in words:
+            if not word_obj.senses:
+                continue
 
-        if pos and pos != word_obj.common_pos:
-            continue
+            if pos_match and pos_match != pos:
+                continue
 
-        items.append(get_word_header(word_obj))
-        for i,sense in enumerate(word_obj.senses, 1):
-            items.append(get_sense_data(i, sense))
-        items.append("")
+            items.append(get_word_header(word_obj))
+            for i,sense in enumerate(word_obj.senses, 1):
+                items.append(get_sense_data(i, sense))
+            items.append("")
 
-        if not pos:
-            for lemma in word_obj.form_of:
-                if lemma not in wordlist.all_words:
-                    if lemma.endswith(".") and lemma.rstrip(".") in wordlist.all_words:
-                        print("stripping . from {lemma}", file=sys.stderr)
-                        lemma = lemma.rstrip(".")
-                    else:
+            if not pos_match:
+                for lemma in word_obj.form_of:
+                    if lemma not in wordlist.all_words:
                         continue
-                lemma_data = get_word_page(lemma, word_obj.common_pos)
-                if lemma_data:
-                    items.append(lemma_data)
+                    lemma_data = get_word_page(lemma, pos)
+                    if lemma_data:
+                        items.append(lemma_data)
 
     return "\n".join(items).strip()
 

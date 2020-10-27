@@ -91,8 +91,8 @@ class Sense():
         "superseded form": "old",
         "superseded spelling": "old",
     }
-    form_pattern = "(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
-    alt_form_pattern = "(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
+    form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
+    alt_form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
 
 class Word():
     def __init__(self, word, pos=None, common_pos=None):
@@ -183,9 +183,9 @@ class Word():
 
 class Wordlist():
     def __init__(self, data):
-        self.all_words = {}
-        self._all_forms = None
-        self._all_lemmas = None
+        self.all_words = {}     # { word: {  pos: [ Word1, .. ] }}
+        self._all_forms = None  # { form: {  pos: { formtype:[lemma1, ..] }}}
+        self._all_lemmas = None # { lemma: { pos: { formtype:[form1, ..] }}}
 
         prev_word = None
         prev_pos = None
@@ -193,24 +193,22 @@ class Wordlist():
         word_item = None
 
         for line in data:
-            word, pos, note, syn, definition = self.parse_line(line)
+            word, pos, note, syn, data = self.parse_line(line)
             common_pos = None
 
             if pos.startswith("meta-"):
                 common_pos = pos[len("meta-"):]
-                # A meta line starts a new word unless it was preceeded by an identical meta line
-                if prev_word != word or prev_pos != pos:
-                    word_item = self.add_word(word,None,common_pos)
-                word_item.add_meta(definition)
+                word_item = self.add_word(word,None,common_pos)
+                word_item.add_meta(data)
 
             else:
                 common_pos = Word.get_common_pos(pos)
-                if word != prev_word or common_pos != prev_common_pos: # or (pos != prev_pos and "meta-" not in prev_pos):
+                if word != prev_word or common_pos != prev_common_pos:
                     word_item = self.add_word(word,pos,common_pos)
 
                 if not word_item.pos:
                     word_item.pos = pos
-                word_item.add_sense(pos, note, definition, syn)
+                word_item.add_sense(pos, note, data, syn)
 
             prev_word = word
             prev_pos = pos
@@ -220,9 +218,11 @@ class Wordlist():
         word_item = Word(word, pos, common_pos)
 
         if word not in self.all_words:
-            self.all_words[word] = [word_item]
+            self.all_words[word] = {common_pos: [word_item]}
+        elif common_pos not in self.all_words[word]:
+            self.all_words[word][common_pos] = [word_item]
         else:
-            self.all_words[word].append(word_item)
+            self.all_words[word][common_pos].append(word_item)
 
         return word_item
 
@@ -233,12 +233,10 @@ class Wordlist():
         Check if a given word, pos is a lemma
         """
 
-        return any(word.common_pos == common_pos and word.is_lemma
-                for word in self.all_words.get(lemma,[]))
+        return any(word.is_lemma for word in self.get_words(lemma, common_pos))
 
-    def get_words(self, word, common_pos=None):
-        return [word_obj for word_obj in self.all_words.get(word, [])
-                if common_pos is None or word_obj.common_pos == common_pos]
+    def get_words(self, word, common_pos):
+        return self.all_words.get(word,{}).get(common_pos,[])
 
     def get_lemmas(self, word, max_depth=3):
         """
@@ -354,25 +352,28 @@ class Wordlist():
         """
         all_items = {}
 
-        for word in [ word for words in self.all_words.values() for word in words ]:
-            if not len(word.senses):
-                continue
+        for pos_list in self.all_words.values():
+            for words in pos_list.values():
+                for word in words:
 
-            # Word is a lemma, add it and all its forms
-            if word.is_lemma:
-                self.add_form(all_items, word.word, word.common_pos, word.pos, word.word, reverse=reverse)
-                self.add_forms(all_items, word.word, word.common_pos, word.forms, reverse=reverse)
-                continue
+                    if not len(word.senses):
+                        continue
 
-            # Word is form of another lemma, add its forms to the lemma
-            for lemma, formtypes in self.get_lemmas(word).items():
-                for formtype in formtypes:
-                    self.add_form(all_items, lemma, word.common_pos, formtype, word.word, reverse=reverse)
-                    if formtype == "f":
-                        # If this is the feminine of a masculine, add all plurals as "fpl"
-                        self.add_feminine_forms(all_items, lemma, word.common_pos, word.forms, reverse=reverse)
-                    else:
-                        self.add_forms(all_items, lemma, word.common_pos, word.forms, formtype, reverse=reverse)
+                    # Word is a lemma, add it and all its forms
+                    if word.is_lemma:
+                        self.add_form(all_items, word.word, word.common_pos, word.pos, word.word, reverse=reverse)
+                        self.add_forms(all_items, word.word, word.common_pos, word.forms, reverse=reverse)
+                        continue
+
+                    # Word is form of another lemma, add its forms to the lemma
+                    for lemma, formtypes in self.get_lemmas(word).items():
+                        for formtype in formtypes:
+                            self.add_form(all_items, lemma, word.common_pos, formtype, word.word, reverse=reverse)
+                            if formtype == "f":
+                                # If this is the feminine of a masculine, add all plurals as "fpl"
+                                self.add_feminine_forms(all_items, lemma, word.common_pos, word.forms, reverse=reverse)
+                            else:
+                                self.add_forms(all_items, lemma, word.common_pos, word.forms, formtype, reverse=reverse)
 
         return all_items
 

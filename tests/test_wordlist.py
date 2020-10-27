@@ -94,13 +94,13 @@ test7 {m} :: alternate form of "test-none"
     assert wlist.has_lemma("test1", "noun") == True
     assert wlist.has_lemma("test2", "noun") == False
 
-    test1 = wlist.all_words["test1"][0]
-    test2 = wlist.all_words["test2"][0]
-    test3 = wlist.all_words["test3"][0]
-    test4 = wlist.all_words["test4"][0]
-    test5 = wlist.all_words["test5"][0]
-    test6 = wlist.all_words["test6"][0]
-    test7 = wlist.all_words["test7"][0]
+    test1 = wlist.all_words["test1"]["noun"][0]
+    test2 = wlist.all_words["test2"]["noun"][0]
+    test3 = wlist.all_words["test3"]["noun"][0]
+    test4 = wlist.all_words["test4"]["noun"][0]
+    test5 = wlist.all_words["test5"]["noun"][0]
+    test6 = wlist.all_words["test6"]["noun"][0]
+    test7 = wlist.all_words["test7"]["noun"][0]
 
     assert test1.word == "test1"
     assert test1.pos == "m"
@@ -135,3 +135,19 @@ test4 {m} :: alternate form of "test3"
     assert wlist.all_lemmas ==  {
 'test1': {'noun': {'alt': ['test2', 'test3', 'test4'], 'm': ['test1']}}
 }
+
+def test_multiple_words():
+
+    data = """\
+testo {meta-noun} :: pl=testos
+testo {m} :: test
+testo {meta-noun} :: pl=testoz
+testo {m} :: test2
+testa {meta-noun} :: pl=testas
+testa {f} :: feminine noun of "testo"
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    assert len(wlist.all_words) == 2
+    assert len(wlist.all_words["testo"]) == 1
+    assert len(wlist.all_words["testo"]["noun"]) == 2
