@@ -636,3 +636,60 @@ decaer {v} :: to decay\
 """
 
 
+def test_abandonar():
+    orig_text="""\
+==Spanish==
+{{root|es|ine-pro|*bʰeh₂-|id=speak}}
+
+===Etymology===
+From {{bor|es|fr|abandonner}}, from {{der|es|gem-pro|*bannaną}}.
+
+===Pronunciation===
+* {{es-IPA}}
+
+===Verb===
+{{es-verb|abandon|ar}}
+
+# to [[abandon]], to [[leave]]
+#: {{uxi|es|La '''abandonó''' por otra mujer.|He abandoned her for another woman.}}
+# to [[neglect]]
+#: {{syn|es|descuidar}}
+
+====Conjugation====
+{{es-conj-ar|abandon|combined=1}}
+
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+    entry = builder.parse_entry(lang_entry, "abandonar")
+
+    assert "\n".join(entry) == """\
+abandonar {verb-forms} :: 1=abandonar; 10=abandona; 11=abandonamos; 12=abandonáis; 13=abandonan; 14=abandonaba; 15=abandonabas; 16=abandonaba; 17=abandonábamos; 18=abandonabais; 19=abandonaban; 2=abandonando; 20=abandoné; 21=abandonaste; 22=abandonó; 23=abandonamos; 24=abandonasteis; 25=abandonaron; 26=abandonaré; 27=abandonarás; 28=abandonará; 29=abandonaremos; 3=abandonado; 30=abandonaréis; 31=abandonarán; 32=abandonaría; 33=abandonarías; 34=abandonaría; 35=abandonaríamos; 36=abandonaríais; 37=abandonarían; 38=abandone; 39=abandones; 4=abandonada; 40=abandonés; 41=abandone; 42=abandonemos; 43=abandonéis; 44=abandonen; 45=abandonara; 46=abandonaras; 47=abandonara; 48=abandonáramos; 49=abandonarais; 5=abandonados; 50=abandonaran; 51=abandonase; 52=abandonases; 53=abandonase; 54=abandonásemos; 55=abandonaseis; 56=abandonasen; 57=abandonare; 58=abandonares; 59=abandonare; 6=abandonadas; 60=abandonáremos; 61=abandonareis; 62=abandonaren; 63=abandona; 64=abandoná; 65=abandone; 66=abandonemos; 67=abandonad; 68=abandonen; 69=abandones; 7=abandono; 70=abandone; 71=abandonemos; 72=abandonéis; 73=abandonen; 8=abandonas; 9=abandonás
+abandonar {v} :: to abandon, to leave
+abandonar {v} | descuidar :: to neglect\
+"""
+
+
+def test_bad_conjugation():
+    orig_text="""\
+==Spanish==
+
+===Verb===
+{{es-verb|decae|ar|pres=decaigo|pret=decaí|part=decaído}}
+
+# to [[decay]]
+
+====Conjugation====
+{{es-conj-er|p=caer|de|combined=1}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+    entry = builder.parse_entry(lang_entry, "decaer")
+
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+decaer {v} :: to decay\
+"""
+

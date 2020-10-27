@@ -8,15 +8,11 @@ from wordlist import Wordlist
 def export(data, lemmas=False, json=False):
 
     wordlist = Wordlist(data)
-    if lemmas:
-        all_items = wordlist.all_lemmas
-    else:
-        all_items = wordlist.all_forms
 
     if json:
-        yield from as_json(all_items)
+        yield from as_json(wordlist.all_forms)
     else:
-        yield from as_text(all_items)
+        yield from as_text(wordlist.all_forms)
 
 def as_text(all_items):
     for word, types in sorted(all_items.items()):
@@ -49,7 +45,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate forms-to-lemmas data from wordlist")
     parser.add_argument("wordlist", help="wordlist")
-    parser.add_argument("--lemmas", help="generate lemmas-to-forms instead", action='store_true')
     parser.add_argument("--json", help="format data as json", action='store_true')
     args = parser.parse_args()
 

@@ -41,22 +41,6 @@ testa {f} :: feminine noun of "testo"
 """
     assert "\n".join(exporter.export(test.splitlines(), lemmas=False, json=True)) == expected.strip()
 
-def test_lemmas_text():
-
-    test = """\
-testo {noun-forms} :: pl=testos
-testo {m} :: test
-testo {noun-forms} :: pl=testoz
-testo {m} :: test2
-testa {noun-forms} :: pl=testas
-testa {f} :: feminine noun of "testo"
-"""
-    expected = """\
-testo {noun} f=testa; fpl=testas; m=testo; pl=testos; pl=testoz
-"""
-    assert "\n".join(exporter.export(test.splitlines(), lemmas=True, json=False)) == expected.strip()
-
-
 def test_forms_redirection():
 
     test = """\

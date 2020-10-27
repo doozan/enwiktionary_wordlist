@@ -132,9 +132,157 @@ test4 {m} :: alternate form of "test3"
 'test4': {'noun': {'alt': ['test1']}}
 }
 
-    assert wlist.all_lemmas ==  {
-'test1': {'noun': {'alt': ['test2', 'test3', 'test4'], 'm': ['test1']}}
-}
+def test_forms_complex():
+    # protectora should be a form of protector even though it has a secondary
+    # declaration as a lemma
+
+    data = """\
+protector {noun-forms} :: f=protectora; fpl=protectoras; pl=protectores
+protector {m} :: protector (someone who protects or guards)
+protector {noun-forms} :: pl=protectores
+protector {m} :: protector (a device or mechanism which is designed to protect)
+protectora {noun-forms} :: m=protector; mpl=protectores; pl=protectoras
+protectora {f} :: feminine noun of "protector"
+protectora {noun-forms} :: pl=protectoras
+protectora {f} | protectora de animales :: animal shelter (an organization that provides temporary homes for stray pet animals)
+protectriz {noun-forms} :: m=protector; mpl=protectores; pl=protectrices
+protectriz {f} [uncommon] :: alternative form of "protectora"
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    assert wlist.has_lemma("protector", "noun") == True
+    assert wlist.has_lemma("protectora", "noun") == False
+    assert wlist.has_lemma("protectriz", "noun") == False
+
+    protector = wlist.get_words("protector", "noun")[0]
+    protectora = wlist.get_words("protectora", "noun")[0]
+    protectriz = wlist.get_words("protectriz", "noun")[0]
+
+    assert protector.is_lemma == True
+    assert protectora.is_lemma == False
+    assert protectriz.is_lemma == False
+
+    assert wlist.get_lemmas(protector) == {'protector': ['m']}
+    assert wlist.get_lemmas(protectora) == {'protector': ['f']}
+    assert wlist.get_lemmas(protectriz) == {'protector': ['f']}
+
+    print(wlist.all_forms)
+    assert wlist.all_forms == {
+        'protector': {'noun': {'m': ['protector']}},
+        'protectora': {'noun': {'f': ['protector', 'protectora']}},
+        'protectoras': {'noun': {'fpl': ['protector'], 'pl': ['protectora']}},
+        'protectores': {'noun': {'pl': ['protector']}},
+        'protectriz': {'noun': {'f': ['protector']}},
+        'protectrices': {'noun': {'fpl': ['protector']}}
+        }
+
+
+
+def test_secondary_lemma_unique_forms():
+    # Renfe should be alt of RENFE, but
+    # Renfes should be a form of Renfe (since it cannot be an alt of RENFE)
+
+    data = """\
+RENFE {prop} :: A state owned company that runs the Spanish railway network
+Renfe {m} :: alternative form of "RENFE"
+Renfe {noun-forms} :: pl=Renfes
+Renfe {m} [Spain] :: train station
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    assert wlist.has_lemma("RENFE", "noun") == True
+    assert wlist.has_lemma("Renfe", "noun") == False
+
+    RENFE = wlist.get_words("RENFE", "noun")[0]
+    Renfe1 = wlist.get_words("Renfe", "noun")[0]
+    Renfe2 = wlist.get_words("Renfe", "noun")[1]
+
+    assert RENFE.is_lemma == True
+    assert Renfe1.is_lemma == False
+    assert Renfe2.is_lemma == True
+
+    assert wlist.get_lemmas(RENFE) == {'RENFE': ['prop']}
+    assert wlist.get_lemmas(Renfe1) == {'RENFE': ['alt']}
+    assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
+
+    print(wlist.all_forms)
+    assert wlist.all_forms == {
+        'RENFE': {'noun': {'prop': ['RENFE']}},
+        'Renfe': {'noun': {'alt': ['RENFE'], 'm': ['Renfe']}},
+        'Renfes': {'noun': {'pl': ['Renfe']}}
+        }
+
+
+def test_secondary_lemma_no_unique_forms():
+    # Renfe and Renfes should be alts of RENFE
+
+    data = """\
+RENFE {prop} :: A state owned company that runs the Spanish railway network
+Renfe {noun-forms} :: pl=Renfes
+Renfe {m} :: alternative form of "RENFE"
+Renfe {noun-forms} :: pl=Renfes
+Renfe {m} [Spain] :: train station
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    assert wlist.has_lemma("RENFE", "noun") == True
+    assert wlist.has_lemma("Renfe", "noun") == False
+
+    RENFE = wlist.get_words("RENFE", "noun")[0]
+    Renfe1 = wlist.get_words("Renfe", "noun")[0]
+    Renfe2 = wlist.get_words("Renfe", "noun")[1]
+
+    assert RENFE.is_lemma == True
+    assert Renfe1.is_lemma == False
+    assert Renfe2.is_lemma == True
+
+    assert wlist.get_lemmas(RENFE) == {'RENFE': ['prop']}
+    assert wlist.get_lemmas(Renfe1) == {'RENFE': ['alt']}
+    assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
+
+    assert wlist.all_forms == {
+        'RENFE': {'noun': {'prop': ['RENFE']}},
+        'Renfe': {'noun': {'alt': ['RENFE'], 'm': ['Renfe']}},
+        'Renfes': {'noun': {'pl': ['RENFE', 'Renfe']}}
+        }
+
+
+def test_asco_forms():
+
+    data = """\
+asca {noun-forms} :: pl=ascas
+asca {m} [mycology] | teca :: ascus
+asco {noun-forms} :: pl=ascos
+asco {m} :: disgust
+asco {m} :: nausea
+asco {noun-forms} :: pl=ascos
+asco {m} :: alternative form of "asca"
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    #assert wlist.has_lemma("RENFE", "noun") == True
+    #assert wlist.has_lemma("Renfe", "noun") == False
+#
+#    RENFE = wlist.get_words("RENFE", "noun")[0]
+#    Renfe1 = wlist.get_words("Renfe", "noun")[0]
+#    Renfe2 = wlist.get_words("Renfe", "noun")[1]
+#
+#    assert RENFE.is_lemma == True
+#    assert Renfe1.is_lemma == False
+#    assert Renfe2.is_lemma == True
+#
+#    assert wlist.get_lemmas(RENFE) == {'RENFE': ['prop']}
+#    assert wlist.get_lemmas(Renfe1) == {'RENFE': ['alt']}
+#    assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
+#
+    print(wlist.all_forms)
+    assert wlist.all_forms == {
+        'asca': {'noun': {'m': ['asca']}},
+        'ascas': {'noun': {'pl': ['asca']}},
+        'asco': {'noun': {'m': ['asco'], 'alt': ['asca']}},
+        'ascos': {'noun': {'pl': ['asco', 'asca']}}
+        }
+
 
 def test_multiple_words():
 
