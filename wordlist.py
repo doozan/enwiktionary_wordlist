@@ -119,7 +119,8 @@ class Word():
 
     @property
     def is_lemma(self):
-        return self.senses and not self.form_of
+        return self.senses and not self.form_of \
+                and not ("m" in self.forms and "f" in self.forms)
 
     def add_sense(self, pos, qualifier, gloss, syndata):
         sense = Sense(pos, qualifier, gloss, syndata)
