@@ -300,3 +300,18 @@ testa {f} :: feminine noun of "testo"
     assert len(wlist.all_words["testo"]) == 1
     assert len(wlist.all_words["testo"]["noun"]) == 2
 
+def test_diva():
+
+    data = """\
+diva {noun-forms} :: m=divo; mpl=divos; pl=divas
+diva {f} :: diva
+divo {adj-forms} :: f=diva; fpl=divas; pl=divos
+divo {adj} :: star (famous)
+divo {noun-forms} :: f=diva; fpl=divas; pl=divos
+divo {m} :: star, celeb\
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    diva = wlist.get_words("diva", "noun")[0]
+    assert diva.is_lemma == False
+    assert wlist.get_lemmas(diva) == {'divo': ['f']}

@@ -97,11 +97,25 @@ class Sense():
 class Word():
     def __init__(self, word, pos=None, common_pos=None):
         self.word = word
-        self.pos = pos
+        self._pos = pos
         self._common_pos = common_pos
         self.senses = []
         self.forms = {}   # { formtype: [form1, ..] }
         self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
+
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, value):
+        self._pos = value
+        if value == "f":
+            for form in self.forms.get("m", []):
+                self.add_lemma(form, "f")
+        elif value == "fp":
+            for form in self.forms.get("mpl", []):
+                self.add_lemma(form, "fpl")
 
     @property
     def is_lemma(self):
@@ -138,7 +152,8 @@ class Word():
         if lemma not in self.form_of:
             self.form_of[lemma] = [formtype]
         else:
-            self.form_of[lemma].append(formtype)
+            if formtype not in self.form_of[lemma]:
+                self.form_of[lemma].append(formtype)
 
     def parse_forms(self, data):
         self.add_forms(self.parse_list(data))
