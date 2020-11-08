@@ -27,7 +27,7 @@ import re
 import sys
 
 import enwiktionary_parser as wtparser
-
+from enwiktionary_parser.languages.all_ids import languages as lang_ids
 
 class WordlistBuilder:
     def __init__(self, lang_name, lang_id):
@@ -96,6 +96,8 @@ class WordlistBuilder:
                 if ";" in v:
                     raise ValueError(f"ERROR: ; found in value ({v})")
 
+                k = re.sub("[.,/:;]+", "", k)
+                k = re.sub(" +", "_", k)
                 res.append(f"{k}={v}")
 
         return "; ".join(res)
@@ -257,7 +259,6 @@ def main():
     parser = argparse.ArgumentParser(description="Convert *nym sections to tags.")
     parser.add_argument("--xml", help="XML file to load", required=True)
     parser.add_argument("--lang-id", help="Language id", required=True)
-    parser.add_argument("--lang-section", help="Language name", required=True)
     args = parser.parse_args()
 
     if not os.path.isfile(args.xml):
@@ -269,7 +270,11 @@ def main():
     dump = xmlreader.XmlDump(args.xml)
     parser = dump.parse()
 
-    builder = WordlistBuilder(args.lang_section, args.lang_id)
+    if args.lang_id not in lang_ids:
+        raise ValueError(f"Unknown language id: {args.lang_id}")
+    lang_section = lang_ids[args.lang_id]
+
+    builder = WordlistBuilder(lang_section, args.lang_id)
 
     count = 0
     lang_count = 0

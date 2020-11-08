@@ -315,3 +315,33 @@ divo {m} :: star, celeb\
     diva = wlist.get_words("diva", "noun")[0]
     assert diva.is_lemma == False
     assert wlist.get_lemmas(diva) == {'divo': ['f']}
+
+def test_capitana():
+
+    data = """\
+capitana {noun-forms} :: pl=capitanas
+capitana {f} :: female equivalent of "capitán"
+capitán {noun-forms} :: f=capitana; fpl=capitanas; pl=capitanes
+capitán {m} :: captain\
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    capitana = wlist.get_words("capitana", "noun")[0]
+    assert capitana.is_lemma == False
+    assert wlist.get_lemmas(capitana) == {'capitán': ['f']}
+
+# Ignore "form of" if it's not in the primary sense
+def test_banera():
+
+    data = """\
+bañera {noun-forms} :: pl=bañeras
+bañera {f} :: bathtub
+bañera {f} [nautical] :: cockpit
+bañera {f} [Argentina, Chile, Uruguay] :: female equivalent of "bañero"
+bañero {noun-forms} :: f=bañera; fpl=bañeras; pl=bañeros
+bañero {m} [Argentina, Chile, Uruguay] :: lifeguard
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    capitana = wlist.get_words("bañera", "noun")[0]
+    assert capitana.is_lemma == True
