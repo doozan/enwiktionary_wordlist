@@ -7,7 +7,7 @@ class Sense():
         self.qualifier = qualifier
         self.gloss = gloss
         self._syndata = syndata
-        self._synonyms = None
+        self._synonyms = []
 
         if " of " in gloss:
             self.formtype, self.lemma, self.nonform = self.parse_form_of(gloss)
@@ -69,6 +69,7 @@ class Sense():
         "euphemistic spelling": "alt",
         "eye dialect": "alt",
         "feminine": "f",
+        "female equivalent": "f",
         "feminine equivalent": "f",
         "feminine singular": "f",
         "feminine plural": "fpl",
@@ -124,9 +125,10 @@ class Word():
 
     def add_sense(self, pos, qualifier, gloss, syndata):
         sense = Sense(pos, qualifier, gloss, syndata)
-        self.senses.append(sense)
-        if sense.lemma:
+        # Add "form of" if it's in the first sense
+        if sense.lemma and not self.senses:
             self.add_lemma(sense.lemma, sense.formtype)
+        self.senses.append(sense)
 
     def add_form(self, formtype, form):
         if formtype not in self.forms:
@@ -229,6 +231,11 @@ class Wordlist():
             prev_word = word
             prev_pos = pos
             prev_common_pos = common_pos
+
+    @classmethod
+    def from_file(cls, filename):
+        with open(filename) as infile:
+            return cls(infile)
 
     def add_word(self, word, pos=None, common_pos=None):
         word_item = Word(word, pos, common_pos)
