@@ -203,7 +203,6 @@ class Wordlist():
     def __init__(self, data):
         self.all_words = {}     # { word: {  pos: [ Word1, .. ] }}
         self._all_forms = None  # { form: {  pos: { formtype:[lemma1, ..] }}}
-        self._all_lemmas = None # { lemma: { pos: { formtype:[form1, ..] }}}
 
         prev_word = None
         prev_pos = None
@@ -226,6 +225,7 @@ class Wordlist():
 
                 if not word_item.pos:
                     word_item.pos = pos
+
                 word_item.add_sense(pos, note, data, syn)
 
             prev_word = word
@@ -333,22 +333,34 @@ class Wordlist():
 
 
     @classmethod
-    def add_form(cls, dest, lemma, pos, formtype, form):
+    def add_form(cls, dest, form, pos, formtype, lemma):
         if form == "-":
-            print(f"Bad form '-' referenced by {lemma} {pos}", file=sys.stderr)
+#            print(f"Bad form '-' referenced by {lemma} {formtype} {pos}", file=sys.stderr)
             return
 
-        key = (lemma, pos)
 
-        if lemma not in dest:
-            dest[lemma] = {pos: {formtype: [form]}}
-        elif pos not in dest[lemma]:
-            dest[lemma][pos] = {formtype: [form]}
-        elif formtype not in dest[lemma][pos]:
-            dest[lemma][pos][formtype] = [form]
+        target = f"{pos}:{lemma}:{formtype}"
+        if form not in dest:
+            dest[form] = [target]
         else:
-            if form not in dest[lemma][pos][formtype]:
-                dest[lemma][pos][formtype].append(form)
+            if target not in dest[form]:
+                dest[form].append(target)
+
+
+#        if form not in dest:
+#            dest[form] = {(pos,formtype,lemma)}
+#        else:
+#            dest[form].add((pos,formtype,lemma))
+
+#        if form not in dest:
+#            dest[form] = {pos: {formtype: [lemma]}}
+#        elif pos not in dest[form]:
+#            dest[form][pos] = {formtype: [lemma]}
+#        elif formtype not in dest[form][pos]:
+#            dest[form][pos][formtype] = [lemma]
+#        else:
+#            if lemma not in dest[form][pos][formtype]:
+#                dest[form][pos][formtype].append(lemma)
 
     def get_all_forms(self):
         """

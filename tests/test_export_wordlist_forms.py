@@ -17,7 +17,7 @@ testo {noun} m=testo
 testos {noun} pl=testo
 testoz {noun} pl=testo
 """
-    assert "\n".join(exporter.export(test.splitlines(), lemmas=False, json=False)) == expected.strip()
+    assert "\n".join(exporter.export(test.splitlines(), json=False)) == expected.strip()
 
 def notest_forms_json():
 
@@ -39,9 +39,10 @@ testa {f} :: feminine noun of "testo"
 "testoz": {"noun": {"pl": ["testo"]}}
 }
 """
-    assert "\n".join(exporter.export(test.splitlines(), lemmas=False, json=True)) == expected.strip()
+    assert "\n".join(exporter.export(test.splitlines(), json=True)) == expected.strip()
 
 def test_forms_redirection():
+    import export_wordlist_forms as exporter
 
     test = """\
 test1 {m} :: test
@@ -55,6 +56,6 @@ test2 {noun} alt=test1
 test3 {noun} alt=test1
 test4 {noun} alt=test1
 """
-    assert "\n".join(exporter.export(test.splitlines(), lemmas=False, json=False)) == expected.strip()
+    assert "\n".join(exporter.export(test.splitlines(), json=False)) == expected.strip()
 
 

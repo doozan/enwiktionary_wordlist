@@ -8,8 +8,7 @@ import sys
 from wordlist import Wordlist
 
 wordlist = None
-pages = {}
-all_forms = {}
+all_pages = {}
 
 formtypes = {
     "pl": "plural",
@@ -56,37 +55,37 @@ def get_sense_data(idx, sense):
     return "\n".join(lines)
 
 
-def get_word_page(word, pos_match=None):
-    pos_list = wordlist.all_words.get(word)
-    if not pos_list:
-        raise ValueError(f"No data for {word}")
+def get_word_page(seen, word, pos, recursive=False):
+    print(word,pos,recursive)
+
+    if (word,pos) in seen:
+        return
+    seen.add((word,pos))
 
     items = []
-    for pos, words in sorted(pos_list.items()):
-        for word_obj in words:
-            if not word_obj.senses:
-                continue
+    for word_obj in wordlist.all_words.get(word,{}).get(pos,[]):
+        if not word_obj.senses:
+            continue
 
-            if pos_match and pos_match != pos:
-                continue
+        items.append(get_word_header(word_obj))
+        for i,sense in enumerate(word_obj.senses, 1):
+            items.append(get_sense_data(i, sense))
+        items.append("")
 
-            items.append(get_word_header(word_obj))
-            for i,sense in enumerate(word_obj.senses, 1):
-                items.append(get_sense_data(i, sense))
-            items.append("")
-
-            if not pos:
-                for lemma in word_obj.form_of:
-                    if lemma not in wordlist.all_words:
-                        continue
-                    lemma_data = get_word_page(lemma, pos)
-                    if lemma_data:
-                        items.append(lemma_data)
+        if not recursive:
+            for lemma in word_obj.form_of:
+                if lemma not in wordlist.all_words:
+                    continue
+                lemma_data = get_word_page(seen, lemma, pos, recursive=True)
+                if lemma_data:
+                    items.append(lemma_data)
 
     return "\n".join(items).strip()
 
 def build_page(targets):
-    return "\n\n".join(get_word_page(target) for target in targets)
+    print("building page for", targets)
+    seen = set()
+    return "\n\n".join(get_word_page(seen, word, pos) for word,pos in targets)
 
 all_pages = {}
 def add_key(key, targets):
@@ -106,16 +105,15 @@ def export(data, langid, description):
 
     disambig = set()
     ambig_forms = 0
-    for form, pos_types in wordlist.all_forms.items():
-        form_targets = []
-        for pos, formtypes in pos_types.items():
-            for formtype, targets in formtypes.items():
-                form_targets += targets
+    for form, lemmas in wordlist.all_forms.items():
+        form_targets = set()
+        for pos,lemma,formtype in [x.split(":") for x in sorted(lemmas)]:
+            form_targets.add((lemma,pos))
 
         if len(form_targets) > 1:
             ambig_forms += 1
-            disambig.add(tuple(form_targets))
-        add_key(form, tuple(form_targets))
+            disambig.add(tuple(sorted(form_targets)))
+        add_key(form, tuple(sorted(form_targets)))
 
     name = "Wiktionary"
     if langid != "en":

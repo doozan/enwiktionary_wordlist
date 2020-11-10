@@ -5,7 +5,7 @@ import json
 import sys
 from wordlist import Wordlist
 
-def export(data, lemmas=False, json=False):
+def export(data, json=False):
 
     wordlist = Wordlist(data)
 
@@ -15,13 +15,16 @@ def export(data, lemmas=False, json=False):
         yield from as_text(wordlist.all_forms)
 
 def as_text(all_items):
-    for word, types in sorted(all_items.items()):
-        for pos, targets in sorted(types.items()):
-            forms = [f"{formtype}={form}" for formtype, forms in targets.items() for form in forms]
-            if forms == [f"{pos}={word}"]:
-                yield f"{word} {{{pos}}}"
-            else:
-                yield f"{word} {{{pos}}} " + "; ".join(sorted(forms))
+
+    for form, lemmas in sorted(all_items.items()):
+        forms = []
+        for pos,lemma,formtype in [x.split(":") for x in sorted(lemmas)]:
+            forms.append(f"{formtype}={lemma}")
+
+        if forms == [f"{pos}={form}"]:
+            yield f"{form} {{{pos}}}"
+        else:
+            yield f"{form} {{{pos}}} " + "; ".join(sorted(forms))
 
 def as_json(all_items):
 
@@ -45,9 +48,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate forms-to-lemmas data from wordlist")
     parser.add_argument("wordlist", help="wordlist")
-    parser.add_argument("--json", help="format data as json", action='store_true')
+#    parser.add_argument("--json", help="format data as json", action='store_true')
     args = parser.parse_args()
 
     with open(args.wordlist) as infile:
-        for line in export(infile, args.lemmas, args.json):
+        for line in export(infile, False): # args.json):
             print(line)

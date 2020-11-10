@@ -35,7 +35,15 @@ def test_word():
     assert word.forms == {}
     assert word.form_of == {}
 
-    word.add_sense("m", None, "alternative form of testz", None)
+    # Adding form of in a secondary def should have effect
+    word.add_sense("m", None, 'alternative form of "testz"', None)
+    assert word.forms == {}
+    assert word.form_of == {}
+
+    # But form of in the first def does
+    word = wordlist.Word("test", "m")
+    assert word.common_pos == "noun"
+    word.add_sense("m", None, 'alternative form of "testz"', None)
     assert word.forms == {}
     assert word.form_of == { "testz": ["alt"] }
 
@@ -125,12 +133,13 @@ test4 {m} :: alternate form of "test3"
 """
     wlist = wordlist.Wordlist(data.splitlines())
 
+    print(wlist.all_forms)
     assert wlist.all_forms == {
-'test1': {'noun': {'m': ['test1']}},
-'test2': {'noun': {'alt': ['test1']}},
-'test3': {'noun': {'alt': ['test1']}},
-'test4': {'noun': {'alt': ['test1']}}
-}
+        'test1': {('noun', 'm', 'test1')},
+        'test2': {('noun', 'alt', 'test1')},
+        'test3': {('noun', 'alt', 'test1')},
+        'test4': {('noun', 'alt', 'test1')}
+        }
 
 def test_forms_complex():
     # protectora should be a form of protector even though it has a secondary
@@ -166,16 +175,14 @@ protectriz {f} [uncommon] :: alternative form of "protectora"
     assert wlist.get_lemmas(protectora) == {'protector': ['f']}
     assert wlist.get_lemmas(protectriz) == {'protector': ['f']}
 
-    print(wlist.all_forms)
     assert wlist.all_forms == {
-        'protector': {'noun': {'m': ['protector']}},
-        'protectora': {'noun': {'f': ['protector', 'protectora']}},
-        'protectoras': {'noun': {'fpl': ['protector'], 'pl': ['protectora']}},
-        'protectores': {'noun': {'pl': ['protector']}},
-        'protectriz': {'noun': {'f': ['protector']}},
-        'protectrices': {'noun': {'fpl': ['protector']}}
+        'protector': {('noun', 'm', 'protector')},
+        'protectora': {('noun', 'f', 'protector'), ('noun', 'f', 'protectora')},
+        'protectoras': {('noun', 'pl', 'protectora'), ('noun', 'fpl', 'protector')},
+        'protectores': {('noun', 'pl', 'protector')},
+        'protectriz': {('noun', 'f', 'protector')},
+        'protectrices': {('noun', 'fpl', 'protector')}
         }
-
 
 
 def test_secondary_lemma_unique_forms():
@@ -207,9 +214,9 @@ Renfe {m} [Spain] :: train station
 
     print(wlist.all_forms)
     assert wlist.all_forms == {
-        'RENFE': {'noun': {'prop': ['RENFE']}},
-        'Renfe': {'noun': {'alt': ['RENFE'], 'm': ['Renfe']}},
-        'Renfes': {'noun': {'pl': ['Renfe']}}
+        'RENFE': {('noun', 'prop', 'RENFE')},
+        'Renfe': {('noun', 'alt', 'RENFE'), ('noun', 'm', 'Renfe')},
+        'Renfes': {('noun', 'pl', 'Renfe')}
         }
 
 
@@ -241,9 +248,9 @@ Renfe {m} [Spain] :: train station
     assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
 
     assert wlist.all_forms == {
-        'RENFE': {'noun': {'prop': ['RENFE']}},
-        'Renfe': {'noun': {'alt': ['RENFE'], 'm': ['Renfe']}},
-        'Renfes': {'noun': {'pl': ['RENFE', 'Renfe']}}
+        'RENFE': {('noun', 'prop', 'RENFE')},
+        'Renfe': {('noun', 'alt', 'RENFE'), ('noun', 'm', 'Renfe')},
+        'Renfes': {('noun', 'pl', 'Renfe'), ('noun', 'pl', 'RENFE')}
         }
 
 
@@ -277,10 +284,10 @@ asco {m} :: alternative form of "asca"
 #
     print(wlist.all_forms)
     assert wlist.all_forms == {
-        'asca': {'noun': {'m': ['asca']}},
-        'ascas': {'noun': {'pl': ['asca']}},
-        'asco': {'noun': {'m': ['asco'], 'alt': ['asca']}},
-        'ascos': {'noun': {'pl': ['asco', 'asca']}}
+        'asca': {('noun', 'm', 'asca')},
+        'ascas': {('noun', 'pl', 'asca')},
+        'asco': {('noun', 'm', 'asco'), ('noun', 'alt', 'asca')},
+        'ascos': {('noun', 'pl', 'asco'), ('noun', 'pl', 'asca')}
         }
 
 
