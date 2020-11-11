@@ -89,7 +89,7 @@ class WordlistBuilder:
 
         res = []
         for k,values in sorted(forms.items()):
-            for v in values:
+            for v in sorted(values):
                 if re.search(r"[\<\{\[]", v):
                     v = self.wiki_to_text(v)
 

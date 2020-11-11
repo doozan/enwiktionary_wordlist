@@ -133,12 +133,11 @@ test4 {m} :: alternate form of "test3"
 """
     wlist = wordlist.Wordlist(data.splitlines())
 
-    print(wlist.all_forms)
     assert wlist.all_forms == {
-        'test1': {('noun', 'm', 'test1')},
-        'test2': {('noun', 'alt', 'test1')},
-        'test3': {('noun', 'alt', 'test1')},
-        'test4': {('noun', 'alt', 'test1')}
+        'test1': ['noun:test1:m'],
+        'test2': ['noun:test1:alt'],
+        'test3': ['noun:test1:alt'],
+        'test4': ['noun:test1:alt']
         }
 
 def test_forms_complex():
@@ -175,13 +174,14 @@ protectriz {f} [uncommon] :: alternative form of "protectora"
     assert wlist.get_lemmas(protectora) == {'protector': ['f']}
     assert wlist.get_lemmas(protectriz) == {'protector': ['f']}
 
+    print(wlist.all_forms)
     assert wlist.all_forms == {
-        'protector': {('noun', 'm', 'protector')},
-        'protectora': {('noun', 'f', 'protector'), ('noun', 'f', 'protectora')},
-        'protectoras': {('noun', 'pl', 'protectora'), ('noun', 'fpl', 'protector')},
-        'protectores': {('noun', 'pl', 'protector')},
-        'protectriz': {('noun', 'f', 'protector')},
-        'protectrices': {('noun', 'fpl', 'protector')}
+        'protector': ['noun:protector:m'],
+        'protectora': ['noun:protector:f', 'noun:protectora:f'],
+        'protectoras': ['noun:protector:fpl', 'noun:protectora:pl'],
+        'protectores': ['noun:protector:pl'],
+        'protectriz': ['noun:protector:f'],
+        'protectrices': ['noun:protector:fpl']
         }
 
 
@@ -212,11 +212,10 @@ Renfe {m} [Spain] :: train station
     assert wlist.get_lemmas(Renfe1) == {'RENFE': ['alt']}
     assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
 
-    print(wlist.all_forms)
     assert wlist.all_forms == {
-        'RENFE': {('noun', 'prop', 'RENFE')},
-        'Renfe': {('noun', 'alt', 'RENFE'), ('noun', 'm', 'Renfe')},
-        'Renfes': {('noun', 'pl', 'Renfe')}
+        'RENFE': ['noun:RENFE:prop'],
+        'Renfe': ['noun:RENFE:alt', 'noun:Renfe:m'],
+        'Renfes': ['noun:Renfe:pl']
         }
 
 
@@ -248,11 +247,10 @@ Renfe {m} [Spain] :: train station
     assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
 
     assert wlist.all_forms == {
-        'RENFE': {('noun', 'prop', 'RENFE')},
-        'Renfe': {('noun', 'alt', 'RENFE'), ('noun', 'm', 'Renfe')},
-        'Renfes': {('noun', 'pl', 'Renfe'), ('noun', 'pl', 'RENFE')}
+        'RENFE': ['noun:RENFE:prop'],
+        'Renfe': ['noun:RENFE:alt', 'noun:Renfe:m'],
+        'Renfes': ['noun:RENFE:pl', 'noun:Renfe:pl']
         }
-
 
 def test_asco_forms():
 
@@ -267,28 +265,14 @@ asco {m} :: alternative form of "asca"
 """
     wlist = wordlist.Wordlist(data.splitlines())
 
-    #assert wlist.has_lemma("RENFE", "noun") == True
-    #assert wlist.has_lemma("Renfe", "noun") == False
-#
-#    RENFE = wlist.get_words("RENFE", "noun")[0]
-#    Renfe1 = wlist.get_words("Renfe", "noun")[0]
-#    Renfe2 = wlist.get_words("Renfe", "noun")[1]
-#
-#    assert RENFE.is_lemma == True
-#    assert Renfe1.is_lemma == False
-#    assert Renfe2.is_lemma == True
-#
-#    assert wlist.get_lemmas(RENFE) == {'RENFE': ['prop']}
-#    assert wlist.get_lemmas(Renfe1) == {'RENFE': ['alt']}
-#    assert wlist.get_lemmas(Renfe2) == {'Renfe': ['m']}
-#
     print(wlist.all_forms)
+
     assert wlist.all_forms == {
-        'asca': {('noun', 'm', 'asca')},
-        'ascas': {('noun', 'pl', 'asca')},
-        'asco': {('noun', 'm', 'asco'), ('noun', 'alt', 'asca')},
-        'ascos': {('noun', 'pl', 'asco'), ('noun', 'pl', 'asca')}
-        }
+        'asca': ['noun:asca:m'],
+        'ascas': ['noun:asca:pl'],
+        'asco': ['noun:asco:m', 'noun:asca:alt'],
+        'ascos': ['noun:asco:pl', 'noun:asca:pl']
+    }
 
 
 def test_multiple_words():
