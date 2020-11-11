@@ -56,8 +56,6 @@ def get_sense_data(idx, sense):
 
 
 def get_word_page(seen, word, pos, recursive=False):
-    print(word,pos,recursive)
-
     if (word,pos) in seen:
         return
     seen.add((word,pos))
@@ -83,9 +81,13 @@ def get_word_page(seen, word, pos, recursive=False):
     return "\n".join(items).strip()
 
 def build_page(targets):
-    print("building page for", targets)
     seen = set()
-    return "\n\n".join(get_word_page(seen, word, pos) for word,pos in targets)
+    pages = []
+    for word,pos in targets:
+        page = get_word_page(seen, word, pos)
+        if page:
+            pages.append(page)
+    return "\n\n".join(pages)
 
 all_pages = {}
 def add_key(key, targets):
