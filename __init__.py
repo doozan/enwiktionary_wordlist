@@ -197,6 +197,8 @@ class Word():
         "m",    # masculine (frijole)
         "mf",   # uses el/la to indicate gender of person (el/la dentista)
         "mp",   # masculine plural, nouns that are always plural (lentes)
+        "m/f",  # masculine/feminine have same meaning
+        "m-f",  # masculine/feminine have different meanings
     }
 
 class Wordlist():
@@ -204,33 +206,23 @@ class Wordlist():
         self.all_words = {}     # { word: {  pos: [ Word1, .. ] }}
         self._all_forms = None  # { form: {  pos: { formtype:[lemma1, ..] }}}
 
-        prev_word = None
-        prev_pos = None
-        prev_common_pos = None
         word_item = None
 
         for line in data:
             word, pos, note, syn, data = self.parse_line(line)
-            common_pos = None
 
-            if pos.endswith("-forms"):
-                common_pos = pos[:-len("-forms")]
+            if pos.endswith("-meta"):
+                common_pos = pos[:-len("-meta")]
                 word_item = self.add_word(word,None,common_pos)
+
+            elif pos.endswith("-forms"):
                 word_item.parse_forms(data)
 
             else:
-                common_pos = Word.get_common_pos(pos)
-                if word != prev_word or common_pos != prev_common_pos:
-                    word_item = self.add_word(word,pos,common_pos)
-
                 if not word_item.pos:
                     word_item.pos = pos
 
                 word_item.add_sense(pos, note, data, syn)
-
-            prev_word = word
-            prev_pos = pos
-            prev_common_pos = common_pos
 
     @classmethod
     def from_file(cls, filename):

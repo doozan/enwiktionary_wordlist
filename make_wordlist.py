@@ -107,7 +107,7 @@ class WordlistBuilder:
         if not word.forms:
             return None
 
-        if word.shortpos in ["n", "prop", "num"]:
+        if word.shortpos in ["n", "prop"]:
             common_pos = "noun"
         elif word.shortpos.startswith("v"):
             common_pos = "verb"
@@ -117,6 +117,19 @@ class WordlistBuilder:
         return title + " {" + common_pos + "-forms} :: " + self.forms_to_string(word.forms)
 
 
+    def get_meta(self, title, word):
+        """ Returns a formatted form line with the template(s) defining the forms """
+
+        if word.shortpos in ["n", "prop"]:
+            common_pos = "noun"
+        elif word.shortpos.startswith("v"):
+            common_pos = "verb"
+        else:
+            common_pos = word.shortpos
+
+        return title + " {" + common_pos + "-meta} :: " + " ".join(map(str,word.form_sources))
+
+
     def parse_entry(self, text, title):
         self.title = title
         wikt = wtparser.parse_page(text, title, parent=self)
@@ -124,12 +137,15 @@ class WordlistBuilder:
         entry = []
 
         for word in wikt.ifilter_words():
+            if self.exclude_word(word):
+                continue
+
+            meta = self.get_meta(title, word)
+            if meta:
+                entry.append(meta)
             forms = self.get_forms(title, word)
             if forms:
                 entry.append(forms)
-
-            if self.exclude_word(word):
-                continue
 
             for sense in word.ifilter_wordsenses():
                 # Skip senses that are just a request for a definition
@@ -276,11 +292,7 @@ def main():
 
     builder = WordlistBuilder(lang_section, args.lang_id)
 
-    count = 0
-    lang_count = 0
-
     for entry in parser:
-        count += 1
 
         if ":" in entry.title:
             continue
@@ -289,8 +301,6 @@ def main():
 
         if not lang_entry:
             continue
-
-        lang_count += 1
 
         entry = builder.parse_entry(lang_entry, entry.title)
         for line in entry:

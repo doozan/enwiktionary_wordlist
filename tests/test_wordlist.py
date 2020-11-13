@@ -73,8 +73,10 @@ def test_word():
 
 def test_wordlist():
     data="""\
+amigo {noun-meta} :: x
 amigo {noun-forms} :: f=amiga; fpl=amigas; pl=amigos
 amigo {m} :: friend
+amiga {noun-meta} :: x
 amiga {noun-forms} :: m=amigo; mpl=amigos; pl=amigas
 amiga {f} :: feminine noun of "amigo", friend
 """
@@ -88,12 +90,19 @@ amiga {f} :: feminine noun of "amigo", friend
 
 def test_redirection():
     data="""\
+test1 {noun-meta} :: x
 test1 {m} :: test
+test2 {noun-meta} :: x
 test2 {m} :: alternate form of "test1"
+test3 {noun-meta} :: x
 test3 {m} :: alternate form of "test2"
+test4 {noun-meta} :: x
 test4 {m} :: misspelling of "test3"
+test5 {noun-meta} :: x
 test5 {m} :: alternate form of "test6"
+test6 {noun-meta} :: x
 test6 {m} :: alternate form of "test5"
+test7 {noun-meta} :: x
 test7 {m} :: alternate form of "test-none"
 """
 
@@ -126,9 +135,13 @@ test7 {m} :: alternate form of "test-none"
 def test_forms_redirection():
 
     data = """\
+test1 {noun-meta} :: x
 test1 {m} :: test
+test2 {noun-meta} :: x
 test2 {m} :: alternate form of "test1"
+test3 {noun-meta} :: x
 test3 {m} :: alternate form of "test2"
+test4 {noun-meta} :: x
 test4 {m} :: alternate form of "test3"
 """
     wlist = wordlist.Wordlist(data.splitlines())
@@ -145,14 +158,19 @@ def test_forms_complex():
     # declaration as a lemma
 
     data = """\
+protector {noun-meta} :: x
 protector {noun-forms} :: f=protectora; fpl=protectoras; pl=protectores
 protector {m} :: protector (someone who protects or guards)
+protector {noun-meta} :: x
 protector {noun-forms} :: pl=protectores
 protector {m} :: protector (a device or mechanism which is designed to protect)
+protectora {noun-meta} :: x
 protectora {noun-forms} :: m=protector; mpl=protectores; pl=protectoras
 protectora {f} :: feminine noun of "protector"
+protectora {noun-meta} :: x
 protectora {noun-forms} :: pl=protectoras
 protectora {f} | protectora de animales :: animal shelter (an organization that provides temporary homes for stray pet animals)
+protectriz {noun-meta} :: x
 protectriz {noun-forms} :: m=protector; mpl=protectores; pl=protectrices
 protectriz {f} [uncommon] :: alternative form of "protectora"
 """
@@ -190,8 +208,11 @@ def test_secondary_lemma_unique_forms():
     # Renfes should be a form of Renfe (since it cannot be an alt of RENFE)
 
     data = """\
+RENFE {noun-meta} :: x
 RENFE {prop} :: A state owned company that runs the Spanish railway network
+Renfe {noun-meta} :: x
 Renfe {m} :: alternative form of "RENFE"
+Renfe {noun-meta} :: x
 Renfe {noun-forms} :: pl=Renfes
 Renfe {m} [Spain] :: train station
 """
@@ -223,9 +244,12 @@ def test_secondary_lemma_no_unique_forms():
     # Renfe and Renfes should be alts of RENFE
 
     data = """\
+RENFE {noun-meta} :: x
 RENFE {prop} :: A state owned company that runs the Spanish railway network
+Renfe {noun-meta} :: x
 Renfe {noun-forms} :: pl=Renfes
 Renfe {m} :: alternative form of "RENFE"
+Renfe {noun-meta} :: x
 Renfe {noun-forms} :: pl=Renfes
 Renfe {m} [Spain] :: train station
 """
@@ -255,11 +279,14 @@ Renfe {m} [Spain] :: train station
 def test_asco_forms():
 
     data = """\
+asca {noun-meta} :: x
 asca {noun-forms} :: pl=ascas
 asca {m} [mycology] | teca :: ascus
+asco {noun-meta} :: x
 asco {noun-forms} :: pl=ascos
 asco {m} :: disgust
 asco {m} :: nausea
+asco {noun-meta} :: x
 asco {noun-forms} :: pl=ascos
 asco {m} :: alternative form of "asca"
 """
@@ -278,10 +305,13 @@ asco {m} :: alternative form of "asca"
 def test_multiple_words():
 
     data = """\
+testo {noun-meta} :: x
 testo {noun-forms} :: pl=testos
 testo {m} :: test
+testo {noun-meta} :: x
 testo {noun-forms} :: pl=testoz
 testo {m} :: test2
+testa {noun-meta} :: x
 testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
@@ -294,10 +324,13 @@ testa {f} :: feminine noun of "testo"
 def test_diva():
 
     data = """\
+diva {noun-meta} :: x
 diva {noun-forms} :: m=divo; mpl=divos; pl=divas
 diva {f} :: diva
+divo {adj-meta} :: x
 divo {adj-forms} :: f=diva; fpl=divas; pl=divos
 divo {adj} :: star (famous)
+divo {noun-meta} :: x
 divo {noun-forms} :: f=diva; fpl=divas; pl=divos
 divo {m} :: star, celeb\
 """
@@ -310,8 +343,10 @@ divo {m} :: star, celeb\
 def test_capitana():
 
     data = """\
+capitana {noun-meta} :: x
 capitana {noun-forms} :: pl=capitanas
 capitana {f} :: female equivalent of "capitán"
+capitán {noun-meta} :: x
 capitán {noun-forms} :: f=capitana; fpl=capitanas; pl=capitanes
 capitán {m} :: captain\
 """
@@ -325,10 +360,12 @@ capitán {m} :: captain\
 def test_banera():
 
     data = """\
+bañera {noun-meta} :: x
 bañera {noun-forms} :: pl=bañeras
 bañera {f} :: bathtub
 bañera {f} [nautical] :: cockpit
 bañera {f} [Argentina, Chile, Uruguay] :: female equivalent of "bañero"
+bañero {noun-meta} :: x
 bañero {noun-forms} :: f=bañera; fpl=bañeras; pl=bañeros
 bañero {m} [Argentina, Chile, Uruguay] :: lifeguard
 """
@@ -336,3 +373,52 @@ bañero {m} [Argentina, Chile, Uruguay] :: lifeguard
 
     capitana = wlist.get_words("bañera", "noun")[0]
     assert capitana.is_lemma == True
+
+
+
+def test_dios():
+
+    data = """\
+dios {noun-meta} :: {{es-noun|m|dioses|f=diosa}}
+dios {noun-forms} :: f=diosa; fpl=diosas; pl=dioses
+dios {m} :: god
+diosa {noun-meta} :: {{es-noun|f|m=dios}}
+diosa {noun-forms} :: m=dios; mpl=dios; pl=diosas
+diosa {f} :: goddess
+diosa {noun-meta} :: {{es-noun|f}}
+diosa {noun-forms} :: pl=diosas
+diosa {f} [biochemistry] :: diose
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    dios =  wlist.get_words("dios", "noun")[0]
+    assert dios.is_lemma == True
+    assert dios.forms == {'f': ['diosa'], 'fpl': ['diosas'], 'pl': ['dioses']}
+
+    diosa =  wlist.get_words("diosa", "noun")[0]
+    assert diosa.is_lemma == False
+
+
+def test_aquellos():
+
+    data = """\
+aquél {pron-meta} :: {{head|es|pronoun|demonstrative, feminine|aquélla|neuter|aquello|masculine plural|aquéllos|feminine plural|aquéllas|g=m}}
+aquél {pron-forms} :: demonstrative_feminine=aquélla; feminine_plural=aquéllas; masculine_plural=aquéllos; neuter=aquello
+aquél {pron} [demonstrative] :: that one (far from speaker and listener)
+aquéllos {pron-meta} :: {{head|es|pronoun|demonstrative|g=m-p}}
+aquéllos {pron} :: plural of "aquél"; those ones (far from speaker and listener)
+aquel {pron-meta} :: {{head|es|pronoun|g=m|feminine|aquella|neutrum|aquello|masculine plural|aquellos|neutrum plural|aquellos|feminine plural|aquellas}}
+aquel {pron-forms} :: feminine=aquella; feminine_plural=aquellas; masculine_plural=aquellos; neutrum=aquello; neutrum_plural=aquellos
+aquel {pron} [demonstrative] :: alternative spelling of "aquél"
+aquellos {pron-meta} :: {{head|es|pronoun|demonstrative|g=m-p}}
+aquellos {pron} :: alternative spelling of "aquéllos"; those ones (over there; implying some distance). The unaccented form can function as a pronoun if it can be unambiguously deduced as such from context.
+aquellos {pron-meta} :: {{head|es|pronoun|g=n-p}}
+aquellos {pron} :: Those ones. (over there; implying some distance)
+"""
+    wlist = wordlist.Wordlist(data.splitlines())
+
+    word =  wlist.get_words("aquellos", "pron")[0]
+    assert word.is_lemma == False
+    assert word.form_of == {'aquéllos': ['alt']}
+    assert word.forms == {}
+    assert wlist.get_lemmas(word) == {'aquél': ['pl']}
