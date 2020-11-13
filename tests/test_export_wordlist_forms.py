@@ -1,4 +1,4 @@
-import export_wordlist_forms as exporter
+import enwiktionary_wordlist.export_wordlist_forms as exporter
 
 def test_forms_text():
 
@@ -42,7 +42,6 @@ testa {f} :: feminine noun of "testo"
     assert "\n".join(exporter.export(test.splitlines(), json=True)) == expected.strip()
 
 def test_forms_redirection():
-    import export_wordlist_forms as exporter
 
     test = """\
 test1 {m} :: test

@@ -1,4 +1,4 @@
-import wordlist
+import enwiktionary_wordlist as wordlist
 
 def run_test_sense_form(gloss, formtype, lemma, nonform):
     sense = wordlist.Sense("x",None,gloss,None)

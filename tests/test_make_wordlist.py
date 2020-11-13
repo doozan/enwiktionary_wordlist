@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
-from make_wordlist import WordlistBuilder
+from enwiktionary_wordlist.make_wordlist import WordlistBuilder
 import mwparserfromhell
 
 builder = WordlistBuilder("Spanish", "es")
