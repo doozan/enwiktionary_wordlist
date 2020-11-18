@@ -5,7 +5,7 @@ import os
 import re
 import sys
 
-from enwiktionary_wordlist import Wordlist
+from .wordlist import Wordlist
 
 wordlist = None
 all_pages = {}

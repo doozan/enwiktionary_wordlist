@@ -3,7 +3,7 @@
 import argparse
 import json
 import sys
-from enwiktionary_wordlist import Wordlist
+from .wordlist import Wordlist
 
 def export(data, json=False):
 
