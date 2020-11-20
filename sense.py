@@ -56,6 +56,7 @@ class Sense():
         return (None,None,None)
 
     form_of_prefix = {
+        "alternative case form": "alt",
         "alternate form": "alt",
         "alternate spelling": "alt",
         "alternative form": "alt",
