@@ -43,6 +43,8 @@ class Sense():
             formtype = cls.form_of_prefix[res.group(1)]
             lemma = res.group(2)
             nonform = re.sub(re.escape(res.group(0)), "", definition).strip()
+            if res.group(1) == "compound form":
+                nonform = re.sub(r'^([+]".*?")*', "", nonform)
             return (formtype, lemma, nonform)
 
         res = re.search(cls.alt_form_pattern, definition)
@@ -64,6 +66,7 @@ class Sense():
         "alternative typography": "alt",
         "archaic spelling": "old",
         "common misspelling": "spell",
+        "compound form": "alt", # form
         "dated form": "old",
         "dated spelling": "old",
         "euphemistic form": "alt",
@@ -75,6 +78,7 @@ class Sense():
         "feminine singular": "f",
         "feminine plural": "fpl",
         "feminine noun": "f",
+        "inflection": "alt", # form
         "informal form": "alt",
         "informal spelling": "alt",
         "masculine": "m",
