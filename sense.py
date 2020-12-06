@@ -58,12 +58,14 @@ class Sense():
         return (None,None,None)
 
     form_of_prefix = {
+        "adjective form": "alt", # form
         "alternative case form": "alt",
         "alternate form": "alt",
         "alternate spelling": "alt",
         "alternative form": "alt",
         "alternative spelling": "alt",
         "alternative typography": "alt",
+        "apocopic form": "alt",
         "archaic spelling": "old",
         "common misspelling": "spell",
         "compound form": "alt", # form
@@ -97,5 +99,9 @@ class Sense():
         "superseded form": "old",
         "superseded spelling": "old",
     }
-    form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
     alt_form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
+
+    # Add "form" after the alt form pattern is generated so we don't match every "form of xxx"
+    form_of_prefix["form"] = "alt"
+    form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
+
