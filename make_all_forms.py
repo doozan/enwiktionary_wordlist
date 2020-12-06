@@ -95,10 +95,6 @@ class AllForms:
 
         self.all_forms.add(value)
 
-    #    if lemma.startswith("-ach") or form.startswith("-ach"):
-    #        print(lemma, pos, formtype, form, value, file=sys.stderr)
-
-
     def load_all_forms(self):
         """
         Return a list of all known word form/lemma combinations
@@ -119,19 +115,23 @@ class AllForms:
         if not len(word.senses):
             return
 
+        if word.pos is None:
+            raise ValueError(word.word, word.pos)
+
         for lemma, formtypes in self.wordlist.get_lemmas(word).items():
             for lemma_formtype in formtypes:
                 self.add_form(word.word, word.common_pos, lemma_formtype, lemma)
 
-                for formtype, forms in word.forms.items():
-                    for form in forms:
-                        if lemma_formtype == "f" and not word.is_lemma:
-                            if formtype in ["m", "mpl"]:
-                                continue
-                            elif formtype in ["pl", "fpl"]:
-                                formtype = "fpl"
-
-                        self.add_form(form, word.common_pos, formtype, lemma)
+            for formtype, forms in word.forms.items():
+                for form in forms:
+                    if formtype in [ "m", "masculine", "masculine_counterpart" ]:
+                        continue
+                    if not word.is_lemma and lemma_formtype in ["f", "feminine", "feminine_counterpart"]:
+                        if formtype in ["mpl", "masculine_plural"]:
+                            continue
+                        if formtype in ["pl", "fpl", "plural", "feminine_plural"]:
+                            formtype = "fpl"
+                    self.add_form(form, word.common_pos, formtype, lemma)
 
 if __name__ == "__main__":
 
