@@ -5,133 +5,27 @@ import csv
 import io
 import sys
 from .wordlist import Wordlist
+from .all_forms import AllForms
 
-class AllForms:
+def export(forms):
 
-    def __init__(self, wordlist_data):
-        self.wordlist = Wordlist(wordlist_data)
-        self.all_forms = set()
-        self.load_all_forms()
-        del self.wordlist
+    for form, poslemmas in sorted(forms.all_forms.items()):
+        data = {}
+        for poslemma in poslemmas:
+            pos, lemma = poslemma.split("|")
+            if pos not in data:
+                data[pos] = [lemma]
+            elif lemma not in data[pos]:
+                data[pos].append(lemma)
 
-    def export(self):
+        yield from make_lines(form, data)
 
-        # Convert to list and then sort on each key in reverse order of importance (pos, form)
-        self.all_forms = list(self.all_forms)
-        self.all_forms.sort(key=lambda x: x.split("|")[1])
-        self.all_forms.sort(key=lambda x: x.split("|")[0])
-
-        yield from self.as_text()
-
-    def as_text(self):
-
-        lemmas = []
-        prev_form = None
-        prev_pos = None
-        first = True
-
-        for item in self.all_forms:
-            form, pos, lemma = item.split("|")
-            if prev_form and (prev_form != form or prev_pos != pos):
-                yield self.make_line(prev_form, prev_pos, lemmas)
-
-                lemmas = []
-            #if lemma != form and lemma not in lemmas:
-            if lemma not in lemmas:
-                lemmas.append(lemma)
-
-            prev_form = form
-            prev_pos = pos
-
-        if prev_form:
-            yield self.make_line(prev_form, prev_pos, lemmas)
-
-    def make_line(self, form, pos, lemmas):
+def make_lines(form, data):
+    for pos, lemmas in sorted(data.items()):
         si = io.StringIO()
         cw = csv.writer(si)
         cw.writerow([form,pos]+sorted(lemmas))
-        return si.getvalue().strip()
-
-    def add_form(self, form, pos, formtype, lemma):
-
-        if form == "-":
-#            if pos != "verb":
-#                print(f"Bad form '-' referenced by {lemma} {formtype} {pos}", file=sys.stderr)
-            return
-
-        # target = (pos, lemma, formtype)
-        # memory 1102820
-
-        #target = f"{pos}:{lemma}:{formtype}"
-        # memory 1048596
-
-        #target = (pos, lemma)
-        # memory 908408
-
-        # target = f"{pos}:{lemma}"
-        # memory 917540
-
-        # target = None
-        # memory 738848
-
-        #form = f"{pos}:{form}"
-        #target = lemma
-        # memory 786204
-
-        #form = f"{pos}:{form}"
-        #target = f"{lemma}:{formtype}"
-        # memory 1059896
-
-        # form = (pos, form)
-        # target = lemma
-        # memory 871904
-
-        # form = (pos,form,lemma)
-        # memory 777496
-
-        #rform = f"{lemma};{pos};{form}"
-        value = f"{form}|{pos}|{lemma}"
-        # memory 695364
-
-        self.all_forms.add(value)
-
-    def load_all_forms(self):
-        """
-        Return a list of all known word form/lemma combinations
-        [ "form|pos|lemma", ... ]
-        """
-
-        count = 0
-        #for word in self.wordlist.iter_all_words():
-        for pos_list in self.wordlist.all_words.values():
-            for words in pos_list.values():
-                for word in words:
-                    count += 1
-                    if count % 1000 == 0:
-                        print(count, end="\r", file=sys.stderr)
-                    self.process_word_forms(word)
-
-    def process_word_forms(self, word):
-        if not len(word.senses):
-            return
-
-        if word.pos is None:
-            raise ValueError(word.word, word.pos)
-
-        for lemma, formtypes in self.wordlist.get_lemmas(word).items():
-            for lemma_formtype in formtypes:
-                self.add_form(word.word, word.common_pos, lemma_formtype, lemma)
-
-            for formtype, forms in word.forms.items():
-                for form in forms:
-                    if formtype in [ "m", "masculine", "masculine_counterpart" ]:
-                        continue
-                    if not word.is_lemma and lemma_formtype in ["f", "feminine", "feminine_counterpart"]:
-                        if formtype in ["mpl", "masculine_plural"]:
-                            continue
-                        if formtype in ["pl", "fpl", "plural", "feminine_plural"]:
-                            formtype = "fpl"
-                    self.add_form(form, word.common_pos, formtype, lemma)
+        yield si.getvalue().strip()
 
 if __name__ == "__main__":
 
@@ -141,8 +35,12 @@ if __name__ == "__main__":
     parser.add_argument("wordlist", help="wordlist")
     args = parser.parse_args()
 
-    with open(args.wordlist) as infile:
+    with open(args.wordlist) as wordlist_data:
+        wordlist = Wordlist(wordlist_data)
 
-        all_forms = AllForms(infile)
-        for line in all_forms.export():
+        all_forms = AllForms.from_wordlist(wordlist)
+        for line in export(all_forms):
             print(line)
+
+
+
