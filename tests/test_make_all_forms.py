@@ -1,4 +1,4 @@
-import enwiktionary_wordlist.make_all_forms as exporter
+from enwiktionary_wordlist.make_all_forms import AllForms
 
 def test_forms_text():
 
@@ -14,38 +14,14 @@ testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
     expected = """\
-testa {noun} f=testo
-testas {noun} fpl=testo
-testo {noun} m=testo
-testos {noun} pl=testo
-testoz {noun} pl=testo
-"""
-    assert "\n".join(exporter.export(test.splitlines(), json=False)) == expected.strip()
-
-def notest_forms_json():
-
-    test = """\
-testo {noun-meta} :: x
-testo {noun-forms} :: pl=testos
-testo {m} :: test
-testo {noun-meta} :: x
-testo {noun-forms} :: pl=testoz
-testo {m} :: test2
-testa {noun-meta} :: x
-testa {noun-forms} :: pl=testas
-testa {f} :: feminine noun of "testo"
+testa,noun,testo
+testas,noun,testo
+testo,noun,testo
+testos,noun,testo
+testoz,noun,testo
 """
 
-    expected = """\
-{
-"testa": {"noun": {"f": ["testo"]}},
-"testas": {"noun": {"fpl": ["testo"]}},
-"testo": {"noun": {"m": ["testo"]}},
-"testos": {"noun": {"pl": ["testo"]}},
-"testoz": {"noun": {"pl": ["testo"]}}
-}
-"""
-    assert "\n".join(exporter.export(test.splitlines(), json=True)) == expected.strip()
+    assert "\n".join(AllForms(test.splitlines()).export()) == expected.strip()
 
 def test_forms_redirection():
 
@@ -60,11 +36,10 @@ test4 {noun-meta} :: x
 test4 {m} :: alternate form of "test3"
 """
     expected = """\
-test1 {noun} m=test1
-test2 {noun} alt=test1
-test3 {noun} alt=test1
-test4 {noun} alt=test1
+test1,noun,test1
+test2,noun,test1
+test3,noun,test1
+test4,noun,test1
 """
-    assert "\n".join(exporter.export(test.splitlines(), json=False)) == expected.strip()
 
-
+    assert "\n".join(AllForms(test.splitlines()).export()) == expected.strip()

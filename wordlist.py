@@ -6,7 +6,6 @@ from .word import Word
 class Wordlist():
     def __init__(self, data):
         self.all_words = {}     # { word: {  pos: [ Word1, .. ] }}
-        self._all_forms = None  # { form: {  pos: { formtype:[lemma1, ..] }}}
 
         word_item = None
 
@@ -125,75 +124,3 @@ class Wordlist():
 
         return (word, pos, note, syn, definition)
 
-
-    @classmethod
-    def add_form(cls, dest, form, pos, formtype, lemma):
-        if form == "-":
-#            print(f"Bad form '-' referenced by {lemma} {formtype} {pos}", file=sys.stderr)
-            return
-
-
-        target = f"{pos}:{lemma}:{formtype}"
-        if form not in dest:
-            dest[form] = [target]
-        else:
-            if target not in dest[form]:
-                dest[form].append(target)
-
-
-#        if form not in dest:
-#            dest[form] = {(pos,formtype,lemma)}
-#        else:
-#            dest[form].add((pos,formtype,lemma))
-
-#        if form not in dest:
-#            dest[form] = {pos: {formtype: [lemma]}}
-#        elif pos not in dest[form]:
-#            dest[form][pos] = {formtype: [lemma]}
-#        elif formtype not in dest[form][pos]:
-#            dest[form][pos][formtype] = [lemma]
-#        else:
-#            if lemma not in dest[form][pos][formtype]:
-#                dest[form][pos][formtype].append(lemma)
-
-    def get_all_forms(self):
-        """
-        Return a dictionary of all known lemmas and all of their forms
-        lemma: {pos: { formtype:[form1, ..], .. }}
-        if reverse is True, builds a dictionary all known forms and their lemmas
-        form: {pos: { formtype:[lemma1, ..], .. }}
-        """
-        all_items = {}
-
-        prev_word = None
-        prev_common_pos = None
-        for pos_list in self.all_words.values():
-            for words in pos_list.values():
-                for word in words:
-                    if not len(word.senses):
-                        continue
-
-                    for lemma, formtypes in self.get_lemmas(word).items():
-                        for lemma_formtype in formtypes:
-                            self.add_form(all_items, word.word, word.common_pos, lemma_formtype, lemma)
-
-                            for formtype, forms in word.forms.items():
-                                for form in forms:
-                                    if lemma_formtype == "f" and not word.is_lemma:
-                                        if formtype in ["m", "mpl"]:
-                                            continue
-                                        elif formtype in ["pl", "fpl"]:
-                                            formtype = "fpl"
-
-                                    self.add_form(all_items, form, word.common_pos, formtype, lemma)
-
-        return all_items
-
-    @property
-    def all_forms(self):
-        """ Returns a dictionary of all forms and their lemmas
-        form: {pos: { formtype:[lemma1, ..], .. }}
-        """
-        if not self._all_forms:
-            self._all_forms = self.get_all_forms()
-        return self._all_forms
