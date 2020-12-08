@@ -47,9 +47,11 @@ Borrowed from {{bor|es|fr|chapeau}}, from {{der|es|VL.|*cappellus}}. Doublet of 
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "chapó")
+    entry = builder.entry_to_mbformat(lang_entry, "chapó")
 
     assert "\n".join(entry) == """\
+chapó {verb-meta} :: {{head|es|verb form}}
+chapó {v} :: inflection of "chapar"
 chapó {interj-meta} :: {{es-interj}}
 chapó {interj} :: Used to express appreciation; hat tip\
 """
@@ -77,14 +79,14 @@ def test_bolivariano():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "bolivariano")
+    entry = builder.entry_to_mbformat(lang_entry, "bolivariano")
 
     assert "\n".join(entry) == """\
 bolivariano {adj-meta} :: {{es-adj|f=bolivariana}}
 bolivariano {adj-forms} :: f=bolivariana; fpl=bolivarianas; pl=bolivarianos
 bolivariano {adj} :: Bolivarian (Of or pertaining to Simón Bolívar.)"""
 
-def test_compeltada():
+def test_completada():
     orig_text="""\
 ==Catalan==
 
@@ -130,9 +132,12 @@ def test_compeltada():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "completada")
+    entry = builder.entry_to_mbformat(lang_entry, "completada")
 
     assert "\n".join(entry) == """\
+completada {adj-meta} :: {{head|es|adjective form}}
+completada {verb-meta} :: {{head|es|past participle form}}
+completada {v} :: inflection of "completar"
 completada {noun-meta} :: {{es-noun|f}}
 completada {noun-forms} :: pl=completadas
 completada {f} [Chile] :: party or meeting where they eat completos (hot-dogs)"""
@@ -163,19 +168,21 @@ def test_yero():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    print(lang_entry)
-    entry = builder.parse_entry(lang_entry, "yero")
+    entry = builder.entry_to_mbformat(lang_entry, "yero")
 
     assert "\n".join(entry) == """\
 yero {noun-meta} :: {{es-noun|m}}
 yero {noun-forms} :: pl=yeros
-yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)"""
+yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)
+yero {verb-meta} :: {{head|es|verb form}}
+yero {v} :: inflection of "yerar"\
+"""
 
 
 def test_wiki_to_text():
 
     wiki = mwparserfromhell.parse("{{gloss|a weak unstable acid, H<sub>2</sub>CO<sub>3</sub>}}")
-    text = builder.wiki_to_text(wiki)
+    text = builder.wiki_to_text(wiki, "test")
     assert text == "(a weak unstable acid, H2CO3)"
 
 def test_repanoche():
@@ -190,8 +197,7 @@ def test_repanoche():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    print(lang_entry)
-    entry = builder.parse_entry(lang_entry, "repanoche")
+    entry = builder.entry_to_mbformat(lang_entry, "repanoche")
 
     assert "\n".join(entry) == """\
 repanoche {noun-meta} :: {{es-noun|f|-}}
@@ -202,19 +208,19 @@ repanoche {f} [Spain] :: only used in "ser la repanocha"\
 def test_wiki_to_text():
 
     wiki = mwparserfromhell.parse("{{gloss|a weak unstable acid, H<sub>2</sub>CO<sub>3</sub>}}")
-    text = builder.wiki_to_text(wiki)
+    text = builder.wiki_to_text(wiki, "test")
     assert text == "(a weak unstable acid, H2CO3)"
 
     wiki = mwparserfromhell.parse("[[test|blah]]")
-    text = builder.wiki_to_text(wiki)
+    text = builder.wiki_to_text(wiki, "test")
     assert text == "blah"
 
     wiki = mwparserfromhell.parse("[[w:Spain|Spain]]")
-    text = builder.wiki_to_text(wiki)
+    text = builder.wiki_to_text(wiki, "test")
     assert text == "Spain"
 
     wiki = mwparserfromhell.parse("{{indtr|es|en|.also|.figurative}}")
-    text = builder.wiki_to_text(wiki)
+    text = builder.wiki_to_text(wiki, "test")
     assert text == "(also figurative, transitive with en)"
 
 def test_fullentry():
@@ -232,7 +238,7 @@ def test_fullentry():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "test")
+    entry = builder.entry_to_mbformat(lang_entry, "test")
 
     print("\n".join(entry))
     assert "\n".join(entry) == """\
@@ -253,7 +259,7 @@ def test_noun_forms():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "youtuber")
+    entry = builder.entry_to_mbformat(lang_entry, "youtuber")
 
     print( "\n".join(entry))
     assert lang_entry != """
@@ -273,7 +279,7 @@ def test_adj_forms():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "youtuber")
+    entry = builder.entry_to_mbformat(lang_entry, "youtuber")
 
     assert "\n".join(entry) == """\
 youtuber {adj-meta} :: {{es-adj|pl=youtubers|pl2=youtuber|f=youtuberista|fpl=youtuberistas}}
@@ -296,7 +302,7 @@ def test_verb_forms():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "abstener")
+    entry = builder.entry_to_mbformat(lang_entry, "abstener")
 
     assert "\n".join(entry) == """\
 abstener {verb-meta} :: {{es-verb|absten|er|pres=abstengo|pret=abstuve}} {{es-conj-er|abs|p=-tener|combined=1}}
@@ -323,7 +329,7 @@ def test_multi_form_verb():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "adecuar")
+    entry = builder.entry_to_mbformat(lang_entry, "adecuar")
 
     assert "\n".join(entry)=="""\
 adecuar {verb-meta} :: {{es-verb|adecu|ar|pres=adecúo}} {{es-conj-ar|adec||p=u-ú|combined=1}} {{es-conj-ar|adecu|combined=1}}
@@ -352,7 +358,7 @@ def test_protector():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "protector")
+    entry = builder.entry_to_mbformat(lang_entry, "protector")
 
     assert "\n".join(entry)=="""\
 protector {adj-meta} :: {{es-adj|f=protectora|mpl=protectores|f2=protectriz|fpl2=protectrices}}
@@ -394,7 +400,7 @@ From {{af|es|a-|terreō|lang2=la}}.
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "aterrar")
+    entry = builder.entry_to_mbformat(lang_entry, "aterrar")
 
     assert "\n".join(entry)=="""\
 aterrar {verb-meta} :: {{es-verb|aterr|ar|pres=atierro}} {{es-conj-ar|at|rr|p=e-ie|combined=1}}
@@ -432,7 +438,7 @@ From {{der|es|la|attentō}}.
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "atentar")
+    entry = builder.entry_to_mbformat(lang_entry, "atentar")
 
     assert "\n".join(entry)=="""\
 atentar {verb-meta} :: {{es-verb|atent|ar|pres=atiento}} {{es-conj-ar|at|nt|p=e-ie|combined=1}}
@@ -459,7 +465,7 @@ def test_billon():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "billón")
+    entry = builder.entry_to_mbformat(lang_entry, "billón")
 
     assert "\n".join(entry)=="""\
 billón {num-meta} :: {{es-noun|m|billones}}
@@ -486,11 +492,18 @@ def test_aquestos():
 # {{masculine plural of|es|aqueste}}
 """
 
+    expected = """\
+aquestos {determiner-meta} :: {{head|es|determiner form}}
+aquestos {determiner} :: masculine plural of "aqueste"
+aquestos {pron-meta} :: {{head|es|pronoun form}}
+aquestos {pron} :: masculine plural of "aqueste"\
+"""
+
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "aquestos")
+    entry = builder.entry_to_mbformat(lang_entry, "aquestos")
 
-    assert "\n".join(entry)==""
+    assert "\n".join(entry)==expected
 
 def test_robot():
     orig_text="""\
@@ -504,7 +517,7 @@ def test_robot():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "robot")
+    entry = builder.entry_to_mbformat(lang_entry, "robot")
 
     assert "\n".join(entry)=="""\
 robot {noun-meta} :: {{es-noun|m}}
@@ -531,9 +544,13 @@ def test_angla():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "angla")
+    entry = builder.entry_to_mbformat(lang_entry, "angla")
+
+    print("\n".join(entry))
 
     assert "\n".join(entry)=="""\
+angla {adj-meta} :: {{head|es|adjective form|g=f-s}}
+angla {adj} :: adjective form of "anglo"
 angla {noun-meta} :: {{es-noun|f|m=anglo}}
 angla {noun-forms} :: m=anglo; mpl=anglos; pl=anglas
 angla {f} :: female equivalent of "anglo"\
@@ -551,7 +568,7 @@ def test_cherry():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "cherry")
+    entry = builder.entry_to_mbformat(lang_entry, "cherry")
 
     assert "\n".join(entry)=="""\
 cherry {noun-meta} :: {{es-noun|m|+|pl2=cherries}}
@@ -572,7 +589,7 @@ def test_torpon():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "torpón")
+    entry = builder.entry_to_mbformat(lang_entry, "torpón")
 
     assert "\n".join(entry)=="""\
 torpón {adj-meta} :: {{es-adj|f=torpona|mpl=torpones}}
@@ -594,7 +611,7 @@ def test_trailing_periods():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "Mejico")
+    entry = builder.entry_to_mbformat(lang_entry, "Mejico")
 
     print("\n".join(entry))
     assert "\n".join(entry)=="""\
@@ -618,7 +635,7 @@ def test_headword():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "Mejico")
+    entry = builder.entry_to_mbformat(lang_entry, "Mejico")
 
     print("\n".join(entry))
     assert "\n".join(entry)=="""\
@@ -638,7 +655,7 @@ def test_noconj():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "test")
+    entry = builder.entry_to_mbformat(lang_entry, "test")
 
     assert "\n".join(entry) == """\
 test {verb-meta} :: {{es-verb|descans|ar}}
@@ -661,7 +678,7 @@ def test_bad_conjugation():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "decaer")
+    entry = builder.entry_to_mbformat(lang_entry, "decaer")
 
     print("\n".join(entry))
     assert "\n".join(entry) == """\
@@ -696,7 +713,7 @@ From {{bor|es|fr|abandonner}}, from {{der|es|gem-pro|*bannaną}}.
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "abandonar")
+    entry = builder.entry_to_mbformat(lang_entry, "abandonar")
 
     assert "\n".join(entry) == """\
 abandonar {verb-meta} :: {{es-verb|abandon|ar}} {{es-conj-ar|abandon|combined=1}}
@@ -721,7 +738,7 @@ def test_bad_conjugation():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "decaer")
+    entry = builder.entry_to_mbformat(lang_entry, "decaer")
 
     print("\n".join(entry))
     assert "\n".join(entry) == """\
@@ -747,7 +764,7 @@ def test_f():
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
-    entry = builder.parse_entry(lang_entry, "f")
+    entry = builder.entry_to_mbformat(lang_entry, "f")
 
     print("\n".join(entry))
     assert "\n".join(entry) == """\

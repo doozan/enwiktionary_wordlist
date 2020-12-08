@@ -1,23 +1,25 @@
 from ..word import Word
 
 def test_word():
-    word = Word("test", "m")
+    word = Word("test", [ ("pos", "noun"), ("form","m") ])
     assert word.common_pos == "noun"
+    assert word.pos == "m"
 
-    word.add_sense("m", "rare", "a test word", None)
+    word.add_sense([("gloss","a test word"),("q","rare")])
     assert len(word.senses) == 1
     assert word.forms == {}
     assert word.form_of == {}
 
-    # Adding form of in a secondary def should have effect
-    word.add_sense("m", None, 'alternative form of "testz"', None)
+    # Adding form of in a secondary def should have no effect
+    word.add_sense([("gloss", 'alternative form of "testz"')])
+    assert len(word.senses) == 2
     assert word.forms == {}
     assert word.form_of == {}
 
     # But form of in the first def does
-    word = Word("test", "m")
+    word = Word("test", [("pos", "noun")])
     assert word.common_pos == "noun"
-    word.add_sense("m", None, 'alternative form of "testz"', None)
+    word.add_sense([("gloss", 'alternative form of "testz"')])
     assert word.forms == {}
     assert word.form_of == { "testz": ["alt"] }
 

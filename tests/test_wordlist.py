@@ -1,38 +1,143 @@
 from ..wordlist import Wordlist
 
-def test_wordlist():
+def test_simple():
     data="""\
-amigo {noun-meta} :: x
-amigo {noun-forms} :: f=amiga; fpl=amigas; pl=amigos
-amigo {m} :: friend
-amiga {noun-meta} :: x
+_____
+amiga
+pos: noun
+  meta: {{es-noun|f|m=amigo}}
+  forms: m=amigo; mpl=amigos; pl=amigas
+  form: f
+  gloss: female equivalent of "amigo", friend
+_____
+amigo
+pos: noun
+  meta: {{es-noun|m|f=amiga}}
+  forms: f=amiga; fpl=amigas; pl=amigos
+  form: m
+  gloss: friend
+"""
+
+    wordlist = Wordlist(data.splitlines())
+    assert len(wordlist.all_entries) == 2
+
+    assert wordlist.has_lemma("test", "noun") == False
+    assert wordlist.has_lemma("amigo", "noun") == True
+    assert wordlist.has_lemma("amiga", "noun") == False
+
+def test_mbformat():
+    data="""\
+amiga {noun-meta} :: {{es-noun|f}}
 amiga {noun-forms} :: m=amigo; mpl=amigos; pl=amigas
-amiga {f} :: feminine noun of "amigo", friend
+amiga {f} :: female equivalent of "amigo", friend
+amigo {noun-meta} :: {{es-noun|m}}
+amigo {noun-forms} :: f=amiga; fpl=amigas; pl=amigos
+amigo {f} :: friend
+"""
+
+    wordlist = Wordlist(data.splitlines(), mbformat=True)
+    assert len(wordlist.all_entries) == 2
+
+    assert wordlist.has_lemma("test", "noun") == False
+    assert wordlist.has_lemma("amigo", "noun") == True
+    assert wordlist.has_lemma("amiga", "noun") == False
+
+
+def test_cache():
+    data="""\
+_____
+amiga
+pos: noun
+  meta: {{es-noun|f|m=amigo}}
+  forms: m=amigo; mpl=amigos; pl=amigas
+  form: f
+  gloss: female equivalent of "amigo", friend
+_____
+amigo
+pos: noun
+  meta: {{es-noun|m|f=amiga}}
+  forms: f=amiga; fpl=amigas; pl=amigos
+  form: m
+  gloss: friend
 """
 
     words = Wordlist(data.splitlines())
 
+    assert len(words._cached) == 0
+
     assert words.has_lemma("test", "noun") == False
+    assert len(words._cached) == 0
+
     assert words.has_lemma("amigo", "noun") == True
+    assert len(words._cached) == 1
+
     assert words.has_lemma("amiga", "noun") == False
+    assert len(words._cached) == 2
+
+
+def test_nocache():
+    data="""\
+_____
+amiga
+pos: noun
+  meta: {{es-noun|f|m=amigo}}
+  forms: m=amigo; mpl=amigos; pl=amigas
+  form: f
+  gloss: female equivalent of "amigo", friend
+_____
+amigo
+pos: noun
+  meta: {{es-noun|m|f=amiga}}
+  forms: f=amiga; fpl=amigas; pl=amigos
+  form: m
+  gloss: friend
+"""
+
+    words = Wordlist(data.splitlines(), cache_words=False)
+
+    assert len(words._cached) == 0
+
+    assert words.has_lemma("test", "noun") == False
+    assert len(words._cached) == 0
+
+    assert words.has_lemma("amigo", "noun") == True
+    assert len(words._cached) == 0
+
+    assert words.has_lemma("amiga", "noun") == False
+    assert len(words._cached) == 0
 
 
 def test_redirection():
     data="""\
-test1 {noun-meta} :: x
-test1 {m} :: test
-test2 {noun-meta} :: x
-test2 {m} :: alternate form of "test1"
-test3 {noun-meta} :: x
-test3 {m} :: alternate form of "test2"
-test4 {noun-meta} :: x
-test4 {m} :: misspelling of "test3"
-test5 {noun-meta} :: x
-test5 {m} :: alternate form of "test6"
-test6 {noun-meta} :: x
-test6 {m} :: alternate form of "test5"
-test7 {noun-meta} :: x
-test7 {m} :: alternate form of "test-none"
+_____
+test1
+pos: noun
+  form: m
+  gloss: test
+_____
+test2
+pos: noun
+  gloss: alternate form of "test1"
+_____
+test3
+pos: noun
+  gloss: alternate form of "test2"
+_____
+test4
+pos: noun
+  gloss: misspelling of "test3"
+_____
+test5
+pos: noun
+  gloss: alternative form of "test6"
+_____
+test6
+pos: noun
+  gloss: alternative form of "test5"
+_____
+test7
+pos: noun
+  gloss: alternative form of "test-none"
 """
 
     wlist = Wordlist(data.splitlines())
@@ -40,17 +145,17 @@ test7 {m} :: alternate form of "test-none"
     assert wlist.has_lemma("test1", "noun") == True
     assert wlist.has_lemma("test2", "noun") == False
 
-    test1 = wlist.all_words["test1"]["noun"][0]
-    test2 = wlist.all_words["test2"]["noun"][0]
-    test3 = wlist.all_words["test3"]["noun"][0]
-    test4 = wlist.all_words["test4"]["noun"][0]
-    test5 = wlist.all_words["test5"]["noun"][0]
-    test6 = wlist.all_words["test6"]["noun"][0]
-    test7 = wlist.all_words["test7"]["noun"][0]
+    test1 = next(wlist.get_words("test1", "noun"))
+    test2 = next(wlist.get_words("test2", "noun"))
+    test3 = next(wlist.get_words("test3", "noun"))
+    test4 = next(wlist.get_words("test4", "noun"))
+    test5 = next(wlist.get_words("test5", "noun"))
+    test6 = next(wlist.get_words("test6", "noun"))
+    test7 = next(wlist.get_words("test7", "noun"))
 
     assert test1.word == "test1"
-    assert test1.pos == "m"
     assert test1.common_pos == "noun"
+    assert test1.pos == "m"
 
     assert wlist.get_lemmas(test1) == {'test1': ['m']}
     assert wlist.get_lemmas(test2) == {'test1': ['alt']}
@@ -60,37 +165,72 @@ test7 {m} :: alternate form of "test-none"
     assert wlist.get_lemmas(test6) == {}
     assert wlist.get_lemmas(test7) == {}
 
-
 def test_forms_complex():
     # protectora should be a form of protector even though it has a secondary
     # declaration as a lemma
 
-    data = """\
-protector {noun-meta} :: x
-protector {noun-forms} :: f=protectora; fpl=protectoras; pl=protectores
-protector {m} :: protector (someone who protects or guards)
-protector {noun-meta} :: x
-protector {noun-forms} :: pl=protectores
-protector {m} :: protector (a device or mechanism which is designed to protect)
-protectora {noun-meta} :: x
-protectora {noun-forms} :: m=protector; mpl=protectores; pl=protectoras
-protectora {f} :: feminine noun of "protector"
-protectora {noun-meta} :: x
-protectora {noun-forms} :: pl=protectoras
-protectora {f} | protectora de animales :: animal shelter (an organization that provides temporary homes for stray pet animals)
-protectriz {noun-meta} :: x
-protectriz {noun-forms} :: m=protector; mpl=protectores; pl=protectrices
-protectriz {f} [uncommon] :: alternative form of "protectora"
+    wordlist_data = """\
+_____
+protector
+pos: noun
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  forms: f=protectora; f=protectriz; fpl=protectoras; fpl=protectrices; pl=protectores
+  form: m
+  gloss: protector (someone who protects or guards)
+pos: noun
+  meta: {{es-noun|m}}
+  forms: pl=protectores
+  g: m
+  gloss: protector (a device or mechanism which is designed to protect)
+_____
+protectora
+pos: noun
+  meta: {{es-noun|f|m=protector}}
+  forms: m=protector; mpl=protectores; pl=protectoras
+  form: f
+  gloss: female equivalent of "protector"
+pos: noun
+  meta: {{es-noun|f}}
+  forms: pl=protectoras
+  form: f
+  gloss: animal shelter (an organization that provides temporary homes for stray pet animals)
+    syn: protectora de animales
+_____
+protectoras
+pos: noun
+  meta: {{head|es|noun plural form|g=f-p}}
+  form: f-p
+  gloss: inflection of "protector"
+_____
+protectores
+pos: noun
+  meta: {{head|es|noun plural form|g=m-p}}
+  form: m-p
+  gloss: inflection of "protector"
+_____
+protectrices
+pos: noun
+  meta: {{head|es|noun plural form|g=f-p}}
+  form: f-p
+  gloss: inflection of "protector"
+_____
+protectriz
+pos: noun
+  meta: {{es-noun|f|m=protector}}
+  forms: m=protector; mpl=protectores; pl=protectrices
+  form: f
+  gloss: alternative form of "protectora"
+    q: uncommon
 """
-    wlist = Wordlist(data.splitlines())
+    wlist = Wordlist(wordlist_data.splitlines())
 
     assert wlist.has_lemma("protector", "noun") == True
     assert wlist.has_lemma("protectora", "noun") == False
     assert wlist.has_lemma("protectriz", "noun") == False
 
-    protector = wlist.get_words("protector", "noun")[0]
-    protectora = wlist.get_words("protectora", "noun")[0]
-    protectriz = wlist.get_words("protectriz", "noun")[0]
+    protector = next(wlist.get_words("protector", "noun"))
+    protectora = next(wlist.get_words("protectora", "noun"))
+    protectriz = next(wlist.get_words("protectriz", "noun"))
 
     assert protector.is_lemma == True
     assert protectora.is_lemma == False
@@ -99,25 +239,6 @@ protectriz {f} [uncommon] :: alternative form of "protectora"
     assert wlist.get_lemmas(protector) == {'protector': ['m']}
     assert wlist.get_lemmas(protectora) == {'protector': ['f']}
     assert wlist.get_lemmas(protectriz) == {'protector': ['f']}
-
-def test_multiple_words():
-
-    data = """\
-testo {noun-meta} :: x
-testo {noun-forms} :: pl=testos
-testo {m} :: test
-testo {noun-meta} :: x
-testo {noun-forms} :: pl=testoz
-testo {m} :: test2
-testa {noun-meta} :: x
-testa {noun-forms} :: pl=testas
-testa {f} :: feminine noun of "testo"
-"""
-    wlist = Wordlist(data.splitlines())
-
-    assert len(wlist.all_words) == 2
-    assert len(wlist.all_words["testo"]) == 1
-    assert len(wlist.all_words["testo"]["noun"]) == 2
 
 def test_diva():
 
@@ -132,9 +253,9 @@ divo {noun-meta} :: x
 divo {noun-forms} :: f=diva; fpl=divas; pl=divos
 divo {m} :: star, celeb\
 """
-    wlist = Wordlist(data.splitlines())
+    wlist = Wordlist(data.splitlines(), mbformat=True)
 
-    diva = wlist.get_words("diva", "noun")[0]
+    diva = next(wlist.get_words("diva", "noun"))
     assert diva.is_lemma == False
     assert wlist.get_lemmas(diva) == {'divo': ['f']}
 
@@ -148,9 +269,9 @@ capitán {noun-meta} :: x
 capitán {noun-forms} :: f=capitana; fpl=capitanas; pl=capitanes
 capitán {m} :: captain\
 """
-    wlist = Wordlist(data.splitlines())
+    wlist = Wordlist(data.splitlines(), mbformat=True)
 
-    capitana = wlist.get_words("capitana", "noun")[0]
+    capitana = next(wlist.get_words("capitana", "noun"))
     assert capitana.is_lemma == False
     assert wlist.get_lemmas(capitana) == {'capitán': ['f']}
 
@@ -167,9 +288,9 @@ bañero {noun-meta} :: x
 bañero {noun-forms} :: f=bañera; fpl=bañeras; pl=bañeros
 bañero {m} [Argentina, Chile, Uruguay] :: lifeguard
 """
-    wlist = Wordlist(data.splitlines())
+    wlist = Wordlist(data.splitlines(), mbformat=True)
 
-    capitana = wlist.get_words("bañera", "noun")[0]
+    capitana = next(wlist.get_words("bañera", "noun"))
     assert capitana.is_lemma == True
 
 
@@ -187,15 +308,14 @@ diosa {noun-meta} :: {{es-noun|f}}
 diosa {noun-forms} :: pl=diosas
 diosa {f} [biochemistry] :: diose
 """
-    wlist = Wordlist(data.splitlines())
+    wlist = Wordlist(data.splitlines(), mbformat=True)
 
-    dios =  wlist.get_words("dios", "noun")[0]
+    dios =  next(wlist.get_words("dios", "noun"))
     assert dios.is_lemma == True
     assert dios.forms == {'f': ['diosa'], 'fpl': ['diosas'], 'pl': ['dioses']}
 
-    diosa =  wlist.get_words("diosa", "noun")[0]
+    diosa =  next(wlist.get_words("diosa", "noun"))
     assert diosa.is_lemma == False
-
 
 def test_aquellos():
 
@@ -213,10 +333,13 @@ aquellos {pron} :: alternative spelling of "aquéllos"; those ones (over there; 
 aquellos {pron-meta} :: {{head|es|pronoun|g=n-p}}
 aquellos {pron} :: Those ones. (over there; implying some distance)
 """
-    wlist = Wordlist(data.splitlines())
 
-    word =  wlist.get_words("aquellos", "pron")[0]
+    wlist = Wordlist(data.splitlines(), mbformat=True)
+
+    word =  next(wlist.get_words("aquellos", "pron"))
     assert word.is_lemma == False
     assert word.form_of == {'aquéllos': ['alt']}
     assert word.forms == {}
     assert wlist.get_lemmas(word) == {'aquél': ['pl']}
+
+

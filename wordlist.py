@@ -4,43 +4,129 @@ import sys
 from .word import Word
 
 class Wordlist():
-    def __init__(self, data):
-        self.all_words = {}     # { word: {  pos: [ Word1, .. ] }}
-
-        word_item = None
-
-        for line in data:
-            word, pos, note, syn, data = self.parse_line(line)
-
-            if pos.endswith("-meta"):
-                common_pos = pos[:-len("-meta")]
-                word_item = self.add_word(word,None,common_pos)
-
-            elif pos.endswith("-forms"):
-                word_item.parse_forms(data)
-
-            else:
-                if not word_item.pos:
-                    word_item.pos = pos
-
-                word_item.add_sense(pos, note, data, syn)
+    def __init__(self, wordlist_data, cache_words=True, mbformat=False):
+        self.cache_words = cache_words
+        self._cached = {}
+        if mbformat:
+            self.all_entries = {title: entry for title, entry in self.iter_entries_mbformat(wordlist_data)}
+        else:
+            self.all_entries = {title: entry for title, entry in self.iter_entries(wordlist_data)}
 
     @classmethod
     def from_file(cls, filename):
         with open(filename) as infile:
             return cls(infile)
 
-    def add_word(self, word, pos=None, common_pos=None):
-        word_item = Word(word, pos, common_pos)
+    @staticmethod
+    def iter_entries(data):
 
-        if word not in self.all_words:
-            self.all_words[word] = {common_pos: [word_item]}
-        elif common_pos not in self.all_words[word]:
-            self.all_words[word][common_pos] = [word_item]
-        else:
-            self.all_words[word][common_pos].append(word_item)
+        entry = None
+        title = None
+        for line in data:
+            line = line.strip()
+            #line = line.rstrip()
+            if line.startswith("#") or line == "":
+                continue
+            if line == "_____":
+                if entry:
+                    yield(title, entry)
+                entry = []
+                title = None
+            else:
+                if entry is None:
+                    raise ValueError("Invalid file format")
+                if title is None:
+                    title = line
+                else:
+                    entry.append(line)
+        if entry:
+            yield(title, entry)
 
-        return word_item
+    @classmethod
+    def iter_entries_mbformat(cls, data):
+
+        entry = []
+        prev_word = None
+        for line in data:
+            word, pos, note, syn, definition = cls.parse_line(line)
+            if word != prev_word:
+                if prev_word:
+                    yield(prev_word, entry)
+
+                if not pos.endswith("-meta"):
+                    #raise ValueError("Expected meta line", prev_word, line)
+                    print("Expected meta line", prev_word, line, file=sys.stderr)
+                    continue
+                entry = []
+
+            if pos.endswith("-meta"):
+                pos = pos[:-len("-meta")]
+                entry += [f"pos: {pos}", f"  meta: {definition}"]
+
+            elif pos.endswith("-forms"):
+                entry.append(f"forms: {definition}")
+            else:
+                if pos in ["m","f","mf","m-f","mp","fp","mfp"]:
+                    entry.append(f"form: {pos}")
+                if definition:
+                    entry.append(f"gloss: {definition}")
+                    if note:
+                        entry.append(f"q: {note}")
+                    if syn:
+                        entry.append(f"syn: {syn}")
+            prev_word = word
+
+        if entry:
+            yield(prev_word, entry)
+
+
+    def get_entry_words(self, title, lines, pos=None):
+
+        common = []
+        word_items = []
+        word_pos = None
+
+        first = False
+        for line in lines:
+            key, _junk, value = line.partition(": ")
+
+            if first:
+                if key != "pos":
+                    common.append((key, value))
+                else:
+                    first = False
+
+            elif key == "pos":
+                if word_items:
+                    word_obj = Word(title, word_items)
+                    if (not pos or word_obj.common_pos == pos):
+                        yield word_obj
+
+                word_items = common + [ (key,value) ]
+
+                word_pos = value
+#                if word_pos == "n":
+#                    word_pos = "noun"
+#                elif word_pos == "v":
+#                    word_pos = "verb"
+#                if word_pos == "prop":
+#                    word_pos = "n"
+
+            else:
+                word_items.append((key,value))
+
+        if word_items:
+            word_obj = Word(title, word_items)
+            if (not pos or word_obj.common_pos == pos):
+                yield word_obj
+
+    def iter_all_words(self):
+#        count = 0
+        for word, entry in self.all_entries.items():
+#            count += 1
+#            if count > 10000:
+#                break
+            yield from self.get_words(word)
 
     def has_lemma(self, lemma, common_pos):
         """
@@ -50,14 +136,37 @@ class Wordlist():
         """
 
         # only consider it a lemma if the first usage is as a lemma
-        words = self.get_words(lemma, common_pos)
-        return len(words) and words[0].is_lemma
+        for word in self.get_words(lemma, common_pos):
+            return word.is_lemma
+        return False
 
-    def has_word(self, word, common_pos):
-        return bool(self.all_words.get(word,{}).get(common_pos,[]))
+    def has_entry(self, word):
+        return word in self.all_entries
 
-    def get_words(self, word, common_pos):
-        return self.all_words.get(word,{}).get(common_pos,[])
+    def has_word(self, word, pos=None):
+        return any(self.get_words(word, pos))
+
+    def get_words(self, title, pos=None):
+        if title not in self.all_entries:
+            return
+
+        if self.cache_words:
+            if title not in self._cached:
+                self._cached[title] = list(self._get_words(title))
+
+                # Delete the source lines from all_entries
+                if title in self.all_entries:
+                    self.all_entries[title] = None
+
+            for word in self._cached[title]:
+                if not pos or pos == word.common_pos:
+                    yield word
+
+        else:
+            yield from self._get_words(title, pos)
+
+    def _get_words(self, word, pos=None):
+        yield from self.get_entry_words(word, self.all_entries.get(word,[]), pos)
 
     def get_lemmas(self, word, max_depth=3):
         """
@@ -81,6 +190,7 @@ class Wordlist():
                 return {}
 
         return lemmas
+
 
     @staticmethod
     def parse_line(line):
@@ -123,4 +233,3 @@ class Wordlist():
         definition = res.group('def') if res.group('def') else ''
 
         return (word, pos, note, syn, definition)
-

@@ -39,8 +39,6 @@ if __name__ == "__main__":
         wordlist = Wordlist(wordlist_data)
 
         all_forms = AllForms.from_wordlist(wordlist)
+
         for line in export(all_forms):
             print(line)
-
-
-

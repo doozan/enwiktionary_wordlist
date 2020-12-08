@@ -2,15 +2,29 @@ import re
 import sys
 
 class Sense():
-    def __init__(self, pos, qualifier, gloss, syndata):
-        self.pos = pos
-        self.qualifier = qualifier
-        self.gloss = gloss
-        self._syndata = syndata
-        self._synonyms = []
+    def __init__(self, data): # pos, qualifier, gloss, syndata):
 
-        if " of " in gloss:
-            self.formtype, self.lemma, self.nonform = self.parse_form_of(gloss)
+        self.gloss = None
+        self.qualifier = None
+        self._syndata = None
+        self._synonyms = None
+
+        for key, value in data:
+            if key == "gloss":
+                self.gloss = value
+            elif key == "q":
+                self.qualifier = value
+            elif key == "syn":
+                self._syndata = value
+
+#        self.pos = pos
+#        self.qualifier = qualifier
+#        self.gloss = gloss
+#        self._syndata = syndata
+#        self._synonyms = []
+
+        if " of " in self.gloss:
+            self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
             if self.lemma:
                 self.lemma = self.lemma.strip()
         else:
@@ -20,8 +34,10 @@ class Sense():
 
     @property
     def synonyms(self):
-        if not self._synonyms and self._syndata:
+        if self._syndata:
             self._synonyms = self.parse_syndata(self._syndata)
+        if not self._synonyms:
+            return []
         return self._synonyms
 
     @classmethod
@@ -104,4 +120,3 @@ class Sense():
     # Add "form" after the alt form pattern is generated so we don't match every "form of xxx"
     form_of_prefix["form"] = "alt"
     form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
-

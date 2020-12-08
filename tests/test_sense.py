@@ -1,14 +1,19 @@
 from ..sense import Sense
 
 def run_test_sense_form(gloss, formtype, lemma, nonform):
-    sense = Sense("x",None,gloss,None)
+    sense = Sense([("gloss", gloss)])
     assert sense.formtype == formtype
     assert sense.lemma == lemma
     assert sense.nonform == nonform
 
 def test_sense():
-    sense = Sense("m","rare","(mostly) obsolete form of fuego","syn1; syn2")
-    assert sense.pos == "m"
+    data = [
+("gloss", "(mostly) obsolete form of fuego"),
+("syn", "syn1; syn2"),
+("q", "rare")
+]
+
+    sense = Sense(data)
     assert sense.qualifier == "rare"
     assert sense.synonyms == ["syn1", "syn2"]
     assert sense.formtype == "old"
@@ -25,4 +30,5 @@ def test_sense():
     run_test_sense_form("given name: alternative spelling of Carina", "alt", "Carina", "given name")
     run_test_sense_form("obsolete form of se (as a dative pronoun)", "old", "se", "as a dative pronoun)")
     run_test_sense_form('compound form of "ir"+"se"', "alt", "ir", "")
+    run_test_sense_form('inflection of "-acho"', "alt", "-acho", "")
 

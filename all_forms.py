@@ -34,11 +34,12 @@ class AllForms:
         [ "form|pos|lemma", ... ]
         """
 
-        #for word in wordlist.iter_all_words():
-        for pos_list in wordlist.all_words.values():
-            for words in pos_list.values():
-                for word in words:
-                    self._process_word_forms(word, wordlist)
+        for word in wordlist.iter_all_words():
+            self._process_word_forms(word, wordlist)
+#        for word in wordlist.get_words("de"):
+#            self._process_word_forms(word, wordlist)
+#        for word in wordlist.get_words("des"):
+#            self._process_word_forms(word, wordlist)
 
     def _process_word_forms(self, word, wordlist):
         if not len(word.senses):
@@ -54,6 +55,7 @@ class AllForms:
                         continue
                     if not word.is_lemma and lemma_formtype in ["f", "feminine", "feminine_counterpart"]:
                         if formtype in ["mpl", "masculine_plural"]:
+                        #if formtype in ["m", "masculine", "masculine_counterpart", "mpl", "masculine_plural"]:
                             continue
                         if formtype in ["pl", "fpl", "plural", "feminine_plural"]:
                             formtype = "fpl"
@@ -69,6 +71,9 @@ class AllForms:
 
         value = f"{pos}|{lemma}"
         if form not in self.all_forms:
+            #self.all_forms[form] = {value}
             self.all_forms[form] = [value]
         elif value not in self.all_forms[form]:
             self.all_forms[form].append(value)
+#        else:
+#            self.all_forms[form].(value)
