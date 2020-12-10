@@ -2,7 +2,7 @@ from ..word import Word
 
 def test_word():
     word = Word("test", [ ("pos", "noun"), ("form","m") ])
-    assert word.common_pos == "noun"
+    assert word.pos == "noun"
     assert word.form == "m"
 
     word.add_sense([("gloss","a test word"),("q","rare")])
@@ -18,7 +18,7 @@ def test_word():
 
     # But form of in the first def does
     word = Word("test", [("pos", "noun")])
-    assert word.common_pos == "noun"
+    assert word.pos == "noun"
     word.add_sense([("gloss", 'alternative form of "testz"')])
     assert word.forms == {}
     assert word.form_of == { "testz": ["alt"] }

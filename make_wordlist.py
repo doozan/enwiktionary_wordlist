@@ -111,26 +111,26 @@ class WordlistBuilder:
             return None
 
         if word.shortpos in ["n", "prop"]:
-            common_pos = "noun"
+            pos = "noun"
         elif word.shortpos.startswith("v"):
-            common_pos = "verb"
+            pos = "verb"
         else:
-            common_pos = word.shortpos
+            pos = word.shortpos
 
-        return title + " {" + common_pos + "-forms} :: " + self.forms_to_string(word.forms)
+        return title + " {" + pos + "-forms} :: " + self.forms_to_string(word.forms)
 
 
     def get_meta(self, title, word):
         """ Returns a formatted form line with the template(s) defining the forms """
 
         if word.shortpos in ["n", "prop"]:
-            common_pos = "noun"
+            pos = "noun"
         elif word.shortpos.startswith("v"):
-            common_pos = "verb"
+            pos = "verb"
         else:
-            common_pos = word.shortpos
+            pos = word.shortpos
 
-        return title + " {" + common_pos + "-meta} :: " + " ".join(map(str,word.form_sources)).replace("\n","")
+        return title + " {" + pos + "-meta} :: " + " ".join(map(str,word.form_sources)).replace("\n","")
 
 
     def entry_to_text(self, text, title):
@@ -389,8 +389,8 @@ def main():
                 if word.word != prev_word:
                     print("_____")
                     print(word.word)
-                pos = word.common_pos
-                print(f"pos: {word.common_pos}")
+                pos = word.pos
+                print(f"pos: {word.pos}")
                 print(f"  meta: {word.meta}")
                 if word.forms:
                     form_str = []

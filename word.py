@@ -16,7 +16,7 @@ class Word():
         self.meta = None
 
         form = None
-        common_pos = None
+        pos = None
 
         for i, item in enumerate(data):
             key, value = item
@@ -31,16 +31,16 @@ class Word():
                 self.forms
             elif key == "pos":
                 if value == "prop":
-                    common_pos = "noun"
+                    pos = "noun"
 #                    form = "prop"
                 elif value == "v":
-                    common_pos = "verb"
+                    pos = "verb"
                 elif value == "n":
-                    common_pos = "noun"
+                    pos = "noun"
                 else:
-                    common_pos = value
+                    pos = value
             elif key == "form":
-                if common_pos == "noun":
+                if pos == "noun":
                     if value == "?":
                        value = None
                     elif value in [ "m-p", "m;p" ]:
@@ -55,7 +55,7 @@ class Word():
                         value = "p"
                     form = value
 
-        self._common_pos = common_pos
+        self._pos = pos
         self.form = form
 
         # force loading
@@ -128,17 +128,17 @@ class Word():
         return items
 
     @property
-    def common_pos(self):
-        if not self._common_pos and self.form:
-            self._common_pos = self.get_common_pos(self.form)
-        if self._common_pos == "n":
-            self._common_pos = "noun"
-        elif self._common_pos == "v":
-            self._common_pos = "verb"
-        return self._common_pos
+    def pos(self):
+        if not self._pos and self.form:
+            self._pos = self.get_pos(self.form)
+        if self._pos == "n":
+            self._pos = "noun"
+        elif self._pos == "v":
+            self._pos = "verb"
+        return self._pos
 
     @classmethod
-    def get_common_pos(cls, pos):
+    def get_pos(cls, pos):
         pos = pos.lower().strip()
         if pos.startswith("v"):
             return "verb"

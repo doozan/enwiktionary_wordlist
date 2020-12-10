@@ -46,7 +46,7 @@ class AllForms:
 
         for lemma, formtypes in wordlist.get_lemmas(word).items():
             for lemma_formtype in formtypes:
-                self._add_form(word.word, word.common_pos, lemma)
+                self._add_form(word.word, word.pos, lemma)
             self._add_word_forms(word, lemma)
 
     def _add_word_forms(self, word, lemma):
@@ -61,7 +61,7 @@ class AllForms:
                         continue
                     if formtype in ["pl", "fpl", "plural", "feminine_plural"]:
                         formtype = "fpl"
-                self._add_form(form, word.common_pos, lemma)
+                self._add_form(form, word.pos, lemma)
 
     def _add_form(self, form, pos, lemma):
 

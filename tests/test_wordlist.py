@@ -195,7 +195,7 @@ pos: noun
     test7 = next(wlist.get_words("test7", "noun"))
 
     assert test1.word == "test1"
-    assert test1.common_pos == "noun"
+    assert test1.pos == "noun"
     assert test1.form == "m"
 
     assert wlist.get_lemmas(test1) == {'test1': ['m']}

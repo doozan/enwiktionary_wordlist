@@ -33,10 +33,10 @@ def format_forms(formtype, forms):
 def get_word_header(word_obj):
     line = [f"{word_obj.word}"]
     if word_obj.form:
-        line.append(f" ({word_obj.common_pos}, {word_obj.form})")
+        line.append(f" ({word_obj.pos}, {word_obj.form})")
         #line.append(f" ({word_obj.pos}, {word_obj.form})")
     else:
-        line.append(f" ({word_obj.common_pos})")
+        line.append(f" ({word_obj.pos})")
 
     if word_obj.forms:
         form_items = []

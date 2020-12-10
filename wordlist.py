@@ -135,7 +135,7 @@ class Wordlist():
             elif key == "pos":
                 if word_items:
                     word_obj = Word(title, word_items)
-                    if (not pos or word_obj.common_pos == pos):
+                    if (not pos or word_obj.pos == pos):
                         yield word_obj
 
                 word_items = common + [ (key,value) ]
@@ -153,7 +153,7 @@ class Wordlist():
 
         if word_items:
             word_obj = Word(title, word_items)
-            if (not pos or word_obj.common_pos == pos):
+            if (not pos or word_obj.pos == pos):
                 yield word_obj
 
     def iter_all_words(self):
@@ -164,15 +164,15 @@ class Wordlist():
 #                break
             yield from self.get_words(word)
 
-    def has_lemma(self, lemma, common_pos):
+    def has_lemma(self, lemma, pos):
         """
         lemma is a string
-        common_pos is a string
+        pos is a string
         Check if a given word, pos is a lemma
         """
 
         # only consider it a lemma if the first usage is as a lemma
-        for word in self.get_words(lemma, common_pos):
+        for word in self.get_words(lemma, pos):
             return word.is_lemma
         return False
 
@@ -195,7 +195,7 @@ class Wordlist():
                     self.all_entries[title] = None
 
             for word in self._cached[title]:
-                if not pos or pos == word.common_pos:
+                if not pos or pos == word.pos:
                     yield word
 
         else:
@@ -215,14 +215,14 @@ class Wordlist():
 
         lemmas = {}
         for lemma, formtypes in word.form_of.items():
-            if self.has_lemma(lemma, word.common_pos):
+            if self.has_lemma(lemma, word.pos):
                 lemmas[lemma] = formtypes
             elif max_depth>0:
-                for redirect in self.get_words(lemma, word.common_pos):
+                for redirect in self.get_words(lemma, word.pos):
                     lemmas.update(self.get_lemmas(redirect, max_depth-1))
                     break # Only look at the first word
             else:
-                print(f"Lemma recursion exceeded: {word.word} {word.common_pos} -> {lemma}", file=sys.stderr)
+                print(f"Lemma recursion exceeded: {word.word} {word.pos} -> {lemma}", file=sys.stderr)
                 return {}
 
         return lemmas
