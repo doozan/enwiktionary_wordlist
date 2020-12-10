@@ -4,6 +4,14 @@ import sys
 
 from .word import Word
 
+verb_types = {
+        "t": "transitive",
+        "r": "reflexive",
+        "i": "intransitive",
+        "p": "pronominal",
+        "x": "ambitransitive",
+}
+
 class Wordlist():
     def __init__(self, wordlist_data, cache_words=True):
         self.cache_words = cache_words
@@ -54,6 +62,7 @@ class Wordlist():
 
         entry = []
         prev_word = None
+        first = True
         for line in data:
             word, pos, note, syn, definition = cls.parse_line(line)
             if word != prev_word:
@@ -68,15 +77,21 @@ class Wordlist():
 
             if pos.endswith("-meta"):
                 pos = pos[:-len("-meta")]
-                entry += [f"pos: {pos}", f"  meta: {definition}"]
+                entry += [f"pos: {pos}", f"meta: {definition}"]
+                first = True
 
             elif pos.endswith("-forms"):
                 entry.append(f"forms: {definition}")
             else:
-                if pos in ["m","f","mf","m-f","mp","fp","mfp"]:
-                    entry.append(f"form: {pos}")
+                print(pos, "XX", line)
+                if first:
+                    if pos in ["m","f","mf","m-f","mp","fp","mfp"]:
+                        entry.append(f"form: {pos}")
+                    first = False
                 if definition:
                     entry.append(f"gloss: {definition}")
+                    if pos.startswith("v"):
+                        note = cls.add_verb_forms_to_note(note, pos)
                     if note:
                         entry.append(f"q: {note}")
                     if syn:
@@ -86,6 +101,20 @@ class Wordlist():
         if entry:
             yield(prev_word, entry)
 
+
+    @staticmethod
+    def add_verb_forms_to_note(note, pos):
+        """ Adds verb types to the note usage """
+        if not pos.startswith("v") or pos == "v":
+            return note
+
+        notes = []
+        types = pos[1:].replace("it", "x")
+        for verbtype in types:
+            notes.append(verb_types[verbtype])
+        if note:
+            notes.append(note)
+        return "; ".join(notes)
 
     def get_entry_words(self, title, lines, pos=None):
 

@@ -30,18 +30,59 @@ def test_mbformat():
 amiga {noun-meta} :: {{es-noun|f}}
 amiga {noun-forms} :: m=amigo; mpl=amigos; pl=amigas
 amiga {f} :: female equivalent of "amigo", friend
+amiga {f} :: friend2
 amigo {noun-meta} :: {{es-noun|m}}
 amigo {noun-forms} :: f=amiga; fpl=amigas; pl=amigos
-amigo {f} :: friend
+amigo {m} :: friend
+amigo {m} :: friend2
 """
 
     wordlist = Wordlist(data.splitlines())
-    assert len(wordlist.all_entries) == 2
+
+    assert wordlist.all_entries == {
+'amiga': [
+    'pos: noun',
+    'meta: {{es-noun|f}}',
+    'forms: m=amigo; mpl=amigos; pl=amigas',
+    'form: f',
+    'gloss: female equivalent of "amigo", friend',
+    'gloss: friend2'],
+'amigo': [
+    'pos: noun',
+    'meta: {{es-noun|m}}',
+    'forms: f=amiga; fpl=amigas; pl=amigos',
+    'form: m',
+    'gloss: friend',
+    'gloss: friend2']}
 
     assert wordlist.has_lemma("test", "noun") == False
     assert wordlist.has_lemma("amigo", "noun") == True
     assert wordlist.has_lemma("amiga", "noun") == False
 
+
+    data = """\
+test {noun-meta} :: x
+test {noun-forms} :: pl=tests
+test {m} :: masculine
+test {noun-meta} :: x
+test {noun-forms} :: pl=tests
+test {f} :: feminine
+"""
+    wordlist = Wordlist(data.splitlines())
+    print(wordlist.all_entries)
+    assert wordlist.all_entries == {
+'test': [
+    'pos: noun',
+    'meta: x',
+    'forms: pl=tests',
+    'form: m',
+    'gloss: masculine',
+    'pos: noun',
+    'meta: x',
+    'forms: pl=tests',
+    'form: f',
+    'gloss: feminine']
+}
 
 def test_cache():
     data="""\
