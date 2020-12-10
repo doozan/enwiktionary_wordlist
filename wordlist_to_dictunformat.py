@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
-import argparse
+import csv
 import os
 import re
 import sys
 
 from .wordlist import Wordlist
+from .all_forms import AllForms
 
 wordlist = None
 all_pages = {}
@@ -18,13 +19,24 @@ formtypes = {
     "fpl": "feminine plural"
 }
 
+def mem_use():
+    with open('/proc/self/status') as f:
+        memusage = f.read().split('VmRSS:')[1].split('\n')[0][:-3]
+
+    return int(memusage.strip())
+
 def format_forms(formtype, forms):
     return formtypes[formtype] + ' "' + \
             '" or "'.join(forms) \
             + '"'
 
 def get_word_header(word_obj):
-    line = [f"{word_obj.word} ({word_obj.pos})"]
+    line = [f"{word_obj.word}"]
+    if word_obj.pos:
+        line.append(f" ({word_obj.common_pos}, {word_obj.pos})")
+        #line.append(f" ({word_obj.pos}, {word_obj.form})")
+    else:
+        line.append(f" ({word_obj.common_pos})")
 
     if word_obj.forms:
         form_items = []
@@ -61,7 +73,7 @@ def get_word_page(seen, word, pos, recursive=False):
     seen.add((word,pos))
 
     items = []
-    for word_obj in wordlist.all_words.get(word,{}).get(pos,[]):
+    for word_obj in wordlist.get_words(word, pos):
         if not word_obj.senses:
             continue
 
@@ -72,7 +84,7 @@ def get_word_page(seen, word, pos, recursive=False):
 
         if not recursive:
             for lemma in word_obj.form_of:
-                if lemma not in wordlist.all_words:
+                if not wordlist.has_word(lemma):
                     continue
                 lemma_data = get_word_page(seen, lemma, pos, recursive=True)
                 if lemma_data:
@@ -89,33 +101,117 @@ def build_page(targets):
             pages.append(page)
     return "\n\n".join(pages)
 
+
+def is_valid_target(word, pos):
+    """ Returns true if a given word, pos is in the wordlist and 
+    has a sense other than just a "form of" """
+    for word in wordlist.get_words(word,pos):
+        for sense in word.senses:
+            # If a sense is just a "form of", don't include it
+            if sense.formtype: # and not self.nonform:
+                continue
+            return True
+    return False
+
+def get_valid_targets(targets):
+    """ Take a list of [ (word, pos) ] and returns the same, minus any
+    entries that aren't in the wordlist or that don't contain useful information """
+
+    valid_targets = []
+    for target in targets:
+        word, pos = target
+        if is_valid_target(word, pos):
+            valid_targets.append(target)
+
+    return valid_targets
+
+
 all_pages = {}
 def add_key(key, targets):
-    if targets not in all_pages:
-        all_pages[targets] = {
-            "keys": [key],
-            "data": build_page(targets)
-        }
+
+    targets = get_valid_targets(targets)
+
+    if not targets:
+        return
+
+    target_key = ";".join([f"{lemma}:{pos}" for lemma,pos in sorted(targets)])
+
+    if target_key not in all_pages:
+        all_pages[target_key] = set([key])
     else:
-        if key not in all_pages[targets]["keys"]:
-            all_pages[targets]["keys"].append(key)
+        all_pages[target_key].add(key)
 
-def export(data, langid, description):
 
+def iter_allforms(allforms_data, wordlist):
+    """ if allforms_data is supplied, treat it as a csv
+    otherwise, generate all_froms from wordlist """
+
+    if allforms_data:
+        yield from csv.reader(allforms_data)
+    else:
+        all_forms = AllForms.from_wordlist(wordlist)
+
+        for form, poslemmas in all_forms.all_forms.items():
+            data = {}
+            for poslemma in poslemmas:
+                pos, lemma = poslemma.split("|")
+                if pos not in data:
+                    data[pos] = [lemma]
+                elif lemma not in data[pos]:
+                    data[pos].append(lemma)
+
+            for pos, lemmas in data.items():
+                yield [form, pos] + lemmas
+
+
+def export(wordlist_data, allforms_data, langid, description, low_memory=False):
+
+    cache_words = not low_memory
     global wordlist
-    wordlist = Wordlist(data)
+    wordlist = Wordlist(wordlist_data, cache_words)
 
-    disambig = set()
-    ambig_forms = 0
-    for form, lemmas in wordlist.all_forms.items():
-        form_targets = set()
-        for pos,lemma,formtype in [x.split(":") for x in sorted(lemmas)]:
-            form_targets.add((lemma,pos))
+    print("start memory", mem_use(), file=sys.stderr)
 
-        if len(form_targets) > 1:
-            ambig_forms += 1
-            disambig.add(tuple(sorted(form_targets)))
-        add_key(form, tuple(sorted(form_targets)))
+    prev_form = None
+    form_targets = []
+
+    form_count = 0
+    for form, pos, *lemmas in iter_allforms(allforms_data, wordlist):
+        form_count += 1
+
+        if form_count == 1:
+            print("loop memory", mem_use(), file=sys.stderr)
+        if form_count % 1000 == 0:
+            print(form_count, file=sys.stderr, end="\r")
+
+        if prev_form != form:
+            if prev_form:
+                add_key(prev_form, form_targets)
+            form_targets = [(form,pos)]
+
+        for lemma in lemmas:
+            target = (lemma, pos)
+            if target not in form_targets:
+
+                if wordlist.has_word(lemma, pos):
+                    form_targets.append(target)
+                else:
+                    print(form,lemma,pos,"not found in db", file=sys.stderr)
+                    if not wordlist.has_word(lemma):
+                        print("XXX", form,lemma,pos,"not found in db", file=sys.stderr)
+                    else:
+                        print("XXX", lemma, "is found in db", file=sys.stderr)
+                        for word in wordlist.get_words(lemma):
+                            print(word.word, word.pos, file=sys.stderr)
+
+                        exit()
+
+        prev_form = form
+
+    if prev_form:
+        add_key(prev_form, sorted(form_targets))
+
+    print("dumping memory", mem_use(), file=sys.stderr)
 
     name = "Wiktionary"
     if langid != "en":
@@ -127,13 +223,25 @@ _____
 ##:name:{name}
 ##:url:en.wiktionary.org
 ##:pagecount:{len(all_pages)}
-##:formcount:{len(wordlist.all_forms)}
+##:formcount:{form_count}
 ##:description:{description}\
 """
-    for pagename,page in sorted(all_pages.items()):
+
+    first = True
+    for targets,keys in sorted(all_pages.items()):
+
+        #tgs =[t.split(":") for t in targets.split(";")]
+        #print(targets, tgs, keys, file=sys.stderr)
+        entry = build_page([t.split(":") for t in targets.split(";")])
+
+        if first:
+            print("sorted memory", mem_use(), file=sys.stderr)
+            print(targets, file=sys.stderr)
+            first = False
+
         yield "_____"
-        yield "|".join(page["keys"])
-        yield page["data"]
+        yield "|".join(sorted(keys))
+        yield entry
 
 if __name__ == "__main__":
 
@@ -141,10 +249,18 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Convert wordlist to dictunformat")
     parser.add_argument("wordlist", help="wordlist")
+    parser.add_argument("allforms", help="all_forms csv file")
     parser.add_argument("--lang-id", help="language id")
     parser.add_argument("--description", help="description", default="")
     args = parser.parse_args()
 
-    with open(args.wordlist) as infile:
-        for line in export(infile, args.lang_id, args.description):
-            print(line)
+    wordlist_data = open(args.wordlist)
+    if args.allforms:
+        allforms_data = open(args.allforms)
+
+    for line in export(wordlist_data, allforms_data, args.lang_id, args.description):
+        print(line)
+
+    wordlist_data.close()
+    if args.allforms:
+        allforms_data.close()
