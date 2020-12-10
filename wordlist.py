@@ -1,16 +1,23 @@
+import itertools
 import re
 import sys
 
 from .word import Word
 
 class Wordlist():
-    def __init__(self, wordlist_data, cache_words=True, mbformat=False):
+    def __init__(self, wordlist_data, cache_words=True):
         self.cache_words = cache_words
         self._cached = {}
+
+        iter_list = iter(wordlist_data)
+        first_line = next(iter_list)
+        mbformat = not first_line.startswith("_____")
+        iter_data = itertools.chain([first_line], iter_list)
+
         if mbformat:
-            self.all_entries = {title: entry for title, entry in self.iter_entries_mbformat(wordlist_data)}
+            self.all_entries = {title: entry for title, entry in self.iter_entries_mbformat(iter_data)}
         else:
-            self.all_entries = {title: entry for title, entry in self.iter_entries(wordlist_data)}
+            self.all_entries = {title: entry for title, entry in self.iter_entries(iter_data)}
 
     @classmethod
     def from_file(cls, filename):

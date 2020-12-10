@@ -35,7 +35,7 @@ amigo {noun-forms} :: f=amiga; fpl=amigas; pl=amigos
 amigo {f} :: friend
 """
 
-    wordlist = Wordlist(data.splitlines(), mbformat=True)
+    wordlist = Wordlist(data.splitlines())
     assert len(wordlist.all_entries) == 2
 
     assert wordlist.has_lemma("test", "noun") == False
@@ -253,7 +253,7 @@ divo {noun-meta} :: x
 divo {noun-forms} :: f=diva; fpl=divas; pl=divos
 divo {m} :: star, celeb\
 """
-    wlist = Wordlist(data.splitlines(), mbformat=True)
+    wlist = Wordlist(data.splitlines())
 
     diva = next(wlist.get_words("diva", "noun"))
     assert diva.is_lemma == False
@@ -269,7 +269,7 @@ capitán {noun-meta} :: x
 capitán {noun-forms} :: f=capitana; fpl=capitanas; pl=capitanes
 capitán {m} :: captain\
 """
-    wlist = Wordlist(data.splitlines(), mbformat=True)
+    wlist = Wordlist(data.splitlines())
 
     capitana = next(wlist.get_words("capitana", "noun"))
     assert capitana.is_lemma == False
@@ -288,7 +288,7 @@ bañero {noun-meta} :: x
 bañero {noun-forms} :: f=bañera; fpl=bañeras; pl=bañeros
 bañero {m} [Argentina, Chile, Uruguay] :: lifeguard
 """
-    wlist = Wordlist(data.splitlines(), mbformat=True)
+    wlist = Wordlist(data.splitlines())
 
     capitana = next(wlist.get_words("bañera", "noun"))
     assert capitana.is_lemma == True
@@ -308,7 +308,7 @@ diosa {noun-meta} :: {{es-noun|f}}
 diosa {noun-forms} :: pl=diosas
 diosa {f} [biochemistry] :: diose
 """
-    wlist = Wordlist(data.splitlines(), mbformat=True)
+    wlist = Wordlist(data.splitlines())
 
     dios =  next(wlist.get_words("dios", "noun"))
     assert dios.is_lemma == True
@@ -334,7 +334,7 @@ aquellos {pron-meta} :: {{head|es|pronoun|g=n-p}}
 aquellos {pron} :: Those ones. (over there; implying some distance)
 """
 
-    wlist = Wordlist(data.splitlines(), mbformat=True)
+    wlist = Wordlist(data.splitlines())
 
     word =  next(wlist.get_words("aquellos", "pron"))
     assert word.is_lemma == False

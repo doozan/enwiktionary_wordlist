@@ -150,7 +150,7 @@ testa {f} :: feminine noun of "testo"
 'testoz': ['noun|testo'],
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines(), mbformat=True)
+    wordlist = Wordlist(wordlist_data.splitlines())
     assert AllForms.from_wordlist(wordlist).all_forms == expected
 
 def test_forms_redirection():
@@ -173,7 +173,7 @@ test4 {m} :: alternate form of "test3"
 'test4': ['noun|test1']
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines(), mbformat=True)
+    wordlist = Wordlist(wordlist_data.splitlines())
     assert AllForms.from_wordlist(wordlist).all_forms == expected
 
 
