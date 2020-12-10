@@ -3,7 +3,7 @@ from ..word import Word
 def test_word():
     word = Word("test", [ ("pos", "noun"), ("form","m") ])
     assert word.common_pos == "noun"
-    assert word.pos == "m"
+    assert word.form == "m"
 
     word.add_sense([("gloss","a test word"),("q","rare")])
     assert len(word.senses) == 1

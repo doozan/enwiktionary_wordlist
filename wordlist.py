@@ -211,7 +211,7 @@ class Wordlist():
         """
 
         if word.is_lemma:
-            return {word.word: [word.pos]}
+            return {word.word: [word.form]}
 
         lemmas = {}
         for lemma, formtypes in word.form_of.items():

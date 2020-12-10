@@ -12,10 +12,10 @@ class Word():
         self._senses = None
         self._form_data = None
         self._forms = None
-        self._pos = None
+        self._form = None
         self.meta = None
 
-        pos = None
+        form = None
         common_pos = None
 
         for i, item in enumerate(data):
@@ -32,7 +32,7 @@ class Word():
             elif key == "pos":
                 if value == "prop":
                     common_pos = "noun"
-#                    pos = "prop"
+#                    form = "prop"
                 elif value == "v":
                     common_pos = "verb"
                 elif value == "n":
@@ -53,22 +53,22 @@ class Word():
                         value = "mf"
                     elif value == "p":
                         value = "p"
-                    pos = value
+                    form = value
 
         self._common_pos = common_pos
-        self.pos = pos
+        self.form = form
 
         # force loading
         self.senses
 
 
     @property
-    def pos(self):
-        return self._pos
+    def form(self):
+        return self._form
 
-    @pos.setter
-    def pos(self, value):
-        self._pos = value
+    @form.setter
+    def form(self, value):
+        self._form = value
         if value == "f":
             for form in self.forms.get("m", []):
                 self.add_lemma(form, "f")
@@ -91,9 +91,9 @@ class Word():
                 self._forms[formtype].append(form)
 
         # Feminine nouns are a "form of" their masculine counterpart
-        if formtype == "m" and self.pos == "f":
+        if formtype == "m" and self.form == "f":
             self.add_lemma(form, "f")
-        if formtype == "mpl" and self.pos == "fp":
+        if formtype == "mpl" and self.form == "fp":
             self.add_lemma(form, "fpl")
 
     def add_forms(self, data):
@@ -129,8 +129,8 @@ class Word():
 
     @property
     def common_pos(self):
-        if not self._common_pos and self.pos:
-            self._common_pos = self.get_common_pos(self.pos)
+        if not self._common_pos and self.form:
+            self._common_pos = self.get_common_pos(self.form)
         if self._common_pos == "n":
             self._common_pos = "noun"
         elif self._common_pos == "v":

@@ -196,7 +196,7 @@ pos: noun
 
     assert test1.word == "test1"
     assert test1.common_pos == "noun"
-    assert test1.pos == "m"
+    assert test1.form == "m"
 
     assert wlist.get_lemmas(test1) == {'test1': ['m']}
     assert wlist.get_lemmas(test2) == {'test1': ['alt']}
