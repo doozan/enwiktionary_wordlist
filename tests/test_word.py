@@ -1,8 +1,8 @@
 from ..word import Word
 
 def test_word():
-    word = Word("test", [ ("pos", "noun"), ("form","m") ])
-    assert word.pos == "noun"
+    word = Word("test", [ ("pos", "n"), ("form","m") ])
+    assert word.pos == "n"
     assert word.form == "m"
 
     word.add_sense([("gloss","a test word"),("q","rare")])
@@ -17,8 +17,8 @@ def test_word():
     assert word.form_of == {}
 
     # But form of in the first def does
-    word = Word("test", [("pos", "noun")])
-    assert word.pos == "noun"
+    word = Word("test", [("pos", "n")])
+    assert word.pos == "n"
     word.add_sense([("gloss", 'alternative form of "testz"')])
     assert word.forms == {}
     assert word.form_of == { "testz": ["alt"] }

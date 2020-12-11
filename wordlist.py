@@ -141,12 +141,6 @@ class Wordlist():
                 word_items = common + [ (key,value) ]
 
                 word_pos = value
-#                if word_pos == "n":
-#                    word_pos = "noun"
-#                elif word_pos == "v":
-#                    word_pos = "verb"
-#                if word_pos == "prop":
-#                    word_pos = "n"
 
             else:
                 word_items.append((key,value))

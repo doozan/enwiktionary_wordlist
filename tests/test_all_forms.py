@@ -59,12 +59,12 @@ pos: n
     q: uncommon
 """
     expected = {
-'protector': ['noun|protector'],
-'protectora': ['noun|protector', 'noun|protectora'],
-'protectoras': ['noun|protector', 'noun|protectora'],
-'protectores': ['noun|protector'],
-'protectrices': ['noun|protector'],
-'protectriz': ['noun|protector'],
+'protector': ['n|protector'],
+'protectora': ['n|protector', 'n|protectora'],
+'protectoras': ['n|protector', 'n|protectora'],
+'protectores': ['n|protector'],
+'protectrices': ['n|protector'],
+'protectriz': ['n|protector'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -92,9 +92,9 @@ pos: n
 """
 
     expected = {
-'test': ['noun|test'],
-'test2': ['noun|test', 'noun|test2'],
-'test2s': ['noun|test2']
+'test': ['n|test'],
+'test2': ['n|test', 'n|test2'],
+'test2s': ['n|test2']
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -120,9 +120,9 @@ pos: n
 """
 
     expected = {
-'test': ['noun|test'],
-'test2': ['noun|test', 'noun|test2'],
-'test2s': ['noun|test', 'noun|test2']
+'test': ['n|test'],
+'test2': ['n|test', 'n|test2'],
+'test2s': ['n|test', 'n|test2']
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -132,22 +132,22 @@ pos: n
 def test_forms_text():
 
     wordlist_data = """\
-testo {noun-meta} :: x
+testo {n-meta} :: x
 testo {noun-forms} :: pl=testos
 testo {m} :: test
-testo {noun-meta} :: x
+testo {n-meta} :: x
 testo {noun-forms} :: pl=testoz
 testo {m} :: test2
-testa {noun-meta} :: x
+testa {n-meta} :: x
 testa {noun-forms} :: pl=testas
 testa {f} :: feminine noun of "testo"
 """
     expected = {
-'testa': ['noun|testo'],
-'testas': ['noun|testo'],
-'testo': ['noun|testo'],
-'testos': ['noun|testo'],
-'testoz': ['noun|testo'],
+'testa': ['n|testo'],
+'testas': ['n|testo'],
+'testo': ['n|testo'],
+'testos': ['n|testo'],
+'testoz': ['n|testo'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -156,21 +156,21 @@ testa {f} :: feminine noun of "testo"
 def test_forms_redirection():
 
     wordlist_data = """\
-test1 {noun-meta} :: x
+test1 {n-meta} :: x
 test1 {m} :: test
-test2 {noun-meta} :: x
+test2 {n-meta} :: x
 test2 {m} :: alternate form of "test1"
-test3 {noun-meta} :: x
+test3 {n-meta} :: x
 test3 {m} :: alternate form of "test2"
-test4 {noun-meta} :: x
+test4 {n-meta} :: x
 test4 {m} :: alternate form of "test3"
 """
 
     expected = {
-'test1': ['noun|test1'],
-'test2': ['noun|test1'],
-'test3': ['noun|test1'],
-'test4': ['noun|test1']
+'test1': ['n|test1'],
+'test2': ['n|test1'],
+'test3': ['n|test1'],
+'test4': ['n|test1']
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -182,7 +182,7 @@ def test_asco_forms():
     wordlist_data = """\
 _____
 asca
-pos: noun
+pos: n
   meta: {{es-noun|m}}
   forms: pl=ascas
   form: m
@@ -191,14 +191,14 @@ pos: noun
     syn: teca
 _____
 asco
-pos: noun
+pos: n
   meta: {{es-noun|m}}
   forms: pl=ascos
   form: m
   gloss: disgust
   gloss: nausea
   gloss: disgusting person
-pos: noun
+pos: n
   meta: {{es-noun|m}}
   forms: pl=ascos
   form: m
@@ -206,10 +206,10 @@ pos: noun
 """
 
     expected = {
-'asca': ['noun|asca'],
-'ascas': ['noun|asca'],
-'asco': ['noun|asco', 'noun|asca'],
-'ascos': ['noun|asco', 'noun|asca']
+'asca': ['n|asca'],
+'ascas': ['n|asca'],
+'asco': ['n|asco', 'n|asca'],
+'ascos': ['n|asco', 'n|asca']
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())

@@ -110,10 +110,8 @@ class WordlistBuilder:
         if not word.forms:
             return None
 
-        if word.shortpos in ["n", "prop"]:
-            pos = "noun"
-        elif word.shortpos.startswith("v"):
-            pos = "verb"
+        if word.shortpos == "prop":
+            pos = "n"
         else:
             pos = word.shortpos
 
@@ -123,10 +121,8 @@ class WordlistBuilder:
     def get_meta(self, title, word):
         """ Returns a formatted form line with the template(s) defining the forms """
 
-        if word.shortpos in ["n", "prop"]:
-            pos = "noun"
-        elif word.shortpos.startswith("v"):
-            pos = "verb"
+        if word.shortpos == "prop":
+            pos = "n"
         else:
             pos = word.shortpos
 

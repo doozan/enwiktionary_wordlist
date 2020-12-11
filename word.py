@@ -31,16 +31,12 @@ class Word():
                 self.forms
             elif key == "pos":
                 if value == "prop":
-                    pos = "noun"
+                    pos = "n"
 #                    form = "prop"
-                elif value == "v":
-                    pos = "verb"
-                elif value == "n":
-                    pos = "noun"
                 else:
                     pos = value
             elif key == "form":
-                if pos == "noun":
+                if pos == "n":
                     if value == "?":
                        value = None
                     elif value in [ "m-p", "m;p" ]:
@@ -129,21 +125,15 @@ class Word():
 
     @property
     def pos(self):
-        if not self._pos and self.form:
-            self._pos = self.get_pos(self.form)
-        if self._pos == "n":
-            self._pos = "noun"
-        elif self._pos == "v":
-            self._pos = "verb"
         return self._pos
 
     @classmethod
-    def get_pos(cls, pos):
+    def get_common_pos(cls, pos):
         pos = pos.lower().strip()
         if pos.startswith("v"):
-            return "verb"
+            return "v"
         elif pos in cls.noun_tags:
-            return "noun"
+            return "n"
         return pos
 
     noun_tags = {
