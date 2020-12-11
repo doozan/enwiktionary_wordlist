@@ -11,7 +11,7 @@ protector
 pos: n
   meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
   forms: f=protectora; f=protectriz; fpl=protectoras; fpl=protectrices; pl=protectores
-  form: m
+  g: m
   gloss: protector (someone who protects or guards)
 pos: n
   meta: {{es-noun|m}}
@@ -23,38 +23,38 @@ protectora
 pos: n
   meta: {{es-noun|f|m=protector}}
   forms: m=protector; mpl=protectores; pl=protectoras
-  form: f
+  g: f
   gloss: female equivalent of "protector"
 pos: n
   meta: {{es-noun|f}}
   forms: pl=protectoras
-  form: f
+  g: f
   gloss: animal shelter (an organization that provides temporary homes for stray pet animals)
     syn: protectora de animales
 _____
 protectoras
 pos: n
   meta: {{head|es|noun plural form|g=f-p}}
-  form: f-p
+  g: f-p
   gloss: inflection of "protector"
 _____
 protectores
 pos: n
   meta: {{head|es|noun plural form|g=m-p}}
-  form: m-p
+  g: m-p
   gloss: inflection of "protector"
 _____
 protectrices
 pos: n
   meta: {{head|es|noun plural form|g=f-p}}
-  form: f-p
+  g: f-p
   gloss: inflection of "protector"
 _____
 protectriz
 pos: n
   meta: {{es-noun|f|m=protector}}
   forms: m=protector; mpl=protectores; pl=protectrices
-  form: f
+  g: f
   gloss: alternative form of "protectora"
     q: uncommon
 """
@@ -87,7 +87,7 @@ pos: n
   gloss: alternative form of "test"
 pos: n
   forms: pl=test2s
-  form: m
+  g: m
   gloss: test2
 """
 
@@ -115,7 +115,7 @@ pos: n
   gloss: alternative form of "test"
 pos: n
   forms: pl=test2s
-  form: m
+  g: m
   gloss: test2
 """
 
@@ -185,7 +185,7 @@ asca
 pos: n
   meta: {{es-noun|m}}
   forms: pl=ascas
-  form: m
+  g: m
   gloss: ascus
     q: mycology
     syn: teca
@@ -194,14 +194,14 @@ asco
 pos: n
   meta: {{es-noun|m}}
   forms: pl=ascos
-  form: m
+  g: m
   gloss: disgust
   gloss: nausea
   gloss: disgusting person
 pos: n
   meta: {{es-noun|m}}
   forms: pl=ascos
-  form: m
+  g: m
   gloss: alternative form of "asca"
 """
 

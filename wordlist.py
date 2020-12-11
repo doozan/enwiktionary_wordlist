@@ -83,10 +83,9 @@ class Wordlist():
             elif pos.endswith("-forms"):
                 entry.append(f"forms: {definition}")
             else:
-                print(pos, "XX", line)
                 if first:
                     if pos in ["m","f","mf","m-f","mp","fp","mfp"]:
-                        entry.append(f"form: {pos}")
+                        entry.append(f"g: {pos}")
                     first = False
                 if definition:
                     entry.append(f"gloss: {definition}")
@@ -205,7 +204,7 @@ class Wordlist():
         """
 
         if word.is_lemma:
-            return {word.word: [word.form]}
+            return {word.word: [word.genders]}
 
         lemmas = {}
         for lemma, formtypes in word.form_of.items():

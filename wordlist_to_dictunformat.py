@@ -32,9 +32,10 @@ def format_forms(formtype, forms):
 
 def get_word_header(word_obj):
     line = [f"{word_obj.word}"]
-    if word_obj.form:
-        line.append(f" ({word_obj.pos}, {word_obj.form})")
-        #line.append(f" ({word_obj.pos}, {word_obj.form})")
+    if word_obj.genders:
+        # TODO: pretty format genders
+        line.append(f" ({word_obj.pos}, {word_obj.genders})")
+        #line.append(f" ({word_obj.pos}, {word_obj.genders})")
     else:
         line.append(f" ({word_obj.pos})")
 

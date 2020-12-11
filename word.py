@@ -6,17 +6,16 @@ class Word():
     def __init__(self, word, data):
 
         self.word = word
-        #self.forms = {}   # { formtype: [form1, ..] }
+        self._forms = None # { formtype: [form1, ..] }
         self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
         self._sense_data = None
         self._senses = None
         self._form_data = None
-        self._forms = None
-        self._form = None
+        self._genders = None
         self.meta = None
 
-        form = None
         pos = None
+        genders = None
 
         for i, item in enumerate(data):
             key, value = item
@@ -35,36 +34,24 @@ class Word():
 #                    form = "prop"
                 else:
                     pos = value
-            elif key == "form":
+            elif key == "g":
                 if pos == "n":
-                    if value == "?":
-                       value = None
-                    elif value in [ "m-p", "m;p" ]:
-                        value = "mp"
-                    elif value == "f-p":
-                        value = "fp"
-                    elif value in ["m;f", "f;m"]:
-                        value = "mf"
-                    elif value == "mfbysense":
-                        value = "mf"
-                    elif value == "p":
-                        value = "p"
-                    form = value
+                    genders = value
 
         self._pos = pos
-        self.form = form
+        self.genders = genders
 
         # force loading
         self.senses
 
 
     @property
-    def form(self):
-        return self._form
+    def genders(self):
+        return self._genders
 
-    @form.setter
-    def form(self, value):
-        self._form = value
+    @genders.setter
+    def genders(self, value):
+        self._genders = value
         if value == "f":
             for form in self.forms.get("m", []):
                 self.add_lemma(form, "f")
@@ -87,9 +74,9 @@ class Word():
                 self._forms[formtype].append(form)
 
         # Feminine nouns are a "form of" their masculine counterpart
-        if formtype == "m" and self.form == "f":
+        if formtype == "m" and self.genders == "f":
             self.add_lemma(form, "f")
-        if formtype == "mpl" and self.form == "fp":
+        if formtype == "mpl" and self.genders == "fp":
             self.add_lemma(form, "fpl")
 
     def add_forms(self, data):

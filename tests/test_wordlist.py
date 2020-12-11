@@ -7,14 +7,14 @@ amiga
 pos: n
   meta: {{es-noun|f|m=amigo}}
   forms: m=amigo; mpl=amigos; pl=amigas
-  form: f
+  g: f
   gloss: female equivalent of "amigo", friend
 _____
 amigo
 pos: n
   meta: {{es-noun|m|f=amiga}}
   forms: f=amiga; fpl=amigas; pl=amigos
-  form: m
+  g: m
   gloss: friend
 """
 
@@ -44,14 +44,14 @@ amigo {m} :: friend2
     'pos: n',
     'meta: {{es-noun|f}}',
     'forms: m=amigo; mpl=amigos; pl=amigas',
-    'form: f',
+    'g: f',
     'gloss: female equivalent of "amigo", friend',
     'gloss: friend2'],
 'amigo': [
     'pos: n',
     'meta: {{es-noun|m}}',
     'forms: f=amiga; fpl=amigas; pl=amigos',
-    'form: m',
+    'g: m',
     'gloss: friend',
     'gloss: friend2']}
 
@@ -75,12 +75,12 @@ test {f} :: feminine
     'pos: n',
     'meta: x',
     'forms: pl=tests',
-    'form: m',
+    'g: m',
     'gloss: masculine',
     'pos: n',
     'meta: x',
     'forms: pl=tests',
-    'form: f',
+    'g: f',
     'gloss: feminine']
 }
 
@@ -91,14 +91,14 @@ amiga
 pos: n
   meta: {{es-noun|f|m=amigo}}
   forms: m=amigo; mpl=amigos; pl=amigas
-  form: f
+  g: f
   gloss: female equivalent of "amigo", friend
 _____
 amigo
 pos: n
   meta: {{es-noun|m|f=amiga}}
   forms: f=amiga; fpl=amigas; pl=amigos
-  form: m
+  g: m
   gloss: friend
 """
 
@@ -123,14 +123,14 @@ amiga
 pos: n
   meta: {{es-noun|f|m=amigo}}
   forms: m=amigo; mpl=amigos; pl=amigas
-  form: f
+  g: f
   gloss: female equivalent of "amigo", friend
 _____
 amigo
 pos: n
   meta: {{es-noun|m|f=amiga}}
   forms: f=amiga; fpl=amigas; pl=amigos
-  form: m
+  g: m
   gloss: friend
 """
 
@@ -153,7 +153,7 @@ def test_redirection():
 _____
 test1
 pos: n
-  form: m
+  g: m
   gloss: test
 _____
 test2
@@ -196,7 +196,7 @@ pos: n
 
     assert test1.word == "test1"
     assert test1.pos == "n"
-    assert test1.form == "m"
+    assert test1.genders == "m"
 
     assert wlist.get_lemmas(test1) == {'test1': ['m']}
     assert wlist.get_lemmas(test2) == {'test1': ['alt']}
@@ -216,7 +216,7 @@ protector
 pos: n
   meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
   forms: f=protectora; f=protectriz; fpl=protectoras; fpl=protectrices; pl=protectores
-  form: m
+  g: m
   gloss: protector (someone who protects or guards)
 pos: n
   meta: {{es-noun|m}}
@@ -228,38 +228,38 @@ protectora
 pos: n
   meta: {{es-noun|f|m=protector}}
   forms: m=protector; mpl=protectores; pl=protectoras
-  form: f
+  g: f
   gloss: female equivalent of "protector"
 pos: n
   meta: {{es-noun|f}}
   forms: pl=protectoras
-  form: f
+  g: f
   gloss: animal shelter (an organization that provides temporary homes for stray pet animals)
     syn: protectora de animales
 _____
 protectoras
 pos: n
   meta: {{head|es|noun plural form|g=f-p}}
-  form: f-p
+  g: f-p
   gloss: inflection of "protector"
 _____
 protectores
 pos: n
   meta: {{head|es|noun plural form|g=m-p}}
-  form: m-p
+  g: m-p
   gloss: inflection of "protector"
 _____
 protectrices
 pos: n
   meta: {{head|es|noun plural form|g=f-p}}
-  form: f-p
+  g: f-p
   gloss: inflection of "protector"
 _____
 protectriz
 pos: n
   meta: {{es-noun|f|m=protector}}
   forms: m=protector; mpl=protectores; pl=protectrices
-  form: f
+  g: f
   gloss: alternative form of "protectora"
     q: uncommon
 """

@@ -65,27 +65,6 @@ class WordlistBuilder:
         if res:
             return res.group(0)
 
-#    def exclude_word(self, word):
-#        if not hasattr(word, "headword") or not word.headword:
-#            return False
-#
-#        headword = word.headword
-#        # Ignore forms
-#        # FIXME: put language specific stuff someplace else?
-#        if str(headword.name) in { "es-adj-form", "es-verb-form", "es-past participle" }:
-#            return True
-#
-#        # Ignore feminine forms
-#        # FIXME: put language specific stuff someplace else?
-#        if str(headword.name) == "es-adj" and headword.has("m") or headword.has("masculine"):
-#            return True
-#
-#        if str(headword.name) == "head" and headword.has(2) and " form" in str(headword.get(2)):
-#            return True
-#
-#        return False
-
-
     def forms_to_string(self, forms):
         if not forms:
             return None
@@ -154,7 +133,7 @@ class WordlistBuilder:
                 forms =  self.forms_to_string(word.forms)
                 entry.append(f"  forms: {forms}")
             if word.genders:
-                entry.append(f"  form: {';'.join(word.genders)}")
+                entry.append(f"  g: {'; '.join(word.genders)}")
 
             if word.qualifiers:
                 qualifiers = self.wiki_to_text('; '.join(word.qualifiers), self.title)
@@ -394,8 +373,8 @@ def main():
                         for form in forms:
                             form_str.append(f"{formtype}={form}")
                     print(f"  forms: {'; '.join(form_str)}")
-                if word.pos:
-                    print(f"  form: {word.pos}")
+                if word.genders:
+                    print(f"  g: {word.genders}")
                 for sense in word.senses:
                     print(f"  gloss: {sense.gloss}")
                     if sense.qualifier:

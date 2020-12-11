@@ -9,7 +9,7 @@ asca
 pos: n
   meta: {{es-noun|m}}
   forms: pl=ascas
-  form: m
+  g: m
   gloss: ascus
     q: mycology
     syn: teca
@@ -18,14 +18,14 @@ asco
 pos: n
   meta: {{es-noun|m}}
   forms: pl=ascos
-  form: m
+  g: m
   gloss: disgust
   gloss: nausea
   gloss: disgusting person
 pos: n
   meta: {{es-noun|m}}
   forms: pl=ascos
-  form: m
+  g: m
   gloss: alternative form of "asca"
 """
 

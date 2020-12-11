@@ -1,9 +1,9 @@
 from ..word import Word
 
 def test_word():
-    word = Word("test", [ ("pos", "n"), ("form","m") ])
+    word = Word("test", [ ("pos", "n"), ("g","m") ])
     assert word.pos == "n"
-    assert word.form == "m"
+    assert word.genders == "m"
 
     word.add_sense([("gloss","a test word"),("q","rare")])
     assert len(word.senses) == 1
