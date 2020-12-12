@@ -11,11 +11,10 @@ class Word():
         self._sense_data = None
         self._senses = None
         self._form_data = None
-        self._genders = None
         self.meta = None
+        self.genders = None
 
         pos = None
-        genders = None
 
         for i, item in enumerate(data):
             key, value = item
@@ -27,37 +26,22 @@ class Word():
                 self.meta = value
             elif key == "forms":
                 self._form_data = value
-                self.forms
             elif key == "pos":
                 if value == "prop":
                     pos = "n"
-#                    form = "prop"
                 else:
                     pos = value
             elif key == "g":
                 if pos == "n":
-                    genders = value
+                    self.genders = value
 
         self._pos = pos
-        self.genders = genders
 
-        # force loading
-        self.senses
+        # parse forms so that gender tags get added
+        # TODO: add a flag to track if gender/forms has been processed
+        # TODO: generate _gender from meta and use that as the flag
+        self.forms
 
-
-    @property
-    def genders(self):
-        return self._genders
-
-    @genders.setter
-    def genders(self, value):
-        self._genders = value
-        if value == "f":
-            for form in self.forms.get("m", []):
-                self.add_lemma(form, "f")
-        elif value == "fp":
-            for form in self.forms.get("mpl", []):
-                self.add_lemma(form, "fpl")
 
     @property
     def is_lemma(self):
@@ -181,6 +165,13 @@ class Word():
         if self._form_data:
             self.parse_forms(self._form_data)
             self._form_data = None
+
+            if self.genders == "f":
+                for form in self._forms.get("m", []):
+                    self.add_lemma(form, "f")
+            elif self.genders == "fp":
+                for form in self._forms.get("mpl", []):
+                    self.add_lemma(form, "fpl")
 
         if not self._forms:
             return {}
