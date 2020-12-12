@@ -136,7 +136,7 @@ class WordlistBuilder:
                 entry.append(f"  g: {'; '.join(word.genders)}")
 
             if word.qualifiers:
-                qualifiers = self.wiki_to_text('; '.join(word.qualifiers), self.title)
+                qualifiers = self.make_qualification(word.qualifiers)[1:-1]
                 entry.append(f"  q: {qualifiers}")
 
             # TODO: Check for usage notes
@@ -154,7 +154,7 @@ class WordlistBuilder:
 
                 entry.append(f"  gloss: {gloss_text}")
                 if sense.gloss.qualifiers:
-                    qualifiers = self.wiki_to_text('; '.join(sense.gloss.qualifiers), self.title)
+                    qualifiers = self.make_qualification(sense.gloss.qualifiers)[1:-1]
                     entry.append(f"    q: {qualifiers}")
                 synonyms = []
                 for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
@@ -306,7 +306,7 @@ class WordlistBuilder:
 
 
 
-def iter_langdata(datafile, lang_section, lang_id):
+def iter_langdata(datafile):
 
     if not os.path.isfile(datafile):
         raise FileNotFoundError(f"Cannot open: {datafile}")
@@ -412,6 +412,7 @@ def main():
 
         try:
             entry = to_text(lang_entry, entry_title)
+
         except ValueError as ex:
             print(f"{entry_title} generated an error {ex}", file=sys.stderr)
         if entry:

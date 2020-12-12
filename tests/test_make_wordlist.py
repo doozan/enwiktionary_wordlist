@@ -774,3 +774,31 @@ f {letter} :: letter: ef\
 """
 
 
+def test_ingo():
+
+    orig_text="""\
+==Spanish==
+
+===Suffix===
+{{es-suffix|f=-inga}}
+
+# {{lb|es|mostly|Bolivia}} A [[diminutive]] suffix
+#: ''{{l|es|chica}}'' → (''girl'') ''{{l|es|chiquitinga}}'' (''little girl'')
+#: ''{{l|es|señorito}}'' → (''master'') ''{{l|es|señoritingo}}'' (''little brat'')
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+    entry = builder.entry_to_text(lang_entry, "-ingo")
+
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+-ingo
+pos: suffix
+  meta: {{es-suffix|f=-inga}}
+  gloss: A diminutive suffix
+    q: chiefly Bolivia\
+"""
+
+
