@@ -129,15 +129,13 @@ class WordlistBuilder:
             meta = " ".join(map(str,word.form_sources)).replace("\n", "")
             entry.append(f"  meta: {meta}")
 
-            if word.forms:
-                forms =  self.forms_to_string(word.forms)
-                entry.append(f"  forms: {forms}")
             if word.genders:
                 entry.append(f"  g: {'; '.join(word.genders)}")
 
             if word.qualifiers:
                 qualifiers = self.make_qualification(word.qualifiers)[1:-1]
-                entry.append(f"  q: {qualifiers}")
+                if qualifiers:
+                    entry.append(f"  q: {qualifiers}")
 
             # TODO: Check for usage notes
 

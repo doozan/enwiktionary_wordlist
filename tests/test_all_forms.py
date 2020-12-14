@@ -79,14 +79,15 @@ def test_secondary_lemma_unique_forms():
 _____
 test
 pos: n
+  meta: {{es-noun|m|-}}
   gloss: test
 _____
 test2
 pos: n
-#  forms: pl=test2s
+  meta: {{es-noun|m|-}}
   gloss: alternative form of "test"
 pos: n
-  forms: pl=test2s
+  meta: {{es-noun|m|test2s}}
   g: m
   gloss: test2
 """
@@ -107,14 +108,15 @@ def test_secondary_lemma_no_unique_forms():
 _____
 test
 pos: n
+  meta: {{es-noun|m|-}}
   gloss: test
 _____
 test2
 pos: n
-  forms: pl=test2s
+  meta: {{es-noun|m|test2s}}
   gloss: alternative form of "test"
 pos: n
-  forms: pl=test2s
+  meta: {{es-noun|m|test2s}}
   g: m
   gloss: test2
 """
@@ -132,14 +134,11 @@ pos: n
 def test_forms_text():
 
     wordlist_data = """\
-testo {n-meta} :: x
-testo {noun-forms} :: pl=testos
+testo {n-meta} :: {{es-noun|m}}
 testo {m} :: test
-testo {n-meta} :: x
-testo {noun-forms} :: pl=testoz
+testo {n-meta} :: {{es-noun|m|testoz}}
 testo {m} :: test2
-testa {n-meta} :: x
-testa {noun-forms} :: pl=testas
+testa {n-meta} :: {{es-noun|f}}
 testa {f} :: feminine noun of "testo"
 """
     expected = {
@@ -156,13 +155,13 @@ testa {f} :: feminine noun of "testo"
 def test_forms_redirection():
 
     wordlist_data = """\
-test1 {n-meta} :: x
+test1 {n-meta} :: {{es-noun|m|-}}
 test1 {m} :: test
-test2 {n-meta} :: x
+test2 {n-meta} :: {{es-noun|m|-}}
 test2 {m} :: alternate form of "test1"
-test3 {n-meta} :: x
+test3 {n-meta} :: {{es-noun|m|-}}
 test3 {m} :: alternate form of "test2"
-test4 {n-meta} :: x
+test4 {n-meta} :: {{es-noun|m|-}}
 test4 {m} :: alternate form of "test3"
 """
 
@@ -517,3 +516,36 @@ pos: verb
     assert AllForms.from_wordlist(wordlist).all_forms == expected
 
 
+def test_afecto():
+    wordlist_data = """\
+_____
+afecto
+pos: adj
+  meta: {{es-adj|f=afecta}}
+  forms: f=afecta; fpl=afectas; pl=afectos
+  gloss: test
+"""
+    expected = {
+'afecta': ['adj|afecto'],
+'afectas': ['adj|afecto'],
+'afectos': ['adj|afecto'],
+'afecto': ['adj|afecto']}
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    assert AllForms.from_wordlist(wordlist).all_forms == expected
+
+def test_ninguno():
+    wordlist_data = """\
+_____
+ningún
+pos: adj
+  meta: {{head|es|adjective form|g=m|apocopate||standard form|ninguno}}
+  gloss: test
+"""
+    expected = {
+'ninguno': ['adj|ningún'],
+'ningún': ['adj|ningún']
+}
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    assert AllForms.from_wordlist(wordlist).all_forms == expected

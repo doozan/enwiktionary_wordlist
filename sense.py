@@ -17,12 +17,6 @@ class Sense():
             elif key == "syn":
                 self._syndata = value
 
-#        self.pos = pos
-#        self.qualifier = qualifier
-#        self.gloss = gloss
-#        self._syndata = syndata
-#        self._synonyms = []
-
         if " of " in self.gloss:
             self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
             if self.lemma:

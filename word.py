@@ -1,5 +1,7 @@
+import enwiktionary_templates as templates
 import re
 from .sense import Sense
+from .wiki_to_text import wiki_to_text
 
 class Word():
 
@@ -10,11 +12,8 @@ class Word():
         self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
         self._sense_data = None
         self._senses = None
-        self._form_data = None
         self.meta = None
         self.genders = None
-
-        pos = None
 
         for i, item in enumerate(data):
             key, value = item
@@ -22,35 +21,28 @@ class Word():
                 self._sense_data = data[i:]
                 # Everything after the first gloss will be lazy-loaded as .senses
                 break
-            if key == "meta":
+            elif key == "meta":
                 self.meta = value
-            elif key == "forms":
-                self._form_data = value
             elif key == "pos":
                 if value == "prop":
-                    pos = "n"
-                else:
-                    pos = value
+                    value = "n"
+                self._pos = value
             elif key == "g":
-                if pos == "n":
+                if self._pos == "n":
                     self.genders = value
-
-        self._pos = pos
-
-        # parse forms so that gender tags get added
-        # TODO: add a flag to track if gender/forms has been processed
-        # TODO: generate _gender from meta and use that as the flag
-        self.forms
-
 
     @property
     def is_lemma(self):
-        return self.senses and not self.form_of \
-                and not ("m" in self.forms and "f" in self.forms)
+        return not ("m" in self.forms and "f" in self.forms) and\
+            self.senses and not self.form_of
 
     def add_form(self, formtype, form):
         if self._forms is None:
             self._forms = {}
+
+        if "[[" in form or "</" in form:
+            form = wiki_to_text(form, self.word)
+
         if formtype not in self._forms:
             self._forms[formtype] = [form]
         else:
@@ -159,12 +151,13 @@ class Word():
 #            self.add_lemma(sense.lemma, sense.formtype)
 #        self.senses.append(sense)
 
-
     @property
     def forms(self):
-        if self._form_data:
-            self.parse_forms(self._form_data)
-            self._form_data = None
+        if not self._forms and self.meta:
+            self.get_forms_from_meta()
+            self.meta = None
+            if not self._forms:
+                return {}
 
             if self.genders == "f":
                 for form in self._forms.get("m", []):
@@ -177,3 +170,37 @@ class Word():
             return {}
 
         return self._forms
+
+    def get_forms_from_meta(self):
+        for template in templates.iter_templates(self.meta):
+            if template.name == "head":
+                data = self.get_head_forms(template)
+            else:
+                data = templates.expand_template(template, self.word)
+            self.add_forms(self.parse_list(data))
+
+
+    @staticmethod
+    def get_head_forms(template):
+        if template is None:
+            return {}
+
+        params = templates.get_template_params(template)
+
+        res = {}
+        offset=3
+        while str(offset+1) in params:
+            formtype = params[str(offset)]
+            formtype = re.sub("[^a-zA-Z0-9]", "_", formtype)
+            form = params[str(offset+1)]
+            offset += 2
+
+            if not form.strip():
+                continue
+
+            if formtype not in res:
+                res[formtype] = [form]
+            else:
+                res[formtype].append(form)
+
+        return "; ".join([f"{k}={v}" for k,vs in sorted(res.items()) for v in vs])

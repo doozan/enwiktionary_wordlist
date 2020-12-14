@@ -284,14 +284,12 @@ pos: n
 def test_diva():
 
     data = """\
-diva {n-meta} :: x
-diva {n-forms} :: m=divo; mpl=divos; pl=divas
+diva {n-meta} :: {{es-noun|f|m=divo}}
 diva {f} :: diva
 divo {adj-meta} :: x
 divo {adj-forms} :: f=diva; fpl=divas; pl=divos
 divo {adj} :: star (famous)
-divo {n-meta} :: x
-divo {n-forms} :: f=diva; fpl=divas; pl=divos
+divo {n-meta} :: {{es-noun|m|f=diva}}
 divo {m} :: star, celeb\
 """
     wlist = Wordlist(data.splitlines())
@@ -303,11 +301,9 @@ divo {m} :: star, celeb\
 def test_capitana():
 
     data = """\
-capitana {n-meta} :: x
-capitana {n-forms} :: pl=capitanas
+capitana {n-meta} :: {{es-noun|f}}
 capitana {f} :: female equivalent of "capitán"
-capitán {n-meta} :: x
-capitán {n-forms} :: f=capitana; fpl=capitanas; pl=capitanes
+capitán {n-meta} :: {{es-noun|m|f=capitana}}
 capitán {m} :: captain\
 """
     wlist = Wordlist(data.splitlines())
@@ -320,13 +316,11 @@ capitán {m} :: captain\
 def test_banera():
 
     data = """\
-bañera {n-meta} :: x
-bañera {n-forms} :: pl=bañeras
+bañera {n-meta} :: {{es-noun|f}}
 bañera {f} :: bathtub
 bañera {f} [nautical] :: cockpit
 bañera {f} [Argentina, Chile, Uruguay] :: female equivalent of "bañero"
-bañero {n-meta} :: x
-bañero {n-forms} :: f=bañera; fpl=bañeras; pl=bañeros
+bañero {n-meta} :: {{es-noun|m|f=bañera}}
 bañero {m} [Argentina, Chile, Uruguay] :: lifeguard
 """
     wlist = Wordlist(data.splitlines())
