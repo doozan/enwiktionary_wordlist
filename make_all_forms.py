@@ -33,10 +33,13 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate forms-to-lemmas data from wordlist")
     parser.add_argument("wordlist", help="wordlist")
+    parser.add_argument("--low-mem", help="Use less memory", action='store_true', default=False)
     args = parser.parse_args()
 
+    cache_words = not args.low_mem
+
     with open(args.wordlist) as wordlist_data:
-        wordlist = Wordlist(wordlist_data)
+        wordlist = Wordlist(wordlist_data, cache_words=cache_words)
 
         all_forms = AllForms.from_wordlist(wordlist)
 
