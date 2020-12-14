@@ -179,12 +179,6 @@ yero {v} :: inflection of "yerar"\
 """
 
 
-def test_wiki_to_text():
-
-    wiki = mwparserfromhell.parse("{{gloss|a weak unstable acid, H<sub>2</sub>CO<sub>3</sub>}}")
-    text = builder.wiki_to_text(wiki, "test")
-    assert text == "(a weak unstable acid, H2CO3)"
-
 def test_repanoche():
     orig_text="""\
 ==Spanish== 
@@ -204,24 +198,6 @@ repanoche {n-meta} :: {{es-noun|f|-}}
 repanoche {f} [Spain] :: only used in "ser la repanocha"\
 """
 
-
-def test_wiki_to_text():
-
-    wiki = mwparserfromhell.parse("{{gloss|a weak unstable acid, H<sub>2</sub>CO<sub>3</sub>}}")
-    text = builder.wiki_to_text(wiki, "test")
-    assert text == "(a weak unstable acid, H2CO3)"
-
-    wiki = mwparserfromhell.parse("[[test|blah]]")
-    text = builder.wiki_to_text(wiki, "test")
-    assert text == "blah"
-
-    wiki = mwparserfromhell.parse("[[w:Spain|Spain]]")
-    text = builder.wiki_to_text(wiki, "test")
-    assert text == "Spain"
-
-    wiki = mwparserfromhell.parse("{{indtr|es|en|.also|.figurative}}")
-    text = builder.wiki_to_text(wiki, "test")
-    assert text == "(also figurative, transitive with en)"
 
 def test_fullentry():
     orig_text="""\

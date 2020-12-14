@@ -22,10 +22,10 @@ This will build a dictionary from an english wiktionary dump
 import os
 os.environ["PYWIKIBOT_NO_USER_CONFIG"]="2"
 from pywikibot import xmlreader
-from enwiktionary_templates import expand_templates
 from enwiktionary_extract import LanguageFile
 import re
 import sys
+from .wiki_to_text import wiki_to_text
 
 import enwiktionary_parser as wtparser
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
@@ -73,7 +73,7 @@ class WordlistBuilder:
         for k,values in sorted(forms.items()):
             for v in sorted(values):
                 if re.search(r"[\<\{\[]", v):
-                    v = self.wiki_to_text(v, self.title)
+                    v = wiki_to_text(v, self.title)
 
                 if ";" in v:
                     raise ValueError(f"ERROR: ; found in value ({v})")
@@ -217,46 +217,17 @@ class WordlistBuilder:
 
         return entry
 
-    @staticmethod
-    def wiki_to_text( wikitext, title):
-        wikt = wtparser.parse(wikitext)
-
-        expand_templates(wikt, title)
-
-        # Reparse and expand links
-        wikt = wtparser.parse(str(wikt))
-        for wikilink in wikt.filter_wikilinks():
-            display = wikilink.text if wikilink.text else wikilink.title
-            wikt.replace(wikilink, display)
-
-
-        # Remove comments
-        for comment in wikt.filter_comments():
-            wikt.remove(comment)
-        # Also remove any unterminated comments
-        res = re.sub(r"<!--.*", "", str(wikt))
-
-        res = re.sub("''+", "", res)
-        res = re.sub(r"<sup>(.*?)</sup>", r"^\1", res)
-        res = re.sub(r"<sub>(.*?)</sub>", r"\1", res)
-        res = re.sub(r"<ref(.*?)</ref>", "", res)
-        res = re.sub(r"<ref [^>]*/>", "", res)
-        res = re.sub(r"<ref>.*", "", res)
-        res = re.sub(r"&nbsp;", " ", res)
-        res = re.sub(r"&ndash;", "-", res)
-        return res
-
     def gloss_to_text(self, gloss):
-        return re.sub(r"\s\s+", " ", self.wiki_to_text(gloss.data.rstrip("\r\n\t ."), self.title).strip())
+        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), self.title).strip())
 
     def items_to_synonyms(self, items):
         synonyms = []
         for item in items:
             synonym = None
             if "alt" in item:
-                synonym = self.wiki_to_text(item["alt"], self.title).strip()
+                synonym = wiki_to_text(item["alt"], self.title).strip()
             if not synonym:
-                synonym = self.wiki_to_text(item["target"], self.title).strip()
+                synonym = wiki_to_text(item["target"], self.title).strip()
             if synonym:
                 synonyms.append(synonym)
 #           [ { "target": "word", "q": "qual" }, { "target": "word2", "tr": "tr" } ]
@@ -297,7 +268,7 @@ class WordlistBuilder:
 
         qualifiers = [q for q in all_qualifiers if not q in self.q_verbs]
         template_str = "{{lb|" + self.LANG_ID + "|" + "|".join(qualifiers) + "}}"
-        qualified = self.wiki_to_text(template_str, self.title)
+        qualified = wiki_to_text(template_str, self.title)
         if not qualified:
             return ""
 
