@@ -153,7 +153,8 @@ class WordlistBuilder:
                 entry.append(f"  gloss: {gloss_text}")
                 if sense.gloss.qualifiers:
                     qualifiers = self.make_qualification(sense.gloss.qualifiers)[1:-1]
-                    entry.append(f"    q: {qualifiers}")
+                    if qualifiers:
+                        entry.append(f"    q: {qualifiers}")
                 synonyms = []
                 for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
                     synonyms += self.items_to_synonyms(nymline.items)
@@ -198,7 +199,7 @@ class WordlistBuilder:
 
                 all_qualifiers = word.qualifiers + sense.gloss.qualifiers
                 pos = self.make_pos_tag(word, all_qualifiers)
-                qualification = self.make_qualification(all_qualifiers)
+                qualification = self.make_qualification(all_qualifiers, True)
 
                 items = [title, pos]
                 if qualification:
@@ -261,10 +262,12 @@ class WordlistBuilder:
 
         return "{" + pos + "}"
 
-    def make_qualification(self, all_qualifiers):
-        """ Remove verb qualifiers and process remaining as if it were a label """
+    def make_qualification(self, qualifiers, strip_verb_qualifiers=False):
+        """ Convert a list of qualifiers to label """
 
-        qualifiers = [q for q in all_qualifiers if not q in self.q_verbs]
+        if strip_verb_qualifiers:
+            qualifiers = [q for q in qualifiers if not q in self.q_verbs]
+
         template_str = "{{lb|" + self.LANG_ID + "|" + "|".join(qualifiers) + "}}"
         qualified = wiki_to_text(template_str, self.title)
         if not qualified:
@@ -347,10 +350,9 @@ def main():
                 for sense in word.senses:
                     print(f"  gloss: {sense.gloss}")
                     if sense.qualifier:
-                        quals = sense.qualifier.split("; ")
-                        template_str = "{{lb|es|" + "|".join(quals) + "}}"
-                        qual = WordlistBuilder.wiki_to_text(template_str, word.word)[1:-1]
-                        print(f"    q: {qual}")
+                        qualifiers = self.make_qualification(sense.qualifier.split("; "))[1:-1]
+                        if qualifiers:
+                            print(f"    q: {qualifiers}")
                     if sense.synonyms:
                         print(f"    syn: {'; '.join(sense.synonyms)}")
 
