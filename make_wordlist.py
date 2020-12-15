@@ -22,7 +22,7 @@ This will build a dictionary from an english wiktionary dump
 import os
 os.environ["PYWIKIBOT_NO_USER_CONFIG"]="2"
 from pywikibot import xmlreader
-from enwiktionary_extract import LanguageFile
+from .language_extract import LanguageFile
 import re
 import sys
 from .wiki_to_text import wiki_to_text
