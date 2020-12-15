@@ -84,18 +84,6 @@ class WordlistBuilder:
 
         return "; ".join(res)
 
-    def get_forms(self, title, word):
-        """ Returns a formatted form line containing the word forms """
-        if not word.forms:
-            return None
-
-        if word.shortpos == "prop":
-            pos = "n"
-        else:
-            pos = word.shortpos
-
-        return title + " {" + pos + "-forms} :: " + self.forms_to_string(word.forms)
-
 
     def get_meta(self, title, word):
         """ Returns a formatted form line with the template(s) defining the forms """
@@ -178,9 +166,6 @@ class WordlistBuilder:
             meta = self.get_meta(title, word)
             if meta:
                 entry.append(meta)
-            forms = self.get_forms(title, word)
-            if forms:
-                entry.append(forms)
 
             for sense in word.ifilter_wordsenses():
                 # Skip senses that are just a request for a definition
