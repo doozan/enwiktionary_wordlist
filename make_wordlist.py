@@ -25,7 +25,7 @@ from pywikibot import xmlreader
 from .language_extract import LanguageFile
 import re
 import sys
-from .wiki_to_text import wiki_to_text
+from .utils import wiki_to_text, make_qualification, make_pos_tag
 
 import enwiktionary_parser as wtparser
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
@@ -121,7 +121,7 @@ class WordlistBuilder:
                 entry.append(f"  g: {'; '.join(word.genders)}")
 
             if word.qualifiers:
-                qualifiers = self.make_qualification(word.qualifiers)[1:-1]
+                qualifiers = make_qualification(self.LANG_ID, word.title, word.qualifiers)
                 if qualifiers:
                     entry.append(f"  q: {qualifiers}")
 
@@ -140,7 +140,7 @@ class WordlistBuilder:
 
                 entry.append(f"  gloss: {gloss_text}")
                 if sense.gloss.qualifiers:
-                    qualifiers = self.make_qualification(sense.gloss.qualifiers)[1:-1]
+                    qualifiers = make_qualification(self.LANG_ID, word.title, sense.gloss.qualifiers)
                     if qualifiers:
                         entry.append(f"    q: {qualifiers}")
                 synonyms = []
@@ -183,12 +183,12 @@ class WordlistBuilder:
                     synonyms += self.items_to_synonyms(nymline.items)
 
                 all_qualifiers = word.qualifiers + sense.gloss.qualifiers
-                pos = self.make_pos_tag(word, all_qualifiers)
-                qualification = self.make_qualification(all_qualifiers, True)
+                pos = make_pos_tag(word, all_qualifiers)
+                qualification = make_qualification(self.LANG_ID, self.title, all_qualifiers, True)
 
                 items = [title, pos]
                 if qualification:
-                    items.append(qualification)
+                    items.append("["+qualification+"]")
                 if synonyms:
                     items.append("|")
                     items.append("; ".join(synonyms))
@@ -217,50 +217,6 @@ class WordlistBuilder:
 #           [ { "target": "word", "q": "qual" }, { "target": "word2", "tr": "tr" } ]
 
         return synonyms
-
-    q_verbs = {
-        "transitive": "t",
-        "reflexive": "r",
-        "intransitive": "i",
-        "pronominal": "p",
-        "ambitransitive": "it",
-    }
-
-    def make_gendertag(self, all_genders):
-        genders = []
-        for gender in all_genders:
-            gender = gender.replace("-", "")
-            if gender not in genders:
-                genders.append(gender)
-        return "".join(genders)
-
-    def make_pos_tag(self, word, qualifiers):
-        pos = word.shortpos
-        gendertag = self.make_gendertag(word.genders)
-
-        if pos in ["n","prop"] and gendertag:
-            return "{" + gendertag + "}"
-        if pos == "v":
-            for q in qualifiers:
-                if q in self.q_verbs:
-                    pos += self.q_verbs[q]
-
-        return "{" + pos + "}"
-
-    def make_qualification(self, qualifiers, strip_verb_qualifiers=False):
-        """ Convert a list of qualifiers to label """
-
-        if strip_verb_qualifiers:
-            qualifiers = [q for q in qualifiers if not q in self.q_verbs]
-
-        template_str = "{{lb|" + self.LANG_ID + "|" + "|".join(qualifiers) + "}}"
-        qualified = wiki_to_text(template_str, self.title)
-        if not qualified:
-            return ""
-
-        # Change () to []
-        return "[" + qualified[1:-1] + "]"
-
 
 
 def iter_langdata(datafile):
@@ -335,7 +291,7 @@ def main():
                 for sense in word.senses:
                     print(f"  gloss: {sense.gloss}")
                     if sense.qualifier:
-                        qualifiers = self.make_qualification(sense.qualifier.split("; "))[1:-1]
+                        qualifiers = make_qualification(self.LANG_ID, self.title, sense.qualifier.split("; "))
                         if qualifiers:
                             print(f"    q: {qualifiers}")
                     if sense.synonyms:

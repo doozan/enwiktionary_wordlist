@@ -1,7 +1,7 @@
 import enwiktionary_templates as templates
 import re
 from .sense import Sense
-from .wiki_to_text import wiki_to_text
+from .utils import wiki_to_text
 
 class Word():
 

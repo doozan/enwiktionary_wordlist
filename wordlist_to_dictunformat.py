@@ -237,7 +237,6 @@ _____
 
         if first:
             print("sorted memory", mem_use(), file=sys.stderr)
-            print(targets, file=sys.stderr)
             first = False
 
         yield "_____"

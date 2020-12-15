@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ..wiki_to_text import wiki_to_text
+from ..utils import wiki_to_text
 import mwparserfromhell
 
 def test_wiki_to_text():
