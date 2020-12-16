@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+import mmap
 import sys
 
 from .wordlist import Wordlist
@@ -11,6 +12,31 @@ class AllForms:
     def __init__(self):
         self.all_forms = {}
 
+    def get_lemmas(self, word):
+        if hasattr(self, 'mmap_obj'):
+            if word not in self.all_forms:
+                return []
+            offset = self.all_forms[word]
+            self.mmap_obj.seek(offset)
+
+            results = []
+            for line in iter(self.mmap_obj.readline, b''):
+
+                line = line.decode('utf-8').strip()
+                row = next(csv.reader([line]), None)
+                form,pos,*lemmas = row
+                if form != word:
+                    break
+
+                for lemma in lemmas:
+                    value = f"{pos}|{lemma}"
+                    if value not in results:
+                        results.append(f"{pos}|{lemma}")
+
+            return results
+        else:
+            return self.all_forms.get(word, [])
+
     @classmethod
     def from_data(cls, allforms_data):
         self = cls()
@@ -19,6 +45,27 @@ class AllForms:
         for form,pos,*lemmas in cr:
             for lemma in lemmas:
                 self._add_form(form, pos, lemma)
+
+        return self
+
+    @classmethod
+    def from_file(cls, filename):
+        self = cls()
+
+        self.file_obj = open(filename, mode="rb")
+        self.mmap_obj = mmap.mmap(self.file_obj.fileno(), length=0, access=mmap.ACCESS_READ)
+
+        offset = self.mmap_obj.tell()
+        for line in iter(self.mmap_obj.readline, b''):
+
+            line = line.decode('utf-8').strip()
+            row = next(csv.reader([line]), None)
+            if not row:
+                continue
+            form,pos,*lemmas = row
+            if form not in self.all_forms:
+                self.all_forms[form] = offset
+            offset = self.mmap_obj.tell()
 
         return self
 

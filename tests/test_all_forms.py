@@ -549,3 +549,20 @@ pos: adj
 
     wordlist = Wordlist(wordlist_data.splitlines())
     assert AllForms.from_wordlist(wordlist).all_forms == expected
+
+
+def test_mmap(tmpdir):
+    allforms_data = """\
+test,adj,a1,a2,a3
+test,noun,n1,n2,n3
+"test1,test2",noun,test1,test2,test3
+"""
+
+    p = tmpdir.mkdir("allforms").join("allforms.csv")
+    p.write(allforms_data)
+
+    allforms = AllForms.from_file(p)
+    assert allforms.all_forms == {'test': 0, 'test1,test2': 37}
+
+    assert allforms.get_lemmas('test') == ['adj|a1', 'adj|a2', 'adj|a3', 'noun|n1', 'noun|n2', 'noun|n3']
+    assert allforms.get_lemmas('test1,test2') == ['noun|test1', 'noun|test2', 'noun|test3']
