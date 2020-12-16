@@ -39,7 +39,7 @@ def get_word_header(word_obj):
     else:
         line.append(f" ({word_obj.pos})")
 
-    if word_obj.forms:
+    if word_obj.pos != "v" and word_obj.forms:
         form_items = []
         for formtype in formtypes.keys():
             forms = word_obj.forms.get(formtype)
@@ -183,7 +183,7 @@ def export(wordlist_data, allforms_data, langid, description, low_memory=False):
         if form_count == 1:
             print("loop memory", mem_use(), file=sys.stderr)
         if form_count % 1000 == 0:
-            print(form_count, file=sys.stderr, end="\r")
+            print(form_count, mem_use(), file=sys.stderr, end="\r")
 
         if prev_form != form:
             if prev_form:
@@ -228,16 +228,13 @@ _____
 ##:description:{description}\
 """
 
-    first = True
+    count = 0
     for targets,keys in sorted(all_pages.items()):
+        count += 1
+        if count % 1000 == 0:
+            print(count, mem_use(), file=sys.stderr, end="\r")
 
-        #tgs =[t.split(":") for t in targets.split(";")]
-        #print(targets, tgs, keys, file=sys.stderr)
         entry = build_page([t.split(":") for t in targets.split(";")])
-
-        if first:
-            print("sorted memory", mem_use(), file=sys.stderr)
-            first = False
 
         yield "_____"
         yield "|".join(sorted(keys))
@@ -252,13 +249,14 @@ if __name__ == "__main__":
     parser.add_argument("allforms", help="all_forms csv file")
     parser.add_argument("--lang-id", help="language id")
     parser.add_argument("--description", help="description", default="")
+    parser.add_argument("--low-mem", help="Optimize for low memory devices", default=False, action='store_true')
     args = parser.parse_args()
 
     wordlist_data = open(args.wordlist)
     if args.allforms:
         allforms_data = open(args.allforms)
 
-    for line in export(wordlist_data, allforms_data, args.lang_id, args.description):
+    for line in export(wordlist_data, allforms_data, args.lang_id, args.description, args.low_mem):
         print(line)
 
     wordlist_data.close()
