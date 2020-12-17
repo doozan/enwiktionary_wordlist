@@ -54,8 +54,10 @@ def make_pos_tag(word, qualifiers):
     pos = word.shortpos
     gendertag = make_gendertag(word.genders)
 
-    if pos in ["n","prop"] and gendertag:
+    if pos == "n" and gendertag:
         return "{" + gendertag + "}"
+    if pos == "prop" and gendertag:
+        return "{prop} {" + gendertag + "}"
     if pos == "v":
         pos, _ = extract_verb_qualifiers(qualifiers)
 

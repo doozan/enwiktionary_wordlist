@@ -24,11 +24,9 @@ class Word():
             elif key == "meta":
                 self.meta = value
             elif key == "pos":
-                if value == "prop":
-                    value = "n"
                 self._pos = value
             elif key == "g":
-                if self._pos == "n":
+                if self._pos in ["n", "prop"]:
                     self.genders = value
 
     @property

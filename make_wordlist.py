@@ -88,11 +88,7 @@ class WordlistBuilder:
     def get_meta(self, title, word):
         """ Returns a formatted form line with the template(s) defining the forms """
 
-        if word.shortpos == "prop":
-            pos = "n"
-        else:
-            pos = word.shortpos
-
+        pos = word.shortpos
         return title + " {" + pos + "-meta} :: " + " ".join(map(str,word.form_sources)).replace("\n","")
 
 
