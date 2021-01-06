@@ -30,6 +30,12 @@ def format_forms(formtype, forms):
             '" or "'.join(forms) \
             + '"'
 
+def get_first_lemma(words):
+    """ Returns the first item in a list that is a lemma """
+    for word in words:
+        if wordlist.has_lemma(word):
+            return word
+
 def get_word_header(word_obj):
     line = [f"{word_obj.word}"]
     if word_obj.genders:
@@ -145,7 +151,7 @@ def add_key(key, targets):
 
 def iter_allforms(allforms_data, wordlist):
     """ if allforms_data is supplied, treat it as a csv
-    otherwise, generate all_froms from wordlist """
+    otherwise, generate all_forms from wordlist """
 
     if allforms_data:
         yield from csv.reader(allforms_data)
@@ -237,7 +243,12 @@ _____
         entry = build_page([t.split(":") for t in targets.split(";")])
 
         yield "_____"
-        yield "|".join(sorted(keys))
+        keys = sorted(keys)
+        lemma = get_first_lemma(keys)
+        if not lemma:
+            lemma = keys[0]
+        keys.remove(lemma)
+        yield "|".join([lemma] + keys)
         yield entry
 
 if __name__ == "__main__":

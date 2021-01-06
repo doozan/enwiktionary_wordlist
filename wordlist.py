@@ -157,7 +157,7 @@ class Wordlist():
 #                break
             yield from self.get_words(word)
 
-    def has_lemma(self, lemma, pos):
+    def has_lemma(self, lemma, pos=None):
         """
         lemma is a string
         pos is a string
