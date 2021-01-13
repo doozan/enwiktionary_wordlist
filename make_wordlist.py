@@ -92,6 +92,35 @@ class WordlistBuilder:
         return title + " {" + pos + "-meta} :: " + " ".join(map(str,word.form_sources)).replace("\n","")
 
 
+    def get_etymology(self, word):
+        res = word.get_matching_ancestor(lambda x: hasattr(x, "name") and x.name.startswith("Etymology"))
+        if not res:
+            return []
+        return [res]
+
+
+    def get_usage(self, word):
+        """ Returns a list of Usage sections that match the given word """
+
+        # Get the nearest ancestor that contains Usage Notes
+        item = word
+        while item:
+#            if hasattr(item, "name"):
+#                print("Checking for usage in", item.name)
+#            else:
+#                print("Checking for usage in", item.__class__)
+            res = item.filter_usagenotes(recursive=True)
+            if res:
+#                print("found usage")
+                # TODO: Make sure usage isn't attached to another word (eg: word is noun, but usage is under verb)
+                return res
+
+            # TODO: stop if item is language or etymology
+            item = getattr(item, "_parent", None)
+            if not getattr(item, "filter_usagenotes", None):
+                break
+        return []
+
     def entry_to_text(self, text, title):
         self.title = title
         wikt = wtparser.parse_page(text, title, parent=self)
@@ -121,7 +150,12 @@ class WordlistBuilder:
                 if qualifiers:
                     entry.append(f"  q: {qualifiers}")
 
-            # TODO: Check for usage notes
+            for usage in self.get_usage(word):
+                entry.append(f"  usage: " + self.usage_to_text(usage))
+
+            for ety in self.get_etymology(word):
+                for node in ety.ifilter_etymologies():
+                    entry.append(f"  etymology: " + self.etymology_to_text(node))
 
             for sense in word.ifilter_wordsenses():
                 # Skip senses that are just a request for a definition
@@ -199,6 +233,12 @@ class WordlistBuilder:
 
     def gloss_to_text(self, gloss):
         return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), self.title).strip())
+
+    def usage_to_text(self, usage):
+        return re.sub("\n", r"\\n", wiki_to_text(usage, self.title).strip())
+
+    def etymology_to_text(self, etymology):
+        return re.sub("\n", r"\\n", wiki_to_text(etymology, self.title).strip())
 
     def items_to_synonyms(self, items):
         synonyms = []

@@ -31,7 +31,6 @@ def make_qualification(lang_id, title, qualifiers, strip_verb_qualifiers=False):
     """ Convert a list of qualifiers to label """
 
     if strip_verb_qualifiers:
-        print("extracting", title, qualifiers, strip_verb_qualifiers)
         pos, qualifiers = extract_verb_qualifiers(qualifiers)
 
     template_str = "{{lb|" + lang_id + "|" + "|".join(qualifiers) + "}}"

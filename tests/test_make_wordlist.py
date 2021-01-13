@@ -523,10 +523,12 @@ _____
 aterrar
 pos: v
   meta: {{es-verb|aterr|ar|pres=atierro}} {{es-conj-ar|at|rr|p=e-ie|combined=1}}
+  etymology: a- + tierra + -ar
   gloss: to bring down, to ground
     q: transitive
 pos: v
   meta: {{es-verb|aterr|ar}} {{es-conj-ar|aterr|combined=1}}
+  etymology: From a- + terreō.
   gloss: to scare
     q: transitive\
 """
@@ -575,6 +577,7 @@ _____
 atentar
 pos: v
   meta: {{es-verb|atent|ar|pres=atiento}} {{es-conj-ar|at|nt|p=e-ie|combined=1}}
+  etymology: From Latin attentō.
   gloss: to commit a violent or criminal attack, to strike
     q: intransitive
 pos: v
@@ -848,10 +851,10 @@ pos: prop
 
     print("\n".join(entry))
     assert "\n".join(entry)=="""\
-Mejico {n-meta} :: {{es-proper noun|m}}
-Mejico {m} [Spain] :: alternative spelling of "México"
-Mejico {m} :: alternative spelling of "test."
-Mejico {m} :: test\
+Mejico {prop-meta} :: {{es-proper noun|m}}
+Mejico {prop} {m} [Spain] :: alternative spelling of "México"
+Mejico {prop} {m} :: alternative spelling of "test."
+Mejico {prop} {m} :: test\
 """
 
 # This fails because "adjective form" headwords are ignored right now
@@ -1106,3 +1109,58 @@ pos: suffix
 """
 
 
+def test_usage():
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|m}}
+
+# test
+
+====Usage Notes====
+
+# test {{gloss|test}}
+# '''test2'''
+
+----
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  usage: # test (test)\\n# test2
+  gloss: test\
+"""
+
+def test_hubert():
+    orig_text="""\
+==Spanish==
+
+===Proper noun===
+{{es-proper noun|m}}
+
+# [[Hubert]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "Hubert")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+Hubert
+pos: prop
+  meta: {{es-proper noun|m}}
+  g: m
+  gloss: Hubert\
+"""
