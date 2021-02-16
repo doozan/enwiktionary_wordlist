@@ -102,6 +102,7 @@ class Sense():
         "nonstandard spelling": "alt",
         "obsolete form": "old",
         "obsolete spelling": "old",
+        "only used in": "alt",
         "plural": "pl",
         "pronunciation spelling": "alt",
         "rare form": "rare",
