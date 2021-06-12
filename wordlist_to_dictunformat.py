@@ -30,6 +30,15 @@ def format_forms(formtype, forms):
             '" or "'.join(forms) \
             + '"'
 
+def format_etymology(ety):
+    return ety.encode('latin-1', 'backslashreplace').decode('unicode-escape')
+
+def format_use_notes(usage):
+    if r"\n" not in usage:
+        return "Note: " + re.sub("\*\s+]*","", usage)
+    else:
+        return "Note:\n" + re.sub(r"\\n", "\n", usage)
+
 def get_first_lemma(words):
     """ Returns the first item in a list that is a lemma """
     for word in words:
@@ -85,8 +94,12 @@ def get_word_page(seen, word, pos, recursive=False):
             continue
 
         items.append(get_word_header(word_obj))
+        if word_obj.etymology:
+            items.append(format_etymology(word_obj.etymology))
         for i,sense in enumerate(word_obj.senses, 1):
             items.append(get_sense_data(i, sense))
+        if word_obj.use_notes:
+            items.append(format_use_notes(word_obj.use_notes))
         items.append("")
 
         if not recursive:
@@ -171,7 +184,7 @@ def iter_allforms(allforms_data, wordlist):
                 yield [form, pos] + lemmas
 
 
-def export(wordlist_data, allforms_data, langid, description, low_memory=False):
+def export(wordlist_data, allforms_data, langid, description, low_memory=False, verbose=False):
 
     cache_words = not low_memory
     global wordlist
@@ -188,7 +201,7 @@ def export(wordlist_data, allforms_data, langid, description, low_memory=False):
 
         if form_count == 1:
             print("loop memory", mem_use(), file=sys.stderr)
-        if form_count % 1000 == 0:
+        if form_count % 1000 == 0 and verbose:
             print(form_count, mem_use(), file=sys.stderr, end="\r")
 
         if prev_form != form:
@@ -237,7 +250,7 @@ _____
     count = 0
     for targets,keys in sorted(all_pages.items()):
         count += 1
-        if count % 1000 == 0:
+        if count % 1000 == 0 and verbose:
             print(count, mem_use(), file=sys.stderr, end="\r")
 
         entry = build_page([t.split(":") for t in targets.split(";")])
@@ -261,13 +274,14 @@ if __name__ == "__main__":
     parser.add_argument("--lang-id", help="language id")
     parser.add_argument("--description", help="description", default="")
     parser.add_argument("--low-mem", help="Optimize for low memory devices", default=False, action='store_true')
+    parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args()
 
     wordlist_data = open(args.wordlist)
     if args.allforms:
         allforms_data = open(args.allforms)
 
-    for line in export(wordlist_data, allforms_data, args.lang_id, args.description, args.low_mem):
+    for line in export(wordlist_data, allforms_data, args.lang_id, args.description, args.low_mem, args.verbose):
         print(line)
 
     wordlist_data.close()

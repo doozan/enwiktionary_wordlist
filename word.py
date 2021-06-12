@@ -14,6 +14,8 @@ class Word():
         self._senses = None
         self.meta = None
         self.genders = None
+        self.etymology = None
+        self.use_notes = None
 
         for i, item in enumerate(data):
             key, value = item
@@ -21,6 +23,12 @@ class Word():
                 self._sense_data = data[i:]
                 # Everything after the first gloss will be lazy-loaded as .senses
                 break
+            elif key == "meta":
+                self.meta = value
+            elif key == "usage":
+                self.use_notes = value
+            elif key == "etymology":
+                self.etymology = value
             elif key == "meta":
                 self.meta = value
             elif key == "pos":

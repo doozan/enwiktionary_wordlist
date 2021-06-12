@@ -1141,6 +1141,43 @@ pos: n
   gloss: test\
 """
 
+def test_usage2():
+    orig_text="""\
+==Spanish==
+
+===Etymology===
+Form of {{m|es|-cilla}}, rebracketed from words ending in ''-e''.
+
+===Suffix===
+{{es-noun|f}}{{cln|es|diminutive suffixes}}
+
+# {{alternative form of|es|-ecillo}}; {{n-g|added to feminine nouns to form diminutives}}
+#: {{sufex|es|tienda|t1=shop|tiendecilla|t2=little shop}}
+#: {{sufex|es|red|t1=net|redecilla|t2=small net; hairnet; reticulum}}
+#: {{sufex|es|diosa|t1=goddess|diosecilla|t2=minor goddess}}
+#: {{sufex|es|mano|t1=hand|manecilla|t2=hand (of a clock); needle (of an instrument); doorknob}}
+
+====Usage notes====
+* If the noun has a final vowel (usually {{m|es|-a}}), it is dropped before adding {{m|es||-ecilla}}.
+* In most cases, {{m|es||-ecilla}} is used simply to indicate a small or endeared thing, without changing the basic meaning of the noun; however, in some cases, it is used to effect a greater change in meaning, as shown in the examples above.
+----
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "-ecilla")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+-ecilla
+pos: suffix
+  meta: {{es-noun|f}}
+  g: f
+  usage: * If the noun has a final vowel (usually -a), it is dropped before adding -ecilla.\\n* In most cases, -ecilla is used simply to indicate a small or endeared thing, without changing the basic meaning of the noun; however, in some cases, it is used to effect a greater change in meaning, as shown in the examples above.
+  gloss: alternative form of "-ecillo"; added to feminine nouns to form diminutives\
+"""
+
 def test_hubert():
     orig_text="""\
 ==Spanish==

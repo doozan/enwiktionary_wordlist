@@ -39,13 +39,12 @@ def main():
 
     import argparse
 
-    _INTERACTIVE = hasattr(sys, 'ps1')
-
     argparser = argparse.ArgumentParser(description="Extract language sections from enwiktionary dump")
     argparser.add_argument("--xml", help="XML file to load", required=True)
     argparser.add_argument("--lang", action="append", help="Language to dump, can be specified multiple times", required=True)
     argparser.add_argument("--outdir", help="Path to save extracted languages", default=".")
     argparser.add_argument("--limit", type=int, help="Limit processing to first N articles")
+    argparser.add_argument('--verbose', action='store_true')
 
     args = argparser.parse_args()
 
@@ -74,7 +73,7 @@ def main():
     match_pattern = make_pattern(lang_sections)
 
     for entry in parser:
-        if not count % 1000 and _INTERACTIVE:
+        if not count % 1000 and args.verbose:
             print(count, end = '\r', file=sys.stderr)
 
         if args.limit and count >= args.limit:

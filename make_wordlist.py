@@ -296,6 +296,7 @@ def main():
     parser.add_argument("--lang-id", help="Language id", required=True)
     parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
     parser.add_argument("--mbformat", help="Output mb-compatible file format", action='store_true')
+    parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args()
 
     count = 0
@@ -353,7 +354,7 @@ def main():
 
     for entry_title, lang_entry in iter_data:
         count += 1
-        if count % 1000 == 0:
+        if count % 1000 == 0 and args.verbose:
             print(count, file=sys.stderr, end="\r")
         if args.limit and count % args.limit == 0:
             break
