@@ -155,7 +155,9 @@ class WordlistBuilder:
 
             for ety in self.get_etymology(word):
                 for node in ety.ifilter_etymologies():
-                    entry.append(f"  etymology: " + self.etymology_to_text(node))
+                    ety_text = self.etymology_to_text(node)
+                    if ety_text:
+                        entry.append(f"  etymology: " + self.etymology_to_text(node))
 
             for sense in word.ifilter_wordsenses():
                 # Skip senses that are just a request for a definition
