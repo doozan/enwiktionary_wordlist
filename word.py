@@ -148,7 +148,9 @@ class Word():
             self._senses = []
             if sense.lemma:
                 self.add_lemma(sense.lemma, sense.formtype)
-        self._senses.append(sense)
+
+        if sense not in self._senses:
+            self._senses.append(sense)
 
 #    def add_sense(self, pos, qualifier, gloss, syndata):
 #        sense = Sense(pos, qualifier, gloss, syndata)
