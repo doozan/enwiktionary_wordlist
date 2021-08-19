@@ -93,10 +93,19 @@ class WordlistBuilder:
 
 
     def get_etymology(self, word):
+        # Etymology should be set as L3, with POS as L4
         res = word.get_matching_ancestor(lambda x: hasattr(x, "name") and x.name.startswith("Etymology"))
         if not res:
-            return []
-        return [res]
+            # But sometimes etymology is L3 and POS is also L3, find the nearest preceeding etymology section
+            for sibling in word._parent._parent.ifilter(recursive=False):
+                if hasattr(sibling, "name"):
+                    if sibling.name.startswith("Etymology"):
+                        res = sibling
+                if sibling == word._parent:
+                    break
+        if res:
+            return [res]
+        return []
 
 
     def get_usage(self, word):

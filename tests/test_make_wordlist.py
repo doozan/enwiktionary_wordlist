@@ -58,6 +58,7 @@ pos: v
   gloss: inflection of "chapar"
 pos: interj
   meta: {{es-interj}}
+  etymology: Borrowed from French "chapeau", from VL "*cappellus". Doublet of the inherited capillo, and of capelo (from Italian), as well as chapeo, also from the French word.
   gloss: Used to express appreciation; hat tip\
 """
 
@@ -577,7 +578,7 @@ _____
 atentar
 pos: v
   meta: {{es-verb|atent|ar|pres=atiento}} {{es-conj-ar|at|nt|p=e-ie|combined=1}}
-  etymology: From Latin attentō.
+  etymology: From Latin "attentō".
   gloss: to commit a violent or criminal attack, to strike
     q: intransitive
 pos: v
@@ -994,6 +995,7 @@ _____
 abandonar
 pos: v
   meta: {{es-verb|abandon|ar}} {{es-conj-ar|abandon|combined=1}}
+  etymology: From French "abandonner", from Proto-Germanic "*bannaną".
   gloss: to abandon, to leave
   gloss: to neglect
     syn: descuidar\
@@ -1175,6 +1177,7 @@ pos: suffix
   meta: {{es-noun|f}}
   g: f
   usage: * If the noun has a final vowel (usually -a), it is dropped before adding -ecilla.\\n* In most cases, -ecilla is used simply to indicate a small or endeared thing, without changing the basic meaning of the noun; however, in some cases, it is used to effect a greater change in meaning, as shown in the examples above.
+  etymology: Form of -cilla, rebracketed from words ending in -e.
   gloss: alternative form of "-ecillo"; added to feminine nouns to form diminutives\
 """
 
@@ -1200,4 +1203,163 @@ pos: prop
   meta: {{es-proper noun|m}}
   g: m
   gloss: Hubert\
+"""
+
+def test_abajo():
+    orig_text="""\
+==Spanish==
+
+===Alternative forms===
+* {{alter|es|abaxo||obsolete}}
+
+===Pronunciation===
+{{es-IPA}}
+* {{audio|es|Es-am-lat-abajo.ogg|Audio (Latin America)}}
+
+===Etymology 1===
+{{compound|es|a|t1=to|bajo|t2=down}}. Cognate to {{cog|fr|à bas}}, which is also used in sense “[[down with]]”. Compare {{cog|en|abase}} and {{inh|nap|VL.|[[ad]] [[bassum]]}}.
+
+====Adverb====
+{{es-adv}}
+
+# [[down]]
+#: {{syn|es|ayuso|q1=obsolete|yuso|q2=obsolete}}
+#: {{ant|es|arriba}}
+# [[downstairs]]
+#: {{ux|es|'''Abajo''' están la cocina y el salón.|The kitchen and lounge are '''downstairs'''.}}
+# [[below]]
+
+=====Derived terms=====
+{{der3|es|
+|abajeño
+|boca abajo
+|cuesta abajo
+|de abajo
+|echar abajo
+|irse por la pata abajo
+|para arriba y para abajo
+|para abajo
+|quark abajo
+|venirse abajo
+|hacia abajo
+}}
+
+=====Related terms=====
+* {{l|es|bajar}}
+
+====Interjection====
+{{head|es|interjection}}
+
+# {{lb|es|figuratively}} [[down with]], away with
+#: {{ant|es|viva}}
+#* '''1810''', {{w|Miguel Hidalgo y Costilla}}, ''{{w|Grito de Dolores}},'' September 16th:
+#*: ¡Viva la Virgen de Guadalupe!, ¡'''Abajo''' el mal gobierno!
+
+===Etymology 2===
+{{nonlemma}}
+
+====Verb====
+{{head|es|verb form}}
+
+# {{es-verb form of|ending=ar|mood=indicative|tense=present|pers=1|number=singular|abajar}}
+
+===Further reading===
+* {{R:DRAE}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "abajo")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+abajo
+pos: adv
+  meta: {{es-adv}}
+  etymology: a + bajo. Cognate to à bas, which is also used in sense “down with”. Compare abase and VL "ad bassum".
+  gloss: down
+    syn: ayuso; yuso
+  gloss: downstairs
+  gloss: below
+pos: interj
+  meta: {{head|es|interjection}}
+  etymology: a + bajo. Cognate to à bas, which is also used in sense “down with”. Compare abase and VL "ad bassum".
+  gloss: down with, away with
+    q: figurative
+pos: v
+  meta: {{head|es|verb form}}
+  gloss: inflection of "abajar"\
+"""
+
+
+def test_ll():
+    orig_text="""\
+==Spanish==
+
+===Alternative forms===
+* {{alter|es|Ꝇ||ligature}}
+
+===Letter===
+{{head|es|letter|upper case||lower case|ll|mixed case|Ll}}
+
+# ''[[elle]]'', the 14th letter of the Spanish alphabet, after ''[[L]]'' and before ''[[M]]''
+
+====Usage notes====
+Since 1994, this letter is treated as two separate ''[[L]]'' letters for collation purposes only. In 2010, this letter was officially dropped by the [[RAE]] from the Spanish alphabet.
+
+[[Category:mul:Hundred]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "LL")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+LL
+pos: letter
+  meta: {{head|es|letter|upper case||lower case|ll|mixed case|Ll}}
+  usage: Since 1994, this letter is treated as two separate L letters for collation purposes only. In 2010, this letter was officially dropped by the RAE from the Spanish alphabet.
+  gloss: elle, the 14th letter of the Spanish alphabet, after L and before M\
+"""
+
+def test_malinchista():
+
+    orig_text="""\
+==Spanish==
+
+===Etymology===
+{{named-after|es|La Malinche|wplink==}} {{suffix|es||ista}}.
+
+===Noun===
+{{es-noun|mf}}
+
+# {{lb|es|Mexico|pejorative}} One who has a preference or infatuation for [[foreign]] (non-Mexican) culture, products or people
+#* '''1972''', Manuel Garza Toba, ''Hojas sueltas de París: crónica'', page 152:
+#*: —'''Malinchista'''! —¡Ah, te habías tardado! Desde que se inventó esa palabrita ya no podemos mirar fuera de México, porque nos sellan con … —Bueno, mira, si quieres, soy '''malinchista''' pues; pero ten en cuenta que me lo dices sólo por nada.
+
+====Related terms====
+* {{l|es|malinche}}
+* {{l|es|malinchismo}}
+
+===Further reading===
+* {{R:DRAE}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "malinchista")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+malinchista
+pos: n
+  meta: {{es-noun|mf}}
+  g: mf
+  etymology: Named after La Malinche  + -ista.
+  gloss: One who has a preference or infatuation for foreign (non-Mexican) culture, products or people
+    q: Mexico, derogatory\
 """
