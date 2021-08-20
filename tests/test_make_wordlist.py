@@ -1363,3 +1363,81 @@ pos: n
   gloss: One who has a preference or infatuation for foreign (non-Mexican) culture, products or people
     q: Mexico, derogatory\
 """
+
+def test_guia():
+
+    orig_text="""\
+==Spanish==
+
+===Etymology===
+Probably from the verb {{m|es|guiar}}. Cf. also {{cog|fr|guide}} ({{cog|fro|guie}}), {{cog|it|guida}}.
+
+===Pronunciation===
+{{es-IPA}}
+* {{rhymes|es|ia}}
+
+===Noun===
+{{es-noun|mf}}
+
+# [[guide]] {{gloss|person}}
+
+====Usage notes====
+{{es-note-noun-common-gender-a}}
+
+===Noun===
+{{es-noun|f}}
+
+# [[guidebook]]
+# [[directory]]
+# [[cocket]]
+
+====Derived terms====
+{{der3|es
+|audioguía
+|guía de viaje
+|guía turística
+|guía turístico
+|perro guía
+}}
+
+====Descendants====
+* {{desc|tl|giya|bor=1}}
+
+===Verb===
+{{head|es|verb form}}
+
+# {{es-verb form of|ending=ar|mood=imperative|sense=affirmative|pers=2|formal=no|number=singular|guiar}}
+# {{es-verb form of|ending=ar|mood=indicative|tense=present|pers=2|formal=yes|number=singular|guiar}}
+# {{es-verb form of|ending=ar|mood=indicative|tense=present|pers=3|number=singular|guiar}}
+
+{{cln|es|nouns with irregular gender}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{es-noun|mf}}
+  g: mf
+  usage: The noun test is like several other Spanish nouns with a human referent and ending in a. The masculine articles and adjectives are used when the referent is known to be male, a group of males, a group of mixed or unknown gender, or an individual of unknown or unspecified gender. The feminine articles and adjectives are used if the referent is known to be female or a group of females.
+  etymology: Probably from the verb guiar. Cf. also guide (guie), guida.
+  gloss: guide (person)
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  usage: The noun test is like several other Spanish nouns with a human referent and ending in a. The masculine articles and adjectives are used when the referent is known to be male, a group of males, a group of mixed or unknown gender, or an individual of unknown or unspecified gender. The feminine articles and adjectives are used if the referent is known to be female or a group of females.
+  etymology: Probably from the verb guiar. Cf. also guide (guie), guida.
+  gloss: guidebook
+  gloss: directory
+  gloss: cocket
+pos: v
+  meta: {{head|es|verb form}}
+  usage: The noun test is like several other Spanish nouns with a human referent and ending in a. The masculine articles and adjectives are used when the referent is known to be male, a group of males, a group of mixed or unknown gender, or an individual of unknown or unspecified gender. The feminine articles and adjectives are used if the referent is known to be female or a group of females.
+  etymology: Probably from the verb guiar. Cf. also guide (guie), guida.
+  gloss: inflection of "guiar"
+"""

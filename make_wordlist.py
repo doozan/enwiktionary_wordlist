@@ -98,9 +98,8 @@ class WordlistBuilder:
         if not res:
             # But sometimes etymology is L3 and POS is also L3, find the nearest preceeding etymology section
             for sibling in word._parent._parent.ifilter(recursive=False):
-                if hasattr(sibling, "name"):
-                    if sibling.name.startswith("Etymology"):
-                        res = sibling
+                if hasattr(sibling, "name") and hasattr(sibling.name, "startswith") and sibling.name.startswith("Etymology"):
+                    res = sibling
                 if sibling == word._parent:
                     break
         if res:
@@ -168,6 +167,7 @@ class WordlistBuilder:
                     if ety_text:
                         entry.append(f"  etymology: " + self.etymology_to_text(node))
 
+            seen_senses = []
             for sense in word.ifilter_wordsenses():
                 # Skip senses that are just a request for a definition
                 if "{{rfdef" in sense.gloss:
@@ -179,16 +179,25 @@ class WordlistBuilder:
                 if gloss_text == "":
                     continue
 
-                entry.append(f"  gloss: {gloss_text}")
+                sense_data = []
+
+                sense_data.append(f"  gloss: {gloss_text}")
                 if sense.gloss.qualifiers:
                     qualifiers = make_qualification(self.LANG_ID, word.title, sense.gloss.qualifiers)
                     if qualifiers:
-                        entry.append(f"    q: {qualifiers}")
+                        sense_data.append(f"    q: {qualifiers}")
                 synonyms = []
                 for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
                     synonyms += self.items_to_synonyms(nymline.items)
                 if synonyms:
-                    entry.append(f"    syn: {'; '.join(synonyms)}")
+                    sense_data.append(f"    syn: {'; '.join(synonyms)}")
+
+                sense_alldata = "|".join(sense_data)
+                if sense_alldata in seen_senses:
+                    continue
+                else:
+                    seen_senses.append(sense_alldata)
+                    entry += sense_data
 
                 # TODO: Get usage examples?
 
