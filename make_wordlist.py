@@ -29,6 +29,8 @@ from .utils import wiki_to_text, make_qualification, make_pos_tag
 
 import enwiktionary_parser as wtparser
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
+from enwiktionary_parser.sections.usage import UsageSection
+from enwiktionary_parser.sections.etymology import EtymologySection
 
 class WordlistBuilder:
     def __init__(self, lang_name, lang_id):
@@ -93,40 +95,41 @@ class WordlistBuilder:
 
 
     def get_etymology(self, word):
-        # Etymology should be set as L3, with POS as L4
-        res = word.get_matching_ancestor(lambda x: hasattr(x, "name") and x.name.startswith("Etymology"))
-        if not res:
-            # But sometimes etymology is L3 and POS is also L3, find the nearest preceeding etymology section
-            for sibling in word._parent._parent.ifilter(recursive=False):
-                if hasattr(sibling, "name") and hasattr(sibling.name, "startswith") and sibling.name.startswith("Etymology"):
-                    res = sibling
-                if sibling == word._parent:
-                    break
+        # Ideally, the word is inside an Etymology section
+        res = word.get_ancestor(EtymologySection)
+        if res:
+            return [res]
+
+        # But sometimes etymology is L3 and POS is also L3, find the nearest preceeding etymology section
+        for sibling in word._parent._parent.ifilter(recursive=False):
+            if isinstance(sibling,  EtymologySection):
+                res = sibling
+            if sibling == word._parent:
+                break
         if res:
             return [res]
         return []
 
-
     def get_usage(self, word):
         """ Returns a list of Usage sections that match the given word """
 
-        # Get the nearest ancestor that contains Usage Notes
-        item = word
-        while item:
-#            if hasattr(item, "name"):
-#                print("Checking for usage in", item.name)
-#            else:
-#                print("Checking for usage in", item.__class__)
-            res = item.filter_usagenotes(recursive=True)
-            if res:
-#                print("found usage")
-                # TODO: Make sure usage isn't attached to another word (eg: word is noun, but usage is under verb)
-                return res
+        res = None
+        # First, look for Usage as a child of the word
+        after = False
+        res = word._parent.filter_usagenotes(recursive=True)
+        if res:
+            return res
 
-            # TODO: stop if item is language or etymology
-            item = getattr(item, "_parent", None)
-            if not getattr(item, "filter_usagenotes", None):
-                break
+        # Next, look for usage notes that come after the word at the same level
+        after = False
+        for sibling in word._parent._parent.ifilter(recursive=False):
+            if sibling == word._parent:
+                after = True
+            if not after:
+                continue
+            if isinstance(sibling, UsageSection):
+                return sibling.filter_usagenotes(recursive=True)
+
         return []
 
     def entry_to_text(self, text, title):
@@ -138,9 +141,6 @@ class WordlistBuilder:
             return []
 
         entry = ["_____", title]
-
-        # TODO: Check for usage note outside word entries and append it here
-        # TODO: "" synonym section
 
         for word in wikt.ifilter_words():
             #if self.exclude_word(word):

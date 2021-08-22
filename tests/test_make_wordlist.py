@@ -1277,14 +1277,14 @@ _____
 abajo
 pos: adv
   meta: {{es-adv}}
-  etymology: a + bajo. Cognate to à bas, which is also used in sense “down with”. Compare abase and VL "ad bassum".
+  etymology: a + bajo. Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
   gloss: down
     syn: ayuso; yuso
   gloss: downstairs
   gloss: below
 pos: interj
   meta: {{head|es|interjection}}
-  etymology: a + bajo. Cognate to à bas, which is also used in sense “down with”. Compare abase and VL "ad bassum".
+  etymology: a + bajo. Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
   gloss: down with, away with
     q: figurative
 pos: v
@@ -1425,19 +1425,237 @@ pos: n
   meta: {{es-noun|mf}}
   g: mf
   usage: The noun test is like several other Spanish nouns with a human referent and ending in a. The masculine articles and adjectives are used when the referent is known to be male, a group of males, a group of mixed or unknown gender, or an individual of unknown or unspecified gender. The feminine articles and adjectives are used if the referent is known to be female or a group of females.
-  etymology: Probably from the verb guiar. Cf. also guide (guie), guida.
+  etymology: Probably from the verb guiar. Cf. also French "guide" (Old French "guie"), Italian "guida".
   gloss: guide (person)
 pos: n
   meta: {{es-noun|f}}
   g: f
-  usage: The noun test is like several other Spanish nouns with a human referent and ending in a. The masculine articles and adjectives are used when the referent is known to be male, a group of males, a group of mixed or unknown gender, or an individual of unknown or unspecified gender. The feminine articles and adjectives are used if the referent is known to be female or a group of females.
-  etymology: Probably from the verb guiar. Cf. also guide (guie), guida.
+  etymology: Probably from the verb guiar. Cf. also French "guide" (Old French "guie"), Italian "guida".
   gloss: guidebook
   gloss: directory
   gloss: cocket
 pos: v
   meta: {{head|es|verb form}}
-  usage: The noun test is like several other Spanish nouns with a human referent and ending in a. The masculine articles and adjectives are used when the referent is known to be male, a group of males, a group of mixed or unknown gender, or an individual of unknown or unspecified gender. The feminine articles and adjectives are used if the referent is known to be female or a group of females.
-  etymology: Probably from the verb guiar. Cf. also guide (guie), guida.
-  gloss: inflection of "guiar"
+  etymology: Probably from the verb guiar. Cf. also French "guide" (Old French "guie"), Italian "guida".
+  gloss: inflection of "guiar"\
+"""
+
+def test_usagenotes_nested():
+
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|mf}}
+
+# [[guide]] {{gloss|person}}
+
+====Usage notes====
+test usage notes
+
+===Noun===
+{{es-noun|f}}
+
+# [[guidebook]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{es-noun|mf}}
+  g: mf
+  usage: test usage notes
+  gloss: guide (person)
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  gloss: guidebook\
+"""
+
+def test_usagenotes_l3():
+
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|mf}}
+
+# [[guide]] {{gloss|person}}
+
+===Usage notes===
+test usage notes
+
+===Noun===
+{{es-noun|f}}
+
+# [[guidebook]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{es-noun|mf}}
+  g: mf
+  usage: test usage notes
+  gloss: guide (person)
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  gloss: guidebook\
+"""
+
+def test_usagenotes_l3_multi():
+
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|mf}}
+
+# [[guide]] {{gloss|person}}
+
+===Adjective===
+{{es-adj}}
+
+# [[guide]]
+
+===Usage notes===
+test usage notes
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{es-noun|mf}}
+  g: mf
+  usage: test usage notes
+  gloss: guide (person)
+pos: adj
+  meta: {{es-adj}}
+  usage: test usage notes
+  gloss: guide\
+"""
+
+def test_usagenotes_l3_multi_nested():
+
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|mf}}
+
+# [[guide]] {{gloss|person}}
+
+===Adjective===
+{{es-adj}}
+
+# [[guide]]
+
+====Usage notes====
+test usage notes
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{es-noun|mf}}
+  g: mf
+  gloss: guide (person)
+pos: adj
+  meta: {{es-adj}}
+  usage: test usage notes
+  gloss: guide\
+"""
+
+def test_ety_multi():
+
+    orig_text="""\
+==Spanish==
+
+===Etymology 1===
+From {{inh|es|la|est}}, from {{inh|es|itc-pro|*est}}, from {{inh|es|ine-pro|*h₁ésti}}. Cognate with {{cog|sa|अस्ति|tr=ásti}}, {{cog|en|is}}.
+
+===Verb===
+{{head|es|verb form}}
+
+# {{es-verb form of|mood=ind|tense=pres|num=s|pers=2|formal=y|ending=er|ser}}
+# {{es-verb form of|mood=ind|tense=pres|num=s|pers=3|ending=er|ser|nodot=1}}; (he/she/it/one) [[is]]
+
+===Etymology 2===
+
+===Noun===
+{{head|es|noun form}}
+
+# {{plural of|es|e}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: v
+  meta: {{head|es|verb form}}
+  etymology: From Latin "est", from Proto-Italic "*est", from Proto-Indo-European "*h₁ésti". Cognate with Sanskrit "अस्ति", English "is".
+  gloss: inflection of "ser"
+  gloss: inflection of "ser"; (he/she/it/one) is
+pos: n
+  meta: {{head|es|noun form}}
+  gloss: plural of "e"\
+"""
+
+def test_noun_multi():
+
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|f}}
+
+# [[blanket]], [[coverlet]]
+
+===Noun===
+{{es-noun|f|m=1}}
+
+# {{female equivalent of|es|chivo}}; young female [[goat]], [[kid]]
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "test")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+_____
+test
+pos: n
+  meta: {{head|es|noun form}}
+  gloss: plural of "e"\
 """
