@@ -292,7 +292,7 @@ _____
 test
 pos: v
   meta: {{es-verb|descans|ar}} {{es-conj-ar|descans|combined=1}}
-  gloss: (also figurative, transitive with en) to sit, to rest on
+  gloss: (also figuratively, transitive with en) to sit, to rest on
     q: transitive\
 """
 
@@ -301,7 +301,7 @@ pos: v
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 test {v-meta} :: {{es-verb|descans|ar}} {{es-conj-ar|descans|combined=1}}
-test {vt} :: (also figurative, transitive with en) to sit, to rest on\
+test {vt} :: (also figuratively, transitive with en) to sit, to rest on\
 """
 
 def test_noun_forms():
@@ -913,7 +913,7 @@ _____
 test
 pos: v
   meta: {{es-verb|descans|ar}}
-  gloss: (also figurative, transitive with en) to sit, to rest on
+  gloss: (also figuratively, transitive with en) to sit, to rest on
     q: transitive\
 """
 
@@ -921,7 +921,7 @@ pos: v
 
     assert "\n".join(entry) == """\
 test {v-meta} :: {{es-verb|descans|ar}}
-test {vt} :: (also figurative, transitive with en) to sit, to rest on\
+test {vt} :: (also figuratively, transitive with en) to sit, to rest on\
 """
 
 
@@ -948,7 +948,7 @@ _____
 test
 pos: v
   meta: {{es-verb|descans|ar}}
-  gloss: (also figurative, transitive with en) to sit, to rest on
+  gloss: (also figuratively, transitive with en) to sit, to rest on
     q: transitive\
 """
 
@@ -1123,7 +1123,6 @@ def test_usage():
 ====Usage Notes====
 
 # test {{gloss|test}}
-# '''test2'''
 
 ----
 """
@@ -1139,7 +1138,7 @@ test
 pos: n
   meta: {{es-noun|m}}
   g: m
-  usage: # test (test)\\n# test2
+  usage: test (test)
   gloss: test\
 """
 
@@ -1286,7 +1285,7 @@ pos: interj
   meta: {{head|es|interjection}}
   etymology: a + bajo. Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
   gloss: down with, away with
-    q: figurative
+    q: figuratively
 pos: v
   meta: {{head|es|verb form}}
   gloss: inflection of "abajar"\
@@ -1656,6 +1655,11 @@ def test_noun_multi():
 _____
 test
 pos: n
-  meta: {{head|es|noun form}}
-  gloss: plural of "e"\
+  meta: {{es-noun|f}}
+  g: f
+  gloss: blanket, coverlet
+pos: n
+  meta: {{es-noun|f|m=1}}
+  g: f
+  gloss: female equivalent of "chivo"; young female goat, kid\
 """

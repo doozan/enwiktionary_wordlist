@@ -255,7 +255,13 @@ class WordlistBuilder:
         return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), self.title).strip())
 
     def usage_to_text(self, usage):
-        return re.sub("\n", r"\\n", wiki_to_text(usage, self.title).strip())
+        text = wiki_to_text(usage, self.title).strip()
+        # Strip leading * if there are no newlines
+        if "\n" not in text:
+            text = re.sub("^[ *#]+", "", text)
+        else:
+            text = re.sub("\n", r"\\n", text)
+        return text
 
     def etymology_to_text(self, etymology):
         return re.sub("\n", r"\\n", wiki_to_text(etymology, self.title).strip())
