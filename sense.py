@@ -69,9 +69,10 @@ class Sense():
 
     form_of_prefix = {
         "adjective form": "alt", # form
-        "alternative case form": "alt",
         "alternate form": "alt",
         "alternate spelling": "alt",
+        "alternative letter-case form": "alt",
+        "alternative case form": "alt",
         "alternative form": "alt",
         "alternative spelling": "alt",
         "alternative typography": "alt",
