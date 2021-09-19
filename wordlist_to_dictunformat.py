@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import csv
+import collections
 import os
 import re
 import sys
@@ -9,7 +10,6 @@ from .wordlist import Wordlist
 from .all_forms import AllForms
 
 wordlist = None
-all_pages = {}
 
 formtypes = {
     "pl": "plural",
@@ -35,7 +35,7 @@ def format_etymology(ety):
 
 def format_use_notes(usage):
     if r"\n" not in usage:
-        return "Note: " + re.sub("\*\s+]*","", usage)
+        return "Note: " + re.sub(r"\*\s+]*","", usage)
     else:
         return "Note:\n" + re.sub(r"\\n", "\n", usage)
 
@@ -112,10 +112,11 @@ def get_word_page(seen, word, pos, recursive=False):
 
     return "\n".join(items).strip()
 
-def build_page(targets):
+def build_entry(targets):
     seen = set()
     pages = []
-    for word,pos in targets:
+
+    for pos,word in targets:
         page = get_word_page(seen, word, pos)
         if page:
             pages.append(page)
@@ -146,20 +147,19 @@ def get_valid_targets(targets):
     return valid_targets
 
 
-all_pages = {}
-def add_key(key, targets):
+def add_key(all_pages, key, targets):
 
     targets = get_valid_targets(targets)
 
     if not targets:
         return
 
-    target_key = ";".join([f"{lemma}:{pos}" for lemma,pos in sorted(targets)])
+    # Important to sort tagets so we can identify duplicates
+    # Sort by pos, then lemma so the page is ordered nicely
+    #target_key = ";".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets)])
+    target_key = ";".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets, key=lambda x: (x[1], x[0]))])
 
-    if target_key not in all_pages:
-        all_pages[target_key] = set([key])
-    else:
-        all_pages[target_key].add(key)
+    all_pages[target_key].append(key)
 
 
 def iter_allforms(allforms_data, wordlist):
@@ -172,13 +172,10 @@ def iter_allforms(allforms_data, wordlist):
         all_forms = AllForms.from_wordlist(wordlist)
 
         for form, poslemmas in all_forms.all_forms.items():
-            data = {}
+            data = collections.defaultdict(list)
             for poslemma in poslemmas:
                 pos, lemma = poslemma.split("|")
-                if pos not in data:
-                    data[pos] = [lemma]
-                elif lemma not in data[pos]:
-                    data[pos].append(lemma)
+                data[pos].append(lemma)
 
             for pos, lemmas in data.items():
                 yield [form, pos] + lemmas
@@ -195,6 +192,8 @@ def export(wordlist_data, allforms_data, langid, description, low_memory=False, 
     prev_form = None
     form_targets = []
 
+    all_pages = collections.defaultdict(list)
+
     form_count = 0
     for form, pos, *lemmas in iter_allforms(allforms_data, wordlist):
         form_count += 1
@@ -206,7 +205,7 @@ def export(wordlist_data, allforms_data, langid, description, low_memory=False, 
 
         if prev_form != form:
             if prev_form:
-                add_key(prev_form, form_targets)
+                add_key(all_pages, prev_form, form_targets)
             form_targets = [(form,pos)]
 
         for lemma in lemmas:
@@ -224,12 +223,12 @@ def export(wordlist_data, allforms_data, langid, description, low_memory=False, 
                         for word in wordlist.get_words(lemma):
                             print(word.word, word.pos, file=sys.stderr)
 
-                        exit()
+                    raise ValueError("entry not found")
 
         prev_form = form
 
     if prev_form:
-        add_key(prev_form, sorted(form_targets))
+        add_key(all_pages, prev_form, form_targets)
 
     print("dumping memory", mem_use(), file=sys.stderr)
 
@@ -253,15 +252,17 @@ _____
         if count % 1000 == 0 and verbose:
             print(count, mem_use(), file=sys.stderr, end="\r")
 
-        entry = build_page([t.split(":") for t in targets.split(";")])
+        entry = build_entry([t.split(":") for t in targets.split(";")])
 
         yield "_____"
-        keys = sorted(keys)
         lemma = get_first_lemma(keys)
-        if not lemma:
-            lemma = keys[0]
-        keys.remove(lemma)
-        yield "|".join([lemma] + keys)
+        if lemma:
+            keys.remove(lemma)
+        else:
+            keys.sort()
+            lemma = keys.pop(0)
+
+        yield "|".join([lemma] + sorted(keys))
         yield entry
 
 if __name__ == "__main__":

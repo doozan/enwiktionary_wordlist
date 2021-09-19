@@ -102,6 +102,11 @@ bifurcate|me bifurcaba|me bifurcara|me bifurcare|me bifurcaré|me bifurcaría|me
 bifurcarse (v)
 1. to split, divide, fork, branch off
 """
+    v1 = "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test"))
+    v2 = "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test"))
+    v3 = "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test"))
+    assert v1 == v2 == v3
+
     print("\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test")))
     assert "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test")) == expected.strip()
 
