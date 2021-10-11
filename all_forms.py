@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import argparse
-import collections
 import csv
 import mmap
 import sys
@@ -11,7 +10,7 @@ from .wordlist import Wordlist
 class AllForms:
 
     def __init__(self):
-        self.all_forms = collections.defaultdict(list)
+        self.all_forms = {}
 
     def get_lemmas(self, word):
         if hasattr(self, 'mmap_obj'):
@@ -112,7 +111,12 @@ class AllForms:
                 self._add_form(form, word.pos, lemma)
 
     def _add_form(self, form, pos, lemma):
+
         if form == "-":
             return
 
-        self.all_forms[form].append(f"{pos}|{lemma}")
+        value = f"{pos}|{lemma}"
+        if form not in self.all_forms:
+            self.all_forms[form] = [value]
+        elif value not in self.all_forms[form]:
+            self.all_forms[form].append(value)
