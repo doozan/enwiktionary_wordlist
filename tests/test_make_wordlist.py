@@ -524,12 +524,12 @@ _____
 aterrar
 pos: v
   meta: {{es-verb|aterr|ar|pres=atierro}} {{es-conj-ar|at|rr|p=e-ie|combined=1}}
-  etymology: a- + tierra + -ar
+  etymology: a- + tierra ("land") + -ar
   gloss: to bring down, to ground
     q: transitive
 pos: v
   meta: {{es-verb|aterr|ar}} {{es-conj-ar|aterr|combined=1}}
-  etymology: From a- + terreō.
+  etymology: From a- + Latin terreō.
   gloss: to scare
     q: transitive\
 """
@@ -1276,14 +1276,14 @@ _____
 abajo
 pos: adv
   meta: {{es-adv}}
-  etymology: a + bajo. Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
+  etymology: a ("to") + bajo ("down"). Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
   gloss: down
     syn: ayuso; yuso
   gloss: downstairs
   gloss: below
 pos: interj
   meta: {{head|es|interjection}}
-  etymology: a + bajo. Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
+  etymology: a ("to") + bajo ("down"). Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
   gloss: down with, away with
     q: figuratively
 pos: v

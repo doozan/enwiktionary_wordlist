@@ -33,6 +33,6 @@ def test_wiki_to_text():
 
     wiki = mwparserfromhell.parse("{{indtr|es|en|.also|.figurative}}")
     text = wiki_to_text(wiki, "test")
-    assert text == "(also figurative, transitive with en)"
+    assert text == "(also figuratively, transitive with en)"
 
 
