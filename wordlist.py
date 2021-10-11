@@ -49,7 +49,7 @@ class Wordlist():
                 title = None
             else:
                 if entry is None:
-                    raise ValueError("Invalid file format")
+                    raise ValueError("Invalid file format", line)
                 if title is None:
                     title = line
                 else:

@@ -6,6 +6,8 @@ class Sense():
 
         self.gloss = None
         self.qualifier = None
+        self._regiondata = None
+        self._regions = None
         self._syndata = None
         self._synonyms = None
 
@@ -16,6 +18,10 @@ class Sense():
                 self.qualifier = value
             elif key == "syn":
                 self._syndata = value
+            elif key == "regional":
+                self._regiondata = value
+            else:
+                raise ValueError("Unexpected data")
 
         if " of " in self.gloss:
             self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
@@ -29,13 +35,19 @@ class Sense():
     @property
     def synonyms(self):
         if self._syndata:
-            self._synonyms = self.parse_syndata(self._syndata)
-        if not self._synonyms:
-            return []
+            self._synonyms = self.parse_list(self._syndata)
+            self._syndata = None
         return self._synonyms
 
+    @property
+    def regions(self):
+        if self._regiondata:
+            self._regions = self.parse_list(self._regiondata)
+            self._regiondata = None
+        return self._regions
+
     @classmethod
-    def parse_syndata(cls, syndata):
+    def parse_list(cls, syndata):
         if syndata == "":
             return []
         return syndata.split("; ")
