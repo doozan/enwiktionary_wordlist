@@ -23,9 +23,9 @@ class Wordlist():
         iter_data = itertools.chain([first_line], iter_list)
 
         if mbformat:
-            self.all_entries = {title: entry for title, entry in self.iter_entries_mbformat(iter_data)}
+            self.all_entries = {title: entry for title, entry in self._iter_entries_mbformat(iter_data)}
         else:
-            self.all_entries = {title: entry for title, entry in self.iter_entries(iter_data)}
+            self.all_entries = {title: entry for title, entry in self._iter_entries(iter_data)}
 
     @classmethod
     def from_file(cls, filename):
@@ -33,7 +33,7 @@ class Wordlist():
             return cls(infile)
 
     @staticmethod
-    def iter_entries(data):
+    def _iter_entries(data):
 
         entry = None
         title = None
@@ -58,7 +58,7 @@ class Wordlist():
             yield(title, entry)
 
     @classmethod
-    def iter_entries_mbformat(cls, data):
+    def _iter_entries_mbformat(cls, data):
 
         entry = []
         prev_word = None
