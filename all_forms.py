@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
+import collections
 import csv
 import mmap
 import sys
@@ -9,8 +10,10 @@ from .wordlist import Wordlist
 
 class AllForms:
 
-    def __init__(self):
-        self.all_forms = {}
+    def __init__(self, resolve_true_lemmas=True):
+        #self.count_formtype = collections.defaultdict(lambda: 0)
+        self.all_forms = collections.defaultdict(list)
+        self.resolve_true_lemmas = resolve_true_lemmas
 
     def get_lemmas(self, word):
         if hasattr(self, 'mmap_obj'):
@@ -70,17 +73,16 @@ class AllForms:
         return self
 
     @classmethod
-    def from_wordlist(cls, wordlist):
-        self = cls()
+    def from_wordlist(cls, wordlist, resolve_true_lemmas=True):
+        self = cls(resolve_true_lemmas)
         self._load_wordlist_forms(wordlist)
+
+#        for formtype, count in self.count_formtype.items():
+#            print(formtype, count, file=sys.stderr)
+
         return self
 
     def _load_wordlist_forms(self, wordlist):
-        """
-        Return a list of all known word form/lemma combinations
-        [ "form|pos|lemma", ... ]
-        """
-
         for word in wordlist.iter_all_words():
             self._process_word_forms(word, wordlist)
 
@@ -88,35 +90,42 @@ class AllForms:
         if not len(word.senses):
             return
 
-        if word.is_lemma:
-            self._add_word_forms(word, word.word)
+        if self.resolve_true_lemmas:
+            if word.is_lemma:
+                self._add_word_forms(word, word.word)
 
-        for lemma, formtypes in wordlist.get_lemmas(word).items():
-            for lemma_formtype in formtypes:
+            for lemma, formtypes in wordlist.get_lemmas(word).items():
                 self._add_form(word.word, word.pos, lemma)
-            self._add_word_forms(word, lemma)
+                self._add_word_forms(word, lemma)
+
+        else:
+            if word.is_lemma or (word.form_of and any(x for x in ["alt", "old", "rare", "spell"] for f in word.form_of.values() if x in f)):
+                self._add_form(word.word, word.pos, word.word)
+                self._add_word_forms(word, word.word)
 
     def _add_word_forms(self, word, lemma):
         """ Add all of a word's forms to the given lemma """
+
         for formtype, forms in word.forms.items():
+            #self.count_formtype[formtype] += 1
             for form in forms:
-                if formtype in [ "m", "masculine", "masculine_counterpart" ]:
+                if formtype == "m":
                     continue
-                if not word.is_lemma and formtype in ["f", "feminine", "feminine_counterpart"]:
-                    if formtype in ["mpl", "masculine_plural"]:
-                    #if formtype in ["m", "masculine", "masculine_counterpart", "mpl", "masculine_plural"]:
-                        continue
-                    if formtype in ["pl", "fpl", "plural", "feminine_plural"]:
-                        formtype = "fpl"
+
+                if word.pos == "n" and  formtype == "mpl":
+                    continue
+
+                # ignore masculine/feminine counterparts of non binary words
+                if word.genders == "m; f" and formtype in ["m", "f", "mpl", "fpl"]:
+                    continue
+
+
                 self._add_form(form, word.pos, lemma)
 
     def _add_form(self, form, pos, lemma):
-
         if form == "-":
             return
 
         value = f"{pos}|{lemma}"
-        if form not in self.all_forms:
-            self.all_forms[form] = [value]
-        elif value not in self.all_forms[form]:
+        if value not in self.all_forms[form]:
             self.all_forms[form].append(value)

@@ -179,6 +179,14 @@ _____
 test7
 pos: n
   gloss: alternative form of "test-none"
+_____
+test8
+pos: n
+  gloss: alternative form of "test4"
+_____
+test9
+pos: n
+  gloss: alternative form of "test8"
 """
 
     wlist = Wordlist(data.splitlines())
@@ -193,6 +201,8 @@ pos: n
     test5 = next(wlist.get_words("test5", "n"))
     test6 = next(wlist.get_words("test6", "n"))
     test7 = next(wlist.get_words("test7", "n"))
+    test8 = next(wlist.get_words("test8", "n"))
+    test9 = next(wlist.get_words("test9", "n"))
 
     assert test1.word == "test1"
     assert test1.pos == "n"
@@ -200,11 +210,17 @@ pos: n
 
     assert wlist.get_lemmas(test1) == {'test1': ['m']}
     assert wlist.get_lemmas(test2) == {'test1': ['alt']}
+    assert wlist.get_lemmas(test2, 0) == {}
     assert wlist.get_lemmas(test3) == {'test1': ['alt']}
     assert wlist.get_lemmas(test4) == {'test1': ['alt']}
     assert wlist.get_lemmas(test5) == {}
     assert wlist.get_lemmas(test6) == {}
     assert wlist.get_lemmas(test7) == {}
+
+    assert wlist.get_lemmas(test8) == {'test1': ['alt']}
+
+    assert wlist.get_lemmas(test9) == {}
+    assert wlist.get_lemmas(test9, 4) == {'test1': ['alt']}
 
 def test_forms_complex():
     # protectora should be a form of protector even though it has a secondary

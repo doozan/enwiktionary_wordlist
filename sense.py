@@ -21,7 +21,7 @@ class Sense():
             elif key == "regional":
                 self._regiondata = value
             else:
-                raise ValueError("Unexpected data")
+                raise ValueError(f"Unexpected data: {key}, {value}")
 
         if " of " in self.gloss:
             self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
@@ -80,7 +80,7 @@ class Sense():
         return (None,None,None)
 
     form_of_prefix = {
-        "adjective form": "alt", # form
+        "adjective form": "form",
         "alternate form": "alt",
         "alternate spelling": "alt",
         "alternative letter-case form": "alt",
@@ -90,8 +90,8 @@ class Sense():
         "alternative typography": "alt",
         "apocopic form": "alt",
         "archaic spelling": "old",
-        "common misspelling": "spell",
-        "compound form": "alt", # form
+        "common misspelling": "alt",
+        "compound form": "form",
         "dated form": "old",
         "dated spelling": "old",
         "euphemistic form": "alt",
@@ -103,14 +103,14 @@ class Sense():
         "feminine singular": "f",
         "feminine plural": "fpl",
         "feminine noun": "f",
-        "inflection": "alt", # form
+        "inflection": "form",
         "informal form": "alt",
         "informal spelling": "alt",
         "masculine": "m",
         "masculine singular": "m",
         "masculine plural": "mpl",
         "misspelling": "spell",
-        "neuter singular": "alt",
+        "neuter singular": "form",
         "nonstandard form": "alt",
         "nonstandard spelling": "alt",
         "obsolete form": "old",

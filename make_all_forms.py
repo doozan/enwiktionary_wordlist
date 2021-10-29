@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Generate forms-to-lemmas data from wordlist")
     parser.add_argument("wordlist", help="wordlist")
+    parser.add_argument("--resolve-lemmas", help="Resolve 'form of' lemmas to final lemma", action='store_true', default=False)
     parser.add_argument("--low-mem", help="Use less memory", action='store_true', default=False)
     args = parser.parse_args()
 
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     with open(args.wordlist) as wordlist_data:
         wordlist = Wordlist(wordlist_data, cache_words=cache_words)
 
-        all_forms = AllForms.from_wordlist(wordlist)
+        all_forms = AllForms.from_wordlist(wordlist, args.resolve_lemmas)
 
         for line in export(all_forms):
             print(line)

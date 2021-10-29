@@ -3,6 +3,20 @@ import re
 from .sense import Sense
 from .utils import wiki_to_text
 
+shorten_formtype = {
+    "feminine": "f",
+    "feminine_singular": "f",
+    "feminine_counterpart": "f",
+    "masculine": "m",
+    "masculine_singular": "m",
+    "masculine_counterpart": "m",
+    "feminine_plural": "fpl",
+    "of_plural": "pl",
+    "plural": "pl",
+    "masculine_plural": "mpl",
+}
+
+
 class Word():
 
     def __init__(self, word, data):
@@ -39,7 +53,7 @@ class Word():
 
     @property
     def is_lemma(self):
-        return not ("m" in self.forms and "f" in self.forms) and\
+        return not (self.genders == "f" and "m" in self.forms) and \
             self.senses and not self.form_of
 
     def add_form(self, formtype, form):
@@ -162,6 +176,7 @@ class Word():
     @property
     def forms(self):
         if not self._forms and self.meta:
+
             self.get_forms_from_meta()
             self.meta = None
             if not self._forms:
@@ -187,7 +202,6 @@ class Word():
                 data = templates.expand_template(template, self.word)
             self.add_forms(self.parse_list(data))
 
-
     @staticmethod
     def get_head_forms(template):
         if template is None:
@@ -205,6 +219,8 @@ class Word():
 
             if not form.strip():
                 continue
+
+            formtype = shorten_formtype.get(formtype, formtype)
 
             if formtype not in res:
                 res[formtype] = [form]

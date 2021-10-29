@@ -38,3 +38,12 @@ def test_word():
 
     word.parse_forms("pl=test4s; f=test2a")
     assert word.forms == { "pl": ["tests", "test2s", "test3s", "test4s"], "f": ["testa", "test2a"] }
+
+    word = Word("test", [ ("pos", "prop"), ("g","m"), ("meta", "{{head|es|proper noun|g=m|plural|Fulanos|feminine|Fulana|feminine plural|Fulanas}}") ])
+    assert word.pos == "prop"
+    assert word.genders == "m"
+    assert word.forms == {'f': ['Fulana'], 'fpl': ['Fulanas'], 'pl': ['Fulanos']}
+
+    word = Word("-ito", [ ("pos", "suffix"), ("meta", "{{es-suffix|m|f=-ita}}") ])
+    assert word.pos == "suffix"
+    assert word.forms == {'f': ['-ita']}
