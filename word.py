@@ -48,12 +48,13 @@ class Word():
             elif key == "pos":
                 self._pos = value
             elif key == "g":
-                if self._pos in ["n", "prop"]:
-                    self.genders = value
+#                if self._pos in ["n", "prop"]:
+                self.genders = value
 
     @property
     def is_lemma(self):
-        return not (self.genders == "f" and "m" in self.forms) and \
+        #return not (self.genders == "f" and "m" in self.forms) and \
+        return \
             self.senses and not self.form_of
 
     def add_form(self, formtype, form):
@@ -70,8 +71,8 @@ class Word():
                 self._forms[formtype].append(form)
 
         # Feminine nouns are a "form of" their masculine counterpart
-        if formtype == "m" and self.genders == "f":
-            self.add_lemma(form, "f")
+#        if formtype == "m" and self.genders == "f":
+#            self.add_lemma(form, "f")
         if formtype == "mpl" and self.genders == "fp":
             self.add_lemma(form, "fpl")
 
@@ -182,10 +183,11 @@ class Word():
             if not self._forms:
                 return {}
 
-            if self.genders == "f":
-                for form in self._forms.get("m", []):
-                    self.add_lemma(form, "f")
-            elif self.genders == "fp":
+            # Only do this if there are no non-form senses?
+#            if self.genders == "f":
+#                for form in self._forms.get("m", []):
+#                    self.add_lemma(form, "f")
+            if self.genders == "fp":
                 for form in self._forms.get("mpl", []):
                     self.add_lemma(form, "fpl")
 

@@ -87,36 +87,60 @@ class AllForms:
             self._process_word_forms(word, wordlist)
 
     def _process_word_forms(self, word, wordlist):
+
         if not len(word.senses):
             return
 
         if self.resolve_true_lemmas:
             if word.is_lemma:
-                self._add_word_forms(word, word.word)
+                self._add_form(word.word, word.pos, word.word)
+                self._add_word_forms(word, word.word, wordlist)
 
             for lemma, formtypes in wordlist.get_lemmas(word).items():
                 self._add_form(word.word, word.pos, lemma)
-                self._add_word_forms(word, lemma)
+                self._add_word_forms(word, lemma, wordlist)
 
         else:
-            if word.is_lemma or (word.form_of and any(x for x in ["alt", "old", "rare", "spell"] for f in word.form_of.values() if x in f)):
-                self._add_form(word.word, word.pos, word.word)
-                self._add_word_forms(word, word.word)
+#            if not (word.pos == "v" and not word.is_lemma):
+            self._add_form(word.word, word.pos, word.word)
+            self._add_word_forms(word, word.word, wordlist)
 
-    def _add_word_forms(self, word, lemma):
+            for lemma, formtypes in word.form_of.items():
+                self._add_form(word.word, word.pos, lemma)
+                self._add_word_forms(word, lemma, wordlist)
+
+    opposite_genders = {"m": "f", "f": "m", "m-p": "fpl", "f-p": "mpl"}
+    def _add_word_forms(self, word, lemma, wordlist):
         """ Add all of a word's forms to the given lemma """
+
+        non_binary = "m" in word.forms and "f" in word.forms
+
+        if word.genders in self.opposite_genders:
+            opposite =  self.opposite_genders[word.genders]
+            opposite_forms = word.forms.get(opposite, [])
+            opposite_words = [ w for x in opposite_forms for w in wordlist.get_words(x, word.pos) ]
+
+            # If this is a lemma, restrict overrides to opposite lemmas
+            # Conversely, if this is a form, allow opposite gendered forms to override it
+            if word.is_lemma:
+                opposite_words = [ w for w in opposite_words if w.is_lemma ]
+        else:
+            opposite_words=[]
 
         for formtype, forms in word.forms.items():
             #self.count_formtype[formtype] += 1
             for form in forms:
-                if formtype == "m":
+
+                # If this a gendered noun adding a form of the opposite gender, verify the form isn't already declared
+                # by the opposite lemma
+                if opposite_words and word.word != form and formtype in ["m", "mpl", "fpl"] and formtype[0] != word.genders \
+                   and any(x for x in opposite_words if form == x.word or any(y for y in x.forms.values() if form in y)):
                     continue
 
-                if word.pos == "n" and  formtype == "mpl":
+                if word.genders == "f" and word.form_of and formtype in ["m", "mpl"]:
                     continue
 
-                # ignore masculine/feminine counterparts of non binary words
-                if word.genders == "m; f" and formtype in ["m", "f", "mpl", "fpl"]:
+                if non_binary and formtype in ["m", "f", "mpl", "fpl"]:
                     continue
 
 

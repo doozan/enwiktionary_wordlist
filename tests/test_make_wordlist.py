@@ -739,7 +739,7 @@ angla
 pos: adj
   meta: {{head|es|adjective form|g=f-s}}
   g: f-s
-  gloss: adjective form of "anglo"
+  gloss: feminine singular of "anglo"
 pos: n
   meta: {{es-noun|f|m=anglo}}
   g: f
@@ -752,7 +752,7 @@ pos: n
 
     assert "\n".join(entry)=="""\
 angla {adj-meta} :: {{head|es|adjective form|g=f-s}}
-angla {adj} :: adjective form of "anglo"
+angla {adj} :: feminine singular of "anglo"
 angla {n-meta} :: {{es-noun|f|m=anglo}}
 angla {f} :: female equivalent of "anglo"\
 """

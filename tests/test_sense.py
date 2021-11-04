@@ -29,6 +29,6 @@ def test_sense():
     run_test_sense_form("to defend. (obsolete spelling of defender)", "old", "defender", "to defend.")
     run_test_sense_form("given name: alternative spelling of Carina", "alt", "Carina", "given name")
     run_test_sense_form("obsolete form of se (as a dative pronoun)", "old", "se", "as a dative pronoun)")
-    run_test_sense_form('compound form of "ir"+"se"', "alt", "ir", "")
-    run_test_sense_form('inflection of "-acho"', "alt", "-acho", "")
+    run_test_sense_form('compound form of "ir"+"se"', "form", "ir", "")
+    run_test_sense_form('inflection of "-acho"', "form", "-acho", "")
 

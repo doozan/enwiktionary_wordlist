@@ -629,3 +629,257 @@ test,noun,n1,n2,n3
 
     assert allforms.get_lemmas('test') == ['adj|a1', 'adj|a2', 'adj|a3', 'noun|n1', 'noun|n2', 'noun|n3']
     assert allforms.get_lemmas('test1,test2') == ['noun|test1', 'noun|test2', 'noun|test3']
+
+
+def test_actor():
+
+    # masculine with female forms
+    # feminine with male forms
+
+    wordlist_data="""\
+_____
+actor
+pos: n
+  meta: {{es-noun|m|f=actriz}}
+  g: m
+  gloss: An actor (person who performs in a theatrical play or movie)
+_____
+actriz
+pos: n
+  meta: {{es-noun|f|m=actor}}
+  g: f
+  gloss: actress
+"""
+    expected = {
+        'actores': ['n|actor'],
+        'actriz': ['n|actor', 'n|actriz'],
+        'actrices': ['n|actriz'],
+        'actor': ['n|actor']
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    print(forms)
+    assert forms == expected
+
+def test_female_lemma():
+
+    # feminine lemma with male forms
+
+    wordlist_data="""\
+_____
+cabra
+pos: n
+  meta: {{es-noun|f|m=cabro}}
+  g: f
+  gloss: goat
+"""
+    expected = {
+        'cabras': ['n|cabra'],
+        'cabro': ['n|cabra'],
+        'cabros': ['n|cabra'],
+        'cabra': ['n|cabra']
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    print(forms)
+    assert forms == expected
+
+def test_latine():
+
+    # non binary shouldn't add forms to binary words
+
+    wordlist_data="""\
+_____
+latine
+pos: n
+  meta: {{es-noun|mf|m=latino|f=latina}}
+  g: mf
+  gloss: someone of Latin American descent, regardless of gender; e.g. a Latino or Latina
+_____
+latino
+  pos: n
+  meta: {{es-noun|m|f=latina}}
+  g: m
+  etymology: Borrowed from Latin "latīnus". Compare ladino.
+  gloss: a Latino
+_____
+latina
+pos: n
+  meta: {{es-noun|f|m=latino}}
+  g: f
+  gloss: female equivalent of "latino"; a Latina
+"""
+
+    expected = {
+        'latine': ['n|latine'],
+        'latines': ['n|latine'],
+
+        'latina': ['n|latino'],
+        'latinas': ['n|latino'],
+
+        'latino': ['n|latino'],
+        'latinos': ['n|latino'],
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    print(forms)
+    assert forms == expected
+
+
+def test_clientes():
+
+    # non binary shouldn't add forms to binary words
+
+    wordlist_data="""\
+_____
+clienta
+pos: n
+  meta: {{es-noun|f|m=cliente}}
+  g: f
+  gloss: female equivalent of "cliente"
+_____
+clientas
+pos: n
+  meta: {{head|es|noun form|g=f-p}}
+  g: f-p
+  gloss: plural of "clienta"
+_____
+cliente
+pos: n
+  meta: {{es-noun|m|f=cliente|f2=clienta}}
+  g: m
+  gloss: client
+"""
+
+    expected = {
+        'clienta': ['n|cliente'],
+        'clientas': ['n|cliente'],
+        'clientes': ['n|cliente'],
+        'cliente': ['n|cliente']
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    print(forms)
+    assert forms == expected
+
+
+def test_nosotres():
+
+    # non binary shouldn't add forms to binary words
+
+    wordlist_data="""\
+_____
+nosotras
+pos: pron
+  meta: {{head|es|pronoun|g=f-p|masculine plural|nosotros}}
+  g: f-p
+  etymology: nos + otras
+  gloss: we (feminine plural)
+_____
+nosotres
+pos: pron
+  meta: {{head|es|pronoun|masculine|nosotros|feminine|nosotras}}
+  gloss: we
+    q: hypercorrect, gender-neutral, neologism
+_____
+nosotros
+pos: pron
+  meta: {{head|es|pronoun|g=m-p|feminine plural|nosotras}}
+  g: m-p
+  etymology: From Old Spanish "nos" (us) from Latin "nōs" + otros (others), plural of otro, from Latin "alter". Compare Galician "nosoutros", Catalan "nosaltres", Occitan "nosautre
+  gloss: we (masculine plural)
+  gloss: inflection of "nosotros"
+    q: disjunctive
+"""
+
+    expected = {
+        'nosotros': ['pron|nosotros'],
+        'nosotras': ['pron|nosotras'],
+        'nosotres': ['pron|nosotres']
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    print(forms)
+    assert forms == expected
+
+
+def test_bosniacas():
+
+    wordlist_data="""\
+_____
+bosníaco
+pos: n
+  meta: {{es-noun|m|f=bosníaca}}
+  g: m
+  gloss: Bosniak (native or resident of the region of Bosnia; a descendant of the people from the region of Bosnia)
+_____
+bosniaca
+pos: n
+  meta: {{es-noun|f|m=bosniaco}}
+  g: f
+  gloss: female equivalent of "bosniaco"
+_____
+bosniaco
+pos: n
+  meta: {{es-noun|m|f=bosniaca}}
+  g: m
+  gloss: alternative spelling of "bosníaco"
+"""
+
+    expected = {
+        'bosníaco': ['n|bosníaco'],
+        'bosníacos': ['n|bosníaco'],
+        'bosníaca': ['n|bosníaco'],
+        'bosníacas': ['n|bosníaco'],
+        'bosniaca': ['n|bosníaco'],
+        'bosniacas': ['n|bosníaco'],
+        'bosniaco': ['n|bosníaco'],
+        'bosniacos': ['n|bosníaco'],
+    }
+
+    expected_unresolved = {
+        'bosníaco': ['n|bosníaco'],
+        'bosníacos': ['n|bosníaco'],
+        'bosníaca': ['n|bosníaco'],
+        'bosníacas': ['n|bosníaco'],
+        'bosniaca': ['n|bosniaca', 'n|bosniaco', 'n|bosníaco'],
+        'bosniacas': ['n|bosniaca', 'n|bosniaco'],
+        'bosniaco': ['n|bosniaco', 'n|bosníaco'],
+        'bosniacos': ['n|bosniaco', 'n|bosníaco']
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    print(forms)
+    assert forms == expected
+
+    forms = AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms
+    print(forms)
+    assert forms == expected_unresolved
+
+
+def test_acapulco():
+
+    # non binary shouldn't add forms to binary words
+
+    wordlist_data="""\
+_____
+Acapulco
+pos: prop
+  meta: {{es-proper noun}}
+  gloss: Acapulco (a city in Guerrero, Mexico)
+"""
+
+    expected = {'Acapulco': ['prop|Acapulco']}
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    forms = AllForms.from_wordlist(wordlist).all_forms
+    assert forms == expected
+
+    forms = AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms
+    assert forms == expected
