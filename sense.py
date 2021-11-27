@@ -103,6 +103,7 @@ class Sense():
         "feminine singular": "f",
         "feminine plural": "fpl",
         "feminine noun": "f",
+        "infinitive": "form",
         "inflection": "form",
         "informal form": "alt",
         "informal spelling": "alt",
