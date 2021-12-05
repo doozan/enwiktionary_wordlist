@@ -39,7 +39,6 @@ class WordlistBuilder:
         self._problems = {}
         self._stats = {}
         self.fixes = set()
-        self.title = None
 
         start = fr"(^|\n)==\s*{self.LANG_SECTION}\s*==\s*\n"
         re_endings = [ r"\[\[\s*Category\s*:", r"==[^=]+==", r"----" ]
@@ -67,7 +66,7 @@ class WordlistBuilder:
         if res:
             return res.group(0)
 
-    def forms_to_string(self, forms):
+    def forms_to_string(self, forms, title):
         if not forms:
             return None
 
@@ -75,7 +74,7 @@ class WordlistBuilder:
         for k,values in sorted(forms.items()):
             for v in sorted(values):
                 if re.search(r"[\<\{\[]", v):
-                    v = wiki_to_text(v, self.title)
+                    v = wiki_to_text(v, title)
 
                 if ";" in v:
                     raise ValueError(f"ERROR: ; found in value ({v})")
@@ -133,7 +132,6 @@ class WordlistBuilder:
         return []
 
     def entry_to_text(self, text, title):
-        self.title = title
         wikt = wtparser.parse_page(text, title, parent=self)
 
         words = wikt.filter_words()
@@ -154,18 +152,20 @@ class WordlistBuilder:
                 entry.append(f"  g: {'; '.join(word.genders)}")
 
             if word.qualifiers:
-                qualifiers = make_qualification(self.LANG_ID, word.title, word.qualifiers)
+                qualifiers = make_qualification(self.LANG_ID, title, word.qualifiers)
                 if qualifiers:
                     entry.append(f"  q: {qualifiers}")
 
             for usage in self.get_usage(word):
-                entry.append(f"  usage: " + self.usage_to_text(usage))
+                usage_text = self.usage_to_text(usage, title)
+                if usage_text:
+                    entry.append(f"  usage: " + usage_text)
 
             for ety in self.get_etymology(word):
                 for node in ety.ifilter_etymologies():
-                    ety_text = self.etymology_to_text(node)
+                    ety_text = self.etymology_to_text(node, title)
                     if ety_text:
-                        entry.append(f"  etymology: " + self.etymology_to_text(node))
+                        entry.append(f"  etymology: " + ety_text)
 
             seen_senses = []
             for sense in word.ifilter_wordsenses():
@@ -175,7 +175,7 @@ class WordlistBuilder:
                 if "{{defn" in sense.gloss:
                     continue
 
-                gloss_text = self.gloss_to_text(sense.gloss)
+                gloss_text = self.gloss_to_text(sense.gloss, title)
                 if gloss_text == "":
                     continue
 
@@ -183,12 +183,12 @@ class WordlistBuilder:
 
                 sense_data.append(f"  gloss: {gloss_text}")
                 if sense.gloss.qualifiers:
-                    qualifiers = make_qualification(self.LANG_ID, word.title, sense.gloss.qualifiers)
+                    qualifiers = make_qualification(self.LANG_ID, title, sense.gloss.qualifiers)
                     if qualifiers:
                         sense_data.append(f"    q: {qualifiers}")
                 synonyms = []
                 for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
-                    synonyms += self.items_to_synonyms(nymline.items)
+                    synonyms += self.items_to_synonyms(nymline.items, title)
                 if synonyms:
                     sense_data.append(f"    syn: {'; '.join(synonyms)}")
 
@@ -204,7 +204,6 @@ class WordlistBuilder:
         return entry
 
     def entry_to_mbformat(self, text, title):
-        self.title = title
         wikt = wtparser.parse_page(text, title, parent=self)
 
         entry = []
@@ -224,17 +223,17 @@ class WordlistBuilder:
                 if "{{defn" in sense.gloss:
                     continue
 
-                gloss_text = self.gloss_to_text(sense.gloss)
+                gloss_text = self.gloss_to_text(sense.gloss, title)
                 if gloss_text == "":
                     continue
 
                 synonyms = []
                 for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
-                    synonyms += self.items_to_synonyms(nymline.items)
+                    synonyms += self.items_to_synonyms(nymline.items, title)
 
                 all_qualifiers = word.qualifiers + sense.gloss.qualifiers
                 pos = make_pos_tag(word, all_qualifiers)
-                qualification = make_qualification(self.LANG_ID, self.title, all_qualifiers, True)
+                qualification = make_qualification(self.LANG_ID, title, all_qualifiers, True)
 
                 items = [title, pos]
                 if qualification:
@@ -251,11 +250,11 @@ class WordlistBuilder:
 
         return entry
 
-    def gloss_to_text(self, gloss):
-        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), self.title).strip())
+    def gloss_to_text(self, gloss, title):
+        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title).strip())
 
-    def usage_to_text(self, usage):
-        text = wiki_to_text(usage, self.title).strip()
+    def usage_to_text(self, usage, title):
+        text = wiki_to_text(usage, title).strip()
         # Strip leading * if there are no newlines
         if "\n" not in text:
             text = re.sub("^[ *#]+", "", text)
@@ -263,17 +262,17 @@ class WordlistBuilder:
             text = re.sub("\n", r"\\n", text)
         return text
 
-    def etymology_to_text(self, etymology):
-        return re.sub("\n", r"\\n", wiki_to_text(etymology, self.title).strip())
+    def etymology_to_text(self, etymology, title):
+        return re.sub("\n", r"\\n", wiki_to_text(etymology, title).strip())
 
-    def items_to_synonyms(self, items):
+    def items_to_synonyms(self, items, title):
         synonyms = []
         for item in items:
             synonym = None
             if "alt" in item:
-                synonym = wiki_to_text(item["alt"], self.title).strip()
+                synonym = wiki_to_text(item["alt"], title).strip()
             if not synonym:
-                synonym = wiki_to_text(item["target"], self.title).strip()
+                synonym = wiki_to_text(item["target"], title).strip()
             if synonym:
                 synonyms.append(synonym)
 #           [ { "target": "word", "q": "qual" }, { "target": "word2", "tr": "tr" } ]
@@ -354,7 +353,7 @@ def main():
                 for sense in word.senses:
                     print(f"  gloss: {sense.gloss}")
                     if sense.qualifier:
-                        qualifiers = make_qualification(self.LANG_ID, self.title, sense.qualifier.split("; "))
+                        qualifiers = make_qualification(self.LANG_ID, word.word, sense.qualifier.split("; "))
                         if qualifiers:
                             print(f"    q: {qualifiers}")
                     if sense.synonyms:
@@ -387,9 +386,9 @@ def main():
 
         try:
             entry = to_text(lang_entry, entry_title)
-
         except ValueError as ex:
             print(f"{entry_title} generated an error {ex}", file=sys.stderr)
+
         if entry:
             entries[entry_title] = entry
         else:
