@@ -23,14 +23,9 @@ class Sense():
             else:
                 raise ValueError(f"Unexpected data: {key}, {value}")
 
-        if " of " in self.gloss:
-            self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
-            if self.lemma:
-                self.lemma = self.lemma.strip()
-        else:
-            self.formtype = None
-            self.lemma = None
-            self.nonform = None
+        self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
+        if self.lemma:
+            self.lemma = self.lemma.strip()
 
     @property
     def synonyms(self):
@@ -62,7 +57,7 @@ class Sense():
         res = re.search(cls.form_pattern, definition)
 
         if res:
-            formtype = cls.form_of_prefix[res.group(1)]
+            formtype = cls.form_of_prefix.get(res.group(1), res.group(1))
             lemma = res.group(2)
             nonform = re.sub(re.escape(res.group(0)), "", definition).strip()
             if res.group(1) == "compound form":
@@ -116,16 +111,21 @@ class Sense():
         "nonstandard spelling": "alt",
         "obsolete form": "old",
         "obsolete spelling": "old",
-        "only used in": "alt",
+        "only used": "alt",
         "plural": "pl",
         "pronunciation spelling": "alt",
         "rare form": "rare",
         "rare spelling": "rare",
+        "reflexive": "reflexive",
         "superseded form": "old",
         "superseded spelling": "old",
+        "gerund": "gerund",
+        "infinitive": "infinitive",
+        r"(?:gerund|pp|cond|fut|infinitive|imp|impf|neg_imp|pres|pret)_\w+": "1", # patern matches will always be themselves
     }
-    alt_form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") of ([^,;:()]*)[,;:()]?"
 
-    # Add "form" after the alt form pattern is generated so we don't match every "form of xxx"
+    alt_form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r") (?:of|in) ([^,;:()]*)[,;:()]?"
+
+    # Add "form" after the alt form pattern is generated so it doesn't warn on every literal string with the phrase "form of xxx"
     form_of_prefix["form"] = "alt"
-    form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') of "([^"]*)"'
+    form_pattern = r"(?:^|A |An |\(|[,;:\)] )(" + "|".join(form_of_prefix.keys()) + r') (?:of|in) "([^"]*)"'

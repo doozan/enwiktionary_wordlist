@@ -115,7 +115,8 @@ class Wordlist():
             notes.append(note)
         return "; ".join(notes)
 
-    def get_entry_words(self, title, lines, pos=None):
+    @staticmethod
+    def get_entry_words(title, lines, pos=None):
 
         common = []
         word_items = []

@@ -55,7 +55,7 @@ _____
 chapó
 pos: v
   meta: {{head|es|verb form}}
-  gloss: inflection of "chapar"
+  gloss: pret_3s of "chapar"
 pos: interj
   meta: {{es-interj}}
   etymology: Borrowed from French "chapeau", from VL "*cappellus". Doublet of the inherited capillo, and of capelo (from Italian), as well as chapeo, also from the French word.
@@ -66,7 +66,7 @@ pos: interj
 
     assert "\n".join(entry) == """\
 chapó {v-meta} :: {{head|es|verb form}}
-chapó {v} :: inflection of "chapar"
+chapó {v} :: pret_3s of "chapar"
 chapó {interj-meta} :: {{es-interj}}
 chapó {interj} :: Used to express appreciation; hat tip\
 """
@@ -167,7 +167,7 @@ pos: adj
   meta: {{head|es|adjective form}}
 pos: v
   meta: {{head|es|past participle form}}
-  gloss: inflection of "completar"
+  gloss: pp_fs of "completar"
 pos: n
   meta: {{es-noun|f}}
   g: f
@@ -180,7 +180,7 @@ pos: n
     assert "\n".join(entry) == """\
 completada {adj-meta} :: {{head|es|adjective form}}
 completada {v-meta} :: {{head|es|past participle form}}
-completada {v} :: inflection of "completar"
+completada {v} :: pp_fs of "completar"
 completada {n-meta} :: {{es-noun|f}}
 completada {f} [Chile] :: party or meeting where they eat completos (hot-dogs)"""
 
@@ -223,7 +223,7 @@ pos: n
     syn: alcarceña
 pos: v
   meta: {{head|es|verb form}}
-  gloss: inflection of "yerar"\
+  gloss: pres_1s of "yerar"\
 """
 
     entry = builder.entry_to_mbformat(lang_entry, "yero")
@@ -232,7 +232,7 @@ pos: v
 yero {n-meta} :: {{es-noun|m}}
 yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)
 yero {v-meta} :: {{head|es|verb form}}
-yero {v} :: inflection of "yerar"\
+yero {v} :: pres_1s of "yerar"\
 """
 
 
@@ -1288,7 +1288,7 @@ pos: interj
     q: figuratively
 pos: v
   meta: {{head|es|verb form}}
-  gloss: inflection of "abajar"\
+  gloss: pres_1s of "abajar"\
 """
 
 
@@ -1436,7 +1436,9 @@ pos: n
 pos: v
   meta: {{head|es|verb form}}
   etymology: Probably from the verb guiar. Cf. also French "guide" (Old French "guie"), Italian "guida".
-  gloss: inflection of "guiar"\
+  gloss: imp_2s of "guiar"
+  gloss: pres_2sf of "guiar"
+  gloss: pres_3s of "guiar"\
 """
 
 def test_usagenotes_nested():
@@ -1623,8 +1625,8 @@ test
 pos: v
   meta: {{head|es|verb form}}
   etymology: From Latin "est", from Proto-Italic "*est", from Proto-Indo-European "*h₁ésti". Cognate with Sanskrit "अस्ति", English "is".
-  gloss: inflection of "ser"
-  gloss: inflection of "ser"; (he/she/it/one) is
+  gloss: pres_2sf of "ser"
+  gloss: pres_3s of "ser"; (he/she/it/one) is
 pos: n
   meta: {{head|es|noun form}}
   gloss: plural of "e"\
