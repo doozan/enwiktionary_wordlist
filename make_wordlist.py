@@ -31,14 +31,16 @@ import enwiktionary_parser as wtparser
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
 from enwiktionary_parser.sections.usage import UsageSection
 from enwiktionary_parser.sections.etymology import EtymologySection
+from .sense import Sense
 
 class WordlistBuilder:
-    def __init__(self, lang_name, lang_id):
+    def __init__(self, lang_name, lang_id, verb_forms=False):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
         self._problems = {}
         self._stats = {}
         self.fixes = set()
+        self.verb_forms = verb_forms # include full verb formtype in definitions
 
         start = fr"(^|\n)==\s*{self.LANG_SECTION}\s*==\s*\n"
         re_endings = [ r"\[\[\s*Category\s*:", r"==[^=]+==", r"----" ]
@@ -138,36 +140,39 @@ class WordlistBuilder:
         if not words:
             return []
 
-        entry = ["_____", title]
+        entry = []
 
         for word in wikt.ifilter_words():
             #if self.exclude_word(word):
             #    continue
 
-            entry.append(f"pos: {word.shortpos}")
+            has_gloss = False
+            word_entry = []
+
+            word_entry.append(f"pos: {word.shortpos}")
             meta = " ".join(map(str,word.form_sources)).replace("\n", "")
-            entry.append(f"  meta: {meta}")
+            word_entry.append(f"  meta: {meta}")
 
             if word.genders:
-                entry.append(f"  g: {'; '.join(word.genders)}")
+                word_entry.append(f"  g: {'; '.join(word.genders)}")
 
             if word.qualifiers:
                 qualifiers = make_qualification(self.LANG_ID, title, word.qualifiers)
                 if qualifiers:
-                    entry.append(f"  q: {qualifiers}")
+                    word_entry.append(f"  q: {qualifiers}")
 
             for usage in self.get_usage(word):
                 usage_text = self.usage_to_text(usage, title)
                 if usage_text:
-                    entry.append(f"  usage: " + usage_text)
+                    word_entry.append(f"  usage: " + usage_text)
 
             for ety in self.get_etymology(word):
                 for node in ety.ifilter_etymologies():
                     ety_text = self.etymology_to_text(node, title)
                     if ety_text:
-                        entry.append(f"  etymology: " + ety_text)
+                        word_entry.append(f"  etymology: " + ety_text)
 
-            seen_senses = []
+            seen_senses = set()
             for sense in word.ifilter_wordsenses():
                 # Skip senses that are just a request for a definition
                 if "{{rfdef" in sense.gloss:
@@ -192,16 +197,22 @@ class WordlistBuilder:
                 if synonyms:
                     sense_data.append(f"    syn: {'; '.join(synonyms)}")
 
-                sense_alldata = "|".join(sense_data)
-                if sense_alldata in seen_senses:
+                if "|".join(sense_data) in seen_senses:
                     continue
-                else:
-                    seen_senses.append(sense_alldata)
-                    entry += sense_data
+
+                seen_senses.add("|".join(sense_data))
+                word_entry += sense_data
+                has_gloss = True
 
                 # TODO: Get usage examples?
 
-        return entry
+            # Skip words that have no gloss (filtered verb forms, mostly)
+            if has_gloss:
+                entry += word_entry
+                has_entry = True
+
+        if entry:
+            return ["_____", title] + entry
 
     def entry_to_mbformat(self, text, title):
         wikt = wtparser.parse_page(text, title, parent=self)
@@ -251,7 +262,16 @@ class WordlistBuilder:
         return entry
 
     def gloss_to_text(self, gloss, title):
-        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title).strip())
+        text = re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title).strip())
+
+        if self.verb_forms:
+            return text
+
+        match = re.search(r"(gerund|pp|cond|fut|infinitive|imp|impf|neg_imp|pres|pret)_(\w+)", text)
+        if match:
+            return ""
+
+        return text
 
     def usage_to_text(self, usage, title):
         text = wiki_to_text(usage, title).strip()
@@ -321,6 +341,7 @@ def main():
     parser.add_argument("--lang-id", help="Language id", required=True)
     parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
     parser.add_argument("--mbformat", help="Output mb-compatible file format", action='store_true')
+    parser.add_argument('--verbforms', action='store_true', help="Include verb cojugation details")
     parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args()
 
@@ -373,7 +394,7 @@ def main():
     else:
         print("No input file specified, use --xml or --lang-data")
 
-    builder = WordlistBuilder(lang_section, args.lang_id)
+    builder = WordlistBuilder(lang_section, args.lang_id, verb_forms=args.verbforms)
 
     to_text = builder.entry_to_mbformat if args.mbformat else builder.entry_to_text
 
