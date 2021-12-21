@@ -23,6 +23,8 @@ formtypes = {
 display_gender = {
     'm': 'm',
     'f': 'f',
+    'm-s': 'm',
+    'f-s': 'f',
     'p': 'pl',
     'f; m': 'f or m',
     'm; f': 'm or f',
