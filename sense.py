@@ -119,6 +119,12 @@ class Sense():
         "reflexive": "reflexive",
         "superseded form": "old",
         "superseded spelling": "old",
+        "present participle": "gerund",
+        "past participle": "pp_ms",
+        "masculine singular past participle": "pp_ms",
+        "masculine plural past participle": "pp_mp",
+        "feminine singular past participle": "pp_fs",
+        "feminine plural past participle": "pp_fp",
         "gerund": "gerund",
         "infinitive": "infinitive",
         r"(?:gerund|pp|cond|fut|infinitive|imp|impf|neg_imp|pres|pret)_\w+": "1", # patern matches will always be themselves
