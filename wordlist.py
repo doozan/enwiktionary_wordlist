@@ -13,9 +13,12 @@ verb_types = {
 }
 
 class Wordlist():
-    def __init__(self, wordlist_data, cache_words=True):
+    def __init__(self, wordlist_data=None, cache_words=True):
         self.cache_words = cache_words
         self._cached = {}
+        if not wordlist_data:
+            self.all_entries = {}
+            return
 
         iter_list = iter(wordlist_data)
         first_line = next(iter_list)

@@ -22,12 +22,15 @@ class Word():
     def __init__(self, word, data):
 
         self.word = word
+        self._pos = None
         self._forms = None # { formtype: [form1, ..] }
         self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
         self._sense_data = None
         self._senses = None
         self.meta = None
+        self._meta_parsed = False
         self.genders = None
+        self.qualifier = None
         self.etymology = None
         self.use_notes = None
 
@@ -43,13 +46,14 @@ class Word():
                 self.use_notes = value
             elif key == "etymology":
                 self.etymology = value
-            elif key == "meta":
-                self.meta = value
             elif key == "pos":
                 self._pos = value
             elif key == "g":
 #                if self._pos in ["n", "prop"]:
                 self.genders = value
+            # Term labels
+            elif key == "q":
+                self.qualifier = value
 
     @property
     def is_lemma(self):
@@ -176,10 +180,10 @@ class Word():
 
     @property
     def forms(self):
-        if not self._forms and self.meta:
+        if not self._forms and not self._meta_parsed and self.meta:
 
             self.get_forms_from_meta()
-            self.meta = None
+            self._meta_parsed = True
             if not self._forms:
                 return {}
 

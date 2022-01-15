@@ -51,8 +51,6 @@ Borrowed from {{bor|es|fr|chapeau}}, from {{der|es|VL.|*cappellus}}. Doublet of 
     entry = builder.entry_to_text(lang_entry, "chapó")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-chapó
 pos: v
   meta: {{head|es|verb form}}
   gloss: pret_3s of "chapar"
@@ -60,15 +58,6 @@ pos: interj
   meta: {{es-interj}}
   etymology: Borrowed from French "chapeau", from VL "*cappellus". Doublet of the inherited capillo, and of capelo (from Italian), as well as chapeo, also from the French word.
   gloss: Used to express appreciation; hat tip\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "chapó")
-
-    assert "\n".join(entry) == """\
-chapó {v-meta} :: {{head|es|verb form}}
-chapó {v} :: pret_3s of "chapar"
-chapó {interj-meta} :: {{es-interj}}
-chapó {interj} :: Used to express appreciation; hat tip\
 """
 
 
@@ -98,18 +87,10 @@ def test_bolivariano():
     entry = builder.entry_to_text(lang_entry, "bolivariano")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-bolivariano
 pos: adj
   meta: {{es-adj|f=bolivariana}}
   gloss: Bolivarian (Of or pertaining to Simón Bolívar.)\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "bolivariano")
-
-    assert "\n".join(entry) == """\
-bolivariano {adj-meta} :: {{es-adj|f=bolivariana}}
-bolivariano {adj} :: Bolivarian (Of or pertaining to Simón Bolívar.)"""
 
 def test_completada():
     orig_text="""\
@@ -161,10 +142,6 @@ def test_completada():
     entry = builder.entry_to_text(lang_entry, "completada")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-completada
-pos: adj
-  meta: {{head|es|adjective form}}
 pos: v
   meta: {{head|es|past participle form}}
   gloss: pp_fs of "completar"
@@ -174,15 +151,6 @@ pos: n
   gloss: party or meeting where they eat completos (hot-dogs)
     q: Chile\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "completada")
-
-    assert "\n".join(entry) == """\
-completada {adj-meta} :: {{head|es|adjective form}}
-completada {v-meta} :: {{head|es|past participle form}}
-completada {v} :: pp_fs of "completar"
-completada {n-meta} :: {{es-noun|f}}
-completada {f} [Chile] :: party or meeting where they eat completos (hot-dogs)"""
 
 
 def test_yero():
@@ -214,8 +182,6 @@ def test_yero():
     entry = builder.entry_to_text(lang_entry, "yero")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-yero
 pos: n
   meta: {{es-noun|m}}
   g: m
@@ -224,15 +190,6 @@ pos: n
 pos: v
   meta: {{head|es|verb form}}
   gloss: pres_1s of "yerar"\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "yero")
-
-    assert "\n".join(entry) == """\
-yero {n-meta} :: {{es-noun|m}}
-yero {m} | alcarceña :: any variety of bitter vetch (Vicia ervilia)
-yero {v-meta} :: {{head|es|verb form}}
-yero {v} :: pres_1s of "yerar"\
 """
 
 
@@ -252,22 +209,12 @@ def test_repanoche():
     entry = builder.entry_to_text(lang_entry, "repanoche")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-repanoche
 pos: n
   meta: {{es-noun|f|-}}
   g: f
   gloss: only used in "ser la repanocha"
     q: Spain\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "repanoche")
-
-    assert "\n".join(entry) == """\
-repanoche {n-meta} :: {{es-noun|f|-}}
-repanoche {f} [Spain] :: only used in "ser la repanocha"\
-"""
-
 
 def test_fullentry():
     orig_text="""\
@@ -288,20 +235,10 @@ def test_fullentry():
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: v
   meta: {{es-verb|descans|ar}} {{es-conj-ar|descans|combined=1}}
   gloss: (also figuratively, transitive with en) to sit, to rest on
     q: transitive\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "test")
-
-    print("\n".join(entry))
-    assert "\n".join(entry) == """\
-test {v-meta} :: {{es-verb|descans|ar}} {{es-conj-ar|descans|combined=1}}
-test {vt} :: (also figuratively, transitive with en) to sit, to rest on\
 """
 
 def test_noun_forms():
@@ -320,19 +257,10 @@ def test_noun_forms():
     entry = builder.entry_to_text(lang_entry, "youtuber")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-youtuber
 pos: n
   meta: {{es-noun|mf|youtubers|pl2=youtuber|f=youtuberista|fpl=youtuberistas}}
   g: mf
   gloss: A person or a member of a group of people regarded as undesirable\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "youtuber")
-
-    print( "\n".join(entry))
-    assert lang_entry != """
-youtuber {mf} :: A person or a member of a group of people regarded as undesirable
 """
 
 def test_adj_forms():
@@ -351,18 +279,9 @@ def test_adj_forms():
     entry = builder.entry_to_text(lang_entry, "youtuber")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-youtuber
 pos: adj
   meta: {{es-adj|pl=youtubers|pl2=youtuber|f=youtuberista|fpl=youtuberistas}}
   gloss: A person or a member of a group of people regarded as undesirable\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "youtuber")
-
-    assert "\n".join(entry) == """\
-youtuber {adj-meta} :: {{es-adj|pl=youtubers|pl2=youtuber|f=youtuberista|fpl=youtuberistas}}
-youtuber {adj} :: A person or a member of a group of people regarded as undesirable\
 """
 
 def test_verb_forms():
@@ -384,22 +303,11 @@ def test_verb_forms():
     entry = builder.entry_to_text(lang_entry, "abstener")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-abstener
 pos: v
   meta: {{es-verb|absten|er|pres=abstengo|pret=abstuve}} {{es-conj-er|abs|p=-tener|combined=1}}
   gloss: to abstain
     q: reflexive\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "abstener")
-
-    assert "\n".join(entry) == """\
-abstener {v-meta} :: {{es-verb|absten|er|pres=abstengo|pret=abstuve}} {{es-conj-er|abs|p=-tener|combined=1}}
-abstener {vr} :: to abstain\
-"""
-
-#    assert entry[0] == "abstener {v-forms} :: pattern=-tener; stem=abs"
 
 def test_multi_form_verb():
     orig_text="""\
@@ -422,19 +330,10 @@ def test_multi_form_verb():
     entry = builder.entry_to_text(lang_entry, "adecuar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-adecuar
 pos: v
   meta: {{es-verb|adecu|ar|pres=adecúo}} {{es-conj-ar|adec||p=u-ú|combined=1}} {{es-conj-ar|adecu|combined=1}}
   gloss: to adapt, adjust
     q: transitive\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "adecuar")
-
-    assert "\n".join(entry)=="""\
-adecuar {v-meta} :: {{es-verb|adecu|ar|pres=adecúo}} {{es-conj-ar|adec||p=u-ú|combined=1}} {{es-conj-ar|adecu|combined=1}}
-adecuar {vt} :: to adapt, adjust\
 """
 
 def test_protector():
@@ -462,8 +361,6 @@ def test_protector():
     entry = builder.entry_to_text(lang_entry, "protector")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-protector
 pos: adj
   meta: {{es-adj|f=protectora|mpl=protectores|f2=protectriz|fpl2=protectrices}}
   gloss: protective
@@ -476,16 +373,6 @@ pos: n
   g: m
   gloss: protector (a device or mechanism which is designed to protect)\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "protector")
-
-    assert "\n".join(entry)=="""\
-protector {adj-meta} :: {{es-adj|f=protectora|mpl=protectores|f2=protectriz|fpl2=protectrices}}
-protector {adj} :: protective
-protector {n-meta} :: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
-protector {m} :: protector (someone who protects or guards)
-protector {n-meta} :: {{es-noun|m}}
-protector {m} :: protector (a device or mechanism which is designed to protect)"""
 
 def test_aterrar():
     orig_text="""\
@@ -520,8 +407,6 @@ From {{af|es|a-|terreō|lang2=la}}.
     entry = builder.entry_to_text(lang_entry, "aterrar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-aterrar
 pos: v
   meta: {{es-verb|aterr|ar|pres=atierro}} {{es-conj-ar|at|rr|p=e-ie|combined=1}}
   etymology: a- + tierra ("land") + -ar
@@ -532,15 +417,6 @@ pos: v
   etymology: From a- + Latin terreō.
   gloss: to scare
     q: transitive\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "aterrar")
-
-    assert "\n".join(entry)=="""\
-aterrar {v-meta} :: {{es-verb|aterr|ar|pres=atierro}} {{es-conj-ar|at|rr|p=e-ie|combined=1}}
-aterrar {vt} :: to bring down, to ground
-aterrar {v-meta} :: {{es-verb|aterr|ar}} {{es-conj-ar|aterr|combined=1}}
-aterrar {vt} :: to scare\
 """
 
 def test_atentar():
@@ -574,8 +450,6 @@ From {{der|es|la|attentō}}.
     entry = builder.entry_to_text(lang_entry, "atentar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-atentar
 pos: v
   meta: {{es-verb|atent|ar|pres=atiento}} {{es-conj-ar|at|nt|p=e-ie|combined=1}}
   etymology: From Latin "attentō".
@@ -587,17 +461,6 @@ pos: v
     q: transitive, obsolete
   gloss: synonym of "tentar"\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "atentar")
-
-    assert "\n".join(entry)=="""\
-atentar {v-meta} :: {{es-verb|atent|ar|pres=atiento}} {{es-conj-ar|at|nt|p=e-ie|combined=1}}
-atentar {vi} :: to commit a violent or criminal attack, to strike
-atentar {v-meta} :: {{es-verb|atent|ar}} {{es-conj-ar|at|nt|p=e-ie|combined=1}}
-atentar {vt} [obsolete] :: to touch
-atentar {v} :: synonym of "tentar"\
-"""
-
 
 def test_billon():
     orig_text="""\
@@ -617,8 +480,6 @@ def test_billon():
     entry = builder.entry_to_text(lang_entry, "billón")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-billón
 pos: num
   meta: {{es-noun|m|billones}}
   g: m
@@ -626,14 +487,6 @@ pos: num
   gloss: 10^9: a billion (long system)
     q: obsolete\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "billón")
-
-    assert "\n".join(entry)=="""\
-billón {num-meta} :: {{es-noun|m|billones}}
-billón {num} :: 10^12; a trillion (short system)
-billón {num} [obsolete] :: 10^9: a billion (long system)"""
-
 
 def test_aquestos():
     orig_text="""\
@@ -653,12 +506,6 @@ def test_aquestos():
 # {{masculine plural of|es|aqueste}}
 """
 
-    expected = """\
-aquestos {determiner-meta} :: {{head|es|determiner form}}
-aquestos {determiner} :: masculine plural of "aqueste"
-aquestos {pron-meta} :: {{head|es|pronoun form}}
-aquestos {pron} :: masculine plural of "aqueste"\
-"""
 
     lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
@@ -666,8 +513,6 @@ aquestos {pron} :: masculine plural of "aqueste"\
     entry = builder.entry_to_text(lang_entry, "aquestos")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-aquestos
 pos: determiner
   meta: {{head|es|determiner form}}
   gloss: masculine plural of "aqueste"
@@ -675,10 +520,6 @@ pos: pron
   meta: {{head|es|pronoun form}}
   gloss: masculine plural of "aqueste"\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "aquestos")
-
-    assert "\n".join(entry)==expected
 
 def test_robot():
     orig_text="""\
@@ -696,19 +537,11 @@ def test_robot():
     entry = builder.entry_to_text(lang_entry, "robot")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-robot
 pos: n
   meta: {{es-noun|m}}
   g: m
   gloss: robot\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "robot")
-
-    assert "\n".join(entry)=="""\
-robot {n-meta} :: {{es-noun|m}}
-robot {m} :: robot"""
 
 def test_angla():
     orig_text="""\
@@ -734,8 +567,6 @@ def test_angla():
     entry = builder.entry_to_text(lang_entry, "angla")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-angla
 pos: adj
   meta: {{head|es|adjective form|g=f-s}}
   g: f-s
@@ -744,17 +575,6 @@ pos: n
   meta: {{es-noun|f|m=anglo}}
   g: f
   gloss: female equivalent of "anglo"\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "angla")
-
-    print("\n".join(entry))
-
-    assert "\n".join(entry)=="""\
-angla {adj-meta} :: {{head|es|adjective form|g=f-s}}
-angla {adj} :: feminine singular of "anglo"
-angla {n-meta} :: {{es-noun|f|m=anglo}}
-angla {f} :: female equivalent of "anglo"\
 """
 
 def test_cherry():
@@ -773,21 +593,11 @@ def test_cherry():
     entry = builder.entry_to_text(lang_entry, "cherry")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-cherry
 pos: n
   meta: {{es-noun|m|+|pl2=cherries}}
   g: m
   gloss: cherry tomato\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "cherry")
-
-    assert "\n".join(entry)=="""\
-cherry {n-meta} :: {{es-noun|m|+|pl2=cherries}}
-cherry {m} :: cherry tomato\
-"""
-
 
 def test_torpon():
     orig_text="""\
@@ -805,18 +615,9 @@ def test_torpon():
     entry = builder.entry_to_text(lang_entry, "torpón")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-torpón
 pos: adj
   meta: {{es-adj|f=torpona|mpl=torpones}}
   gloss: clumsy\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "torpón")
-
-    assert "\n".join(entry)=="""\
-torpón {adj-meta} :: {{es-adj|f=torpona|mpl=torpones}}
-torpón {adj} :: clumsy\
 """
 
 def test_trailing_periods():
@@ -837,8 +638,6 @@ def test_trailing_periods():
     entry = builder.entry_to_text(lang_entry, "Mejico")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-Mejico
 pos: prop
   meta: {{es-proper noun|m}}
   g: m
@@ -846,16 +645,6 @@ pos: prop
     q: Spain
   gloss: alternative spelling of "test."
   gloss: test\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "Mejico")
-
-    print("\n".join(entry))
-    assert "\n".join(entry)=="""\
-Mejico {prop-meta} :: {{es-proper noun|m}}
-Mejico {prop} {m} [Spain] :: alternative spelling of "México"
-Mejico {prop} {m} :: alternative spelling of "test."
-Mejico {prop} {m} :: test\
 """
 
 # This fails because "adjective form" headwords are ignored right now
@@ -875,23 +664,12 @@ def test_headword():
     entry = builder.entry_to_text(lang_entry, "algún")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-algún
 pos: adj
   meta: {{head|es|adjective form|g=m|apocopate||standard form|alguno}}
   g: m
   gloss: apocopic form of "alguno"; some
     q: before the noun\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "algún")
-
-    print("\n".join(entry))
-    assert "\n".join(entry)=="""\
-algún {adj-meta} :: {{head|es|adjective form|g=m|apocopate||standard form|alguno}}
-algún {adj} [before the noun] :: apocopic form of "alguno"; some\
-"""
-
 
 def test_noconj():
     orig_text="""\
@@ -909,21 +687,11 @@ def test_noconj():
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: v
   meta: {{es-verb|descans|ar}}
   gloss: (also figuratively, transitive with en) to sit, to rest on
     q: transitive\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "test")
-
-    assert "\n".join(entry) == """\
-test {v-meta} :: {{es-verb|descans|ar}}
-test {vt} :: (also figuratively, transitive with en) to sit, to rest on\
-"""
-
 
 def test_bad_conjugation():
     orig_text="""\
@@ -944,22 +712,11 @@ def test_bad_conjugation():
     entry = builder.entry_to_text(lang_entry, "decaer")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: v
   meta: {{es-verb|descans|ar}}
   gloss: (also figuratively, transitive with en) to sit, to rest on
     q: transitive\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "decaer")
-
-    print("\n".join(entry))
-    assert "\n".join(entry) == """\
-decaer {v-meta} :: {{es-verb|decae|ar|pres=decaigo|pret=decaí|part=decaído}} {{es-conj-er|p=caer|de|combined=1}}
-decaer {v} :: to decay\
-"""
-
 
 def test_abandonar():
     orig_text="""\
@@ -991,8 +748,6 @@ From {{bor|es|fr|abandonner}}, from {{der|es|gem-pro|*bannaną}}.
     entry = builder.entry_to_text(lang_entry, "abandonar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-abandonar
 pos: v
   meta: {{es-verb|abandon|ar}} {{es-conj-ar|abandon|combined=1}}
   etymology: From French "abandonner", from Proto-Germanic "*bannaną".
@@ -1000,15 +755,6 @@ pos: v
   gloss: to neglect
     syn: descuidar\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "abandonar")
-
-    assert "\n".join(entry) == """\
-abandonar {v-meta} :: {{es-verb|abandon|ar}} {{es-conj-ar|abandon|combined=1}}
-abandonar {v} :: to abandon, to leave
-abandonar {v} | descuidar :: to neglect\
-"""
-
 
 def test_bad_conjugation():
     orig_text="""\
@@ -1029,19 +775,9 @@ def test_bad_conjugation():
     entry = builder.entry_to_text(lang_entry, "decaer")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-decaer
 pos: v
   meta: {{es-verb|decae|ar|pres=decaigo|pret=decaí|part=decaído}} {{es-conj-er|p=caer|de|combined=1}}
   gloss: to decay\
-"""
-
-    entry = builder.entry_to_mbformat(lang_entry, "decaer")
-
-    print("\n".join(entry))
-    assert "\n".join(entry) == """\
-decaer {v-meta} :: {{es-verb|decae|ar|pres=decaigo|pret=decaí|part=decaído}} {{es-conj-er|p=caer|de|combined=1}}
-decaer {v} :: to decay\
 """
 
 def test_f():
@@ -1066,21 +802,10 @@ def test_f():
     entry = builder.entry_to_text(lang_entry, "f")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-f
 pos: letter
   meta: {{head|es|letter|lower case||upper case|F}}
   gloss: letter: ef\
 """
-
-    entry = builder.entry_to_mbformat(lang_entry, "f")
-
-    print("\n".join(entry))
-    assert "\n".join(entry) == """\
-f {letter-meta} :: {{head|es|letter|lower case||upper case|F}}
-f {letter} :: letter: ef\
-"""
-
 
 def test_ingo():
 
@@ -1102,14 +827,11 @@ def test_ingo():
 
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
--ingo
 pos: suffix
   meta: {{es-suffix|f=-inga}}
   gloss: A diminutive suffix
     q: chiefly Bolivia\
 """
-
 
 def test_usage():
     orig_text="""\
@@ -1133,8 +855,6 @@ def test_usage():
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|m}}
   g: m
@@ -1170,8 +890,6 @@ Form of {{m|es|-cilla}}, rebracketed from words ending in ''-e''.
     entry = builder.entry_to_text(lang_entry, "-ecilla")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
--ecilla
 pos: suffix
   meta: {{es-noun|f}}
   g: f
@@ -1196,8 +914,6 @@ def test_hubert():
     entry = builder.entry_to_text(lang_entry, "Hubert")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-Hubert
 pos: prop
   meta: {{es-proper noun|m}}
   g: m
@@ -1272,8 +988,6 @@ def test_abajo():
     entry = builder.entry_to_text(lang_entry, "abajo")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-abajo
 pos: adv
   meta: {{es-adv}}
   etymology: a ("to") + bajo ("down"). Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
@@ -1316,8 +1030,6 @@ Since 1994, this letter is treated as two separate ''[[L]]'' letters for collati
     entry = builder.entry_to_text(lang_entry, "LL")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-LL
 pos: letter
   meta: {{head|es|letter|upper case||lower case|ll|mixed case|Ll}}
   usage: Since 1994, this letter is treated as two separate L letters for collation purposes only. In 2010, this letter was officially dropped by the RAE from the Spanish alphabet.
@@ -1353,8 +1065,6 @@ def test_malinchista():
     entry = builder.entry_to_text(lang_entry, "malinchista")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-malinchista
 pos: n
   meta: {{es-noun|mf}}
   g: mf
@@ -1418,8 +1128,6 @@ Probably from the verb {{m|es|guiar}}. Cf. also {{cog|fr|guide}} ({{cog|fro|guie
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|mf}}
   g: mf
@@ -1466,8 +1174,6 @@ test usage notes
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|mf}}
   g: mf
@@ -1504,8 +1210,6 @@ test usage notes
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|mf}}
   g: mf
@@ -1542,8 +1246,6 @@ test usage notes
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|mf}}
   g: mf
@@ -1580,8 +1282,6 @@ test usage notes
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|mf}}
   g: mf
@@ -1620,8 +1320,6 @@ From {{inh|es|la|est}}, from {{inh|es|itc-pro|*est}}, from {{inh|es|ine-pro|*h�
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: v
   meta: {{head|es|verb form}}
   etymology: From Latin "est", from Proto-Italic "*est", from Proto-Indo-European "*h₁ésti". Cognate with Sanskrit "अस्ति", English "is".
@@ -1654,8 +1352,6 @@ def test_noun_multi():
     entry = builder.entry_to_text(lang_entry, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
-_____
-test
 pos: n
   meta: {{es-noun|f}}
   g: f

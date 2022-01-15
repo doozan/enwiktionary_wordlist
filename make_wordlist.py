@@ -31,16 +31,15 @@ import enwiktionary_parser as wtparser
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
 from enwiktionary_parser.sections.usage import UsageSection
 from enwiktionary_parser.sections.etymology import EtymologySection
-from .sense import Sense
+from .wordlist import Wordlist
 
 class WordlistBuilder:
-    def __init__(self, lang_name, lang_id, verb_forms=False):
+    def __init__(self, lang_name, lang_id):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
         self._problems = {}
         self._stats = {}
         self.fixes = set()
-        self.verb_forms = verb_forms # include full verb formtype in definitions
 
         start = fr"(^|\n)==\s*{self.LANG_SECTION}\s*==\s*\n"
         re_endings = [ r"\[\[\s*Category\s*:", r"==[^=]+==", r"----" ]
@@ -143,135 +142,99 @@ class WordlistBuilder:
         entry = []
 
         for word in wikt.ifilter_words():
-            #if self.exclude_word(word):
-            #    continue
+            senses = []
+            for sense in word.ifilter_wordsenses():
+                # Skip senses that are just a request for a definition
+                if "{{rfdef" in sense.gloss:
+                    continue
+                if "{{defn" in sense.gloss:
+                    continue
 
-            has_gloss = False
-            word_entry = []
+                gloss_text = self.gloss_to_text(sense.gloss, title)
+                if gloss_text == "":
+                    continue
 
-            word_entry.append(f"pos: {word.shortpos}")
-            meta = " ".join(map(str,word.form_sources)).replace("\n", "")
-            word_entry.append(f"  meta: {meta}")
+                sense_data = {}
+                sense_data["gloss"] = gloss_text
 
-            if word.genders:
-                word_entry.append(f"  g: {'; '.join(word.genders)}")
+                if sense.gloss.qualifiers:
+                    qualifiers = make_qualification(self.LANG_ID, title, sense.gloss.qualifiers)
+                    if qualifiers:
+                        qualifiers = qualifiers.rstrip(", ")
+                        sense_data["q"] = qualifiers
 
-            if word.qualifiers:
-                qualifiers = make_qualification(self.LANG_ID, title, word.qualifiers)
-                if qualifiers:
-                    word_entry.append(f"  q: {qualifiers}")
+                synonyms = []
+                for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
+                    synonyms += self.items_to_synonyms(nymline.items, title)
+                if synonyms:
+                    sense_data["syn"] = '; '.join(synonyms)
 
+                if sense_data not in senses:
+                    senses.append(sense_data)
+
+            if not senses:
+                continue
+
+            usages = []
             for usage in self.get_usage(word):
                 usage_text = self.usage_to_text(usage, title)
                 if usage_text:
-                    word_entry.append(f"  usage: " + usage_text)
+                    usages.append(usage_text)
 
+            etys = []
             for ety in self.get_etymology(word):
                 for node in ety.ifilter_etymologies():
                     ety_text = self.etymology_to_text(node, title)
                     if ety_text:
-                        word_entry.append(f"  etymology: " + ety_text)
+                        etys.append(ety_text)
+                word.ifilter_wordsenses()
 
-            seen_senses = set()
-            for sense in word.ifilter_wordsenses():
-                # Skip senses that are just a request for a definition
-                if "{{rfdef" in sense.gloss:
-                    continue
-                if "{{defn" in sense.gloss:
-                    continue
-
-                gloss_text = self.gloss_to_text(sense.gloss, title)
-                if gloss_text == "":
-                    continue
-
-                sense_data = []
-
-                sense_data.append(f"  gloss: {gloss_text}")
-                if sense.gloss.qualifiers:
-                    qualifiers = make_qualification(self.LANG_ID, title, sense.gloss.qualifiers)
-                    if qualifiers:
-                        sense_data.append(f"    q: {qualifiers}")
-                synonyms = []
-                for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
-                    synonyms += self.items_to_synonyms(nymline.items, title)
-                if synonyms:
-                    sense_data.append(f"    syn: {'; '.join(synonyms)}")
-
-                if "|".join(sense_data) in seen_senses:
-                    continue
-
-                seen_senses.add("|".join(sense_data))
-                word_entry += sense_data
-                has_gloss = True
-
-                # TODO: Get usage examples?
-
-            # Skip words that have no gloss (filtered verb forms, mostly)
-            if has_gloss:
-                entry += word_entry
-                has_entry = True
-
-        if entry:
-            return ["_____", title] + entry
-
-    def entry_to_mbformat(self, text, title):
-        wikt = wtparser.parse_page(text, title, parent=self)
-
-        entry = []
-
-        for word in wikt.ifilter_words():
-            #if self.exclude_word(word):
-            #    continue
-
-            meta = self.get_meta(title, word)
-            if meta:
-                entry.append(meta)
-
-            for sense in word.ifilter_wordsenses():
-                # Skip senses that are just a request for a definition
-                if "{{rfdef" in sense.gloss:
-                    continue
-                if "{{defn" in sense.gloss:
-                    continue
-
-                gloss_text = self.gloss_to_text(sense.gloss, title)
-                if gloss_text == "":
-                    continue
-
-                synonyms = []
-                for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
-                    synonyms += self.items_to_synonyms(nymline.items, title)
-
-                all_qualifiers = word.qualifiers + sense.gloss.qualifiers
-                pos = make_pos_tag(word, all_qualifiers)
-                qualification = make_qualification(self.LANG_ID, title, all_qualifiers, True)
-
-                items = [title, pos]
-                if qualification:
-                    items.append("["+qualification+"]")
-                if synonyms:
-                    items.append("|")
-                    items.append("; ".join(synonyms))
-
-                items.append("::")
-                items.append(gloss_text)
-
-                line = " ".join(items)
-                entry.append(line)
+            entry += self.make_word_entry(
+                pos = word.shortpos,
+                meta = " ".join(map(str,word.form_sources)).replace("\n", ""),
+                genders = "; ".join(word.genders) if word.genders else None,
+                qualifier = make_qualification(self.LANG_ID, title, word.qualifiers),
+                usages = usages,
+                etys =  etys,
+                senses = senses,
+            )
 
         return entry
 
+    @staticmethod
+    def make_word_entry(pos, meta, qualifier, genders, usages, etys, senses):
+        word_entry = []
+        word_entry.append(f"pos: {pos}")
+        if meta:
+            word_entry.append(f"  meta: {meta}")
+
+        if genders:
+            word_entry.append(f"  g: {genders}")
+
+        if qualifier:
+            word_entry.append(f"  q: {qualifier}")
+
+        for usage in usages:
+            if usage:
+                word_entry.append(f"  usage: {usage}")
+
+        for ety in etys:
+            if ety:
+                word_entry.append(f"  etymology: {ety}")
+
+        for sense_data in senses:
+            for k,v in sense_data.items():
+                if not v:
+                    continue
+                if k == "gloss":
+                    word_entry.append(f"  {k}: {v}")
+                else:
+                    word_entry.append(f"    {k}: {v}")
+
+        return word_entry
+
     def gloss_to_text(self, gloss, title):
-        text = re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title).strip())
-
-        if self.verb_forms:
-            return text
-
-        match = re.search(r"(gerund|pp|cond|fut|infinitive|imp|impf|neg_imp|pres|pret)_(\w+)", text)
-        if match:
-            return ""
-
-        return text
+        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title).strip())
 
     def usage_to_text(self, usage, title):
         text = wiki_to_text(usage, title).strip()
@@ -299,6 +262,67 @@ class WordlistBuilder:
 
         return synonyms
 
+    @classmethod
+    def word_to_text(cls, word, exclude_verb_forms):
+
+        senses = []
+        non_verbform_sense = False
+        for sense in word.senses:
+            if not sense.gloss:
+                continue
+
+            if exclude_verb_forms:
+                if sense.nonform or not sense.formtype:
+                    non_verbform_sense = True
+
+                elif "_" not in sense.formtype and sense.formtype not in ["gerund", "infinitive", "reflexive"]:
+                    non_verbform_sense = True
+
+            s = {}
+            s["gloss"] = sense.gloss
+            s["q"] = sense.qualifier.rstrip(", ") if sense.qualifier else None
+            s["syn"] = "; ".join(sense.synonyms) if sense.synonyms else None
+            s["regional"] = "; ".join(sense.regions) if sense.regions else None
+            senses.append(s)
+
+        if not senses or exclude_verb_forms and not non_verbform_sense:
+            return
+
+        word_lines = WordlistBuilder.make_word_entry(
+            pos = word.pos,
+            meta = word.meta,
+            qualifier = word.qualifier,
+            genders = word.genders,
+            usages = [word.use_notes],
+            etys = [word.etymology],
+            senses = senses
+            )
+
+        return word_lines
+
+    @staticmethod
+    def has_extra_info(word):
+        """ Returns true if a word has data beyond what can be auto generated """
+        return word.qualifier or word.use_notes or word.etymology
+
+    @classmethod
+    def is_generated(cls, word, wordlist):
+        """ Returns true if a word is a simple form that can be generated by the given wordlist """
+
+        if cls.has_extra_info(word):
+            return False
+
+        for sense in word.senses:
+            if not sense.formtype or sense.nonform:
+                return False
+
+            lemmas = wordlist.get_words(sense.lemma, word.pos)
+
+            if not any(l for l in lemmas if word.word in l.forms.get(sense.formtype, [])):
+                return False
+
+        return True
+
 
 def iter_langdata(datafile):
 
@@ -307,7 +331,7 @@ def iter_langdata(datafile):
 
     yield from LanguageFile.iter_articles(datafile)
 
-def iter_xml(datafile, lang_section, lang_id):
+def iter_xml(datafile, lang_section):
 
     if not os.path.isfile(datafile):
         raise FileNotFoundError(f"Cannot open: {datafile}")
@@ -316,15 +340,13 @@ def iter_xml(datafile, lang_section, lang_id):
     parser = dump.parse()
 
     langparser = LanguageFile(lang_section)
-    #builder = WordlistBuilder(lang_section, lang_id)
 
     for entry in parser:
 
-        if ":" in entry.title:
+        if ":" in entry.title or "/" in entry.title:
             continue
 
         lang_entry = langparser.get_language_entry(entry.text)
-#        lang_entry = builder.get_language_entry(entry.text)
 
         if not lang_entry:
             continue
@@ -338,87 +360,75 @@ def main():
     parser.add_argument("--xml", help="Read entries from specified wiktionary XML dump")
     parser.add_argument("--langdata", help="Read articles from specified language data file")
     parser.add_argument("--wordlist", help="Read articles from existing wordlist")
-    parser.add_argument("--lang-id", help="Language id", required=True)
+    parser.add_argument("--lang-id", help="Language id")
     parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
-    parser.add_argument("--mbformat", help="Output mb-compatible file format", action='store_true')
-    parser.add_argument('--verbforms', action='store_true', help="Include verb cojugation details")
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--exclude-verb-forms', action='store_true', help="Exclude all verb forms")
+    parser.add_argument('--exclude-generated-forms', action='store_true', help="Exclude forms entries that can be generate automatically")
     args = parser.parse_args()
 
     count = 0
     entries = {}
 
-    # Dump an existing wordlist
-    if args.wordlist:
-        from enwiktionary_wordlist.wordlist import Wordlist
+    if args.langdata or args.xml:
+        if not args.lang_id:
+            raise ValueError("--lang-id is required when using --xml or --langdata")
 
-        with open(args.wordlist) as data:
-            wordlist = Wordlist(data)
-            prev_word = None
-            pos = None
-            for word in wordlist.iter_all_words():
-                if word.word != prev_word:
-                    print("_____")
-                    print(word.word)
-                pos = word.pos
-                print(f"pos: {word.pos}")
-                print(f"  meta: {word.meta}")
-                if word.forms:
-                    form_str = []
-                    for formtype, forms in word.forms.items():
-                        for form in forms:
-                            form_str.append(f"{formtype}={form}")
-                    print(f"  forms: {'; '.join(form_str)}")
-                if word.genders:
-                    print(f"  g: {word.genders}")
-                for sense in word.senses:
-                    print(f"  gloss: {sense.gloss}")
-                    if sense.qualifier:
-                        qualifiers = make_qualification(self.LANG_ID, word.word, sense.qualifier.split("; "))
-                        if qualifiers:
-                            print(f"    q: {qualifiers}")
-                    if sense.synonyms:
-                        print(f"    syn: {'; '.join(sense.synonyms)}")
+        elif args.lang_id not in lang_ids:
+            raise ValueError(f"Unknown language id: {args.lang_id}")
 
-                prev_word = word.word
+        lang_section = lang_ids[args.lang_id]
+        builder = WordlistBuilder(lang_section, args.lang_id)
 
+        if args.langdata:
+            iter_entry = iter_langdata(args.langdata)
+        else:
+            iter_entry = iter_xml(args.xml, lang_section)
 
-    if args.lang_id not in lang_ids:
-        raise ValueError(f"Unknown language id: {args.lang_id}")
-    lang_section = lang_ids[args.lang_id]
+        def _iter_entries():
+            for title, entry in iter_entry:
+                entry = builder.entry_to_text(entry, title)
+                if not entry:
+                    continue
+                yield title, entry
 
-    if args.langdata:
-        iter_data = iter_langdata(args.langdata)
-    elif args.xml:
-        iter_data = iter_xml(args.xml, lang_section, args.lang_id)
+        iter_entries = _iter_entries()
+
+    elif args.wordlist:
+        infile = open(args.wordlist)
+        iter_entries = Wordlist._iter_entries(infile)
+
     else:
-        print("No input file specified, use --xml or --lang-data")
+        raise ValueError("No input file specified, use --xml or --lang-data or --wordlist")
 
-    builder = WordlistBuilder(lang_section, args.lang_id, verb_forms=args.verbforms)
-
-    to_text = builder.entry_to_mbformat if args.mbformat else builder.entry_to_text
-
-    for entry_title, lang_entry in iter_data:
+    # Build a Wordlist manually so later it can be used to validate entries
+    wordlist = Wordlist()
+    count = 0
+    for title, entry in iter_entries:
         count += 1
         if count % 1000 == 0 and args.verbose:
             print(count, file=sys.stderr, end="\r")
-        if args.limit and count % args.limit == 0:
+        if args.limit and count >= args.limit:
             break
+        wordlist.all_entries[title] = map(str.lstrip, entry)
 
-        try:
-            entry = to_text(lang_entry, entry_title)
-        except ValueError as ex:
-            print(f"{entry_title} generated an error {ex}", file=sys.stderr)
+    for word in sorted(wordlist.all_entries.keys()):
+        header = False
+        for word_obj in wordlist.get_words(word):
+            if args.exclude_generated_forms and WordlistBuilder.is_generated(word_obj, wordlist):
+                continue
 
-        if entry:
-            entries[entry_title] = entry
-        else:
-            print(f"{entry_title} generated no data", file=sys.stderr)
-
-    for title, entry in sorted(entries.items()):
-        print("\n".join(entry))
+            word_lines = WordlistBuilder.word_to_text(word_obj, args.exclude_verb_forms)
+            if not word_lines:
+                continue
+            if not header:
+                header = True
+                print("_____")
+                print(word)
+            print("\n".join(word_lines))
 
     print(count, "entries processed", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
+
