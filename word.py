@@ -23,6 +23,7 @@ class Word():
 
         self.word = word
         self._pos = None
+        # accessed as .forms
         self._forms = None # { formtype: [form1, ..] }
         self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
         self._sense_data = None
@@ -87,6 +88,11 @@ class Word():
         for formtype,forms in data.items():
             for form in forms:
                 self.add_form(formtype, form)
+
+    def get_formtypes(self, word):
+       for formtype, forms in self.forms.items():
+           if word in forms:
+               yield formtype
 
     def add_lemma(self, lemma, formtype):
         if lemma not in self.form_of:

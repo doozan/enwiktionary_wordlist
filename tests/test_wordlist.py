@@ -366,6 +366,8 @@ diosa {f} [biochemistry] :: diose
     assert dios.is_lemma == True
     assert dios.forms == {'f': ['diosa'], 'fpl': ['diosas'], 'pl': ['dioses']}
 
+    assert list(wlist.get_formtypes("dios", "n", "diosa")) == ["f"]
+
     diosa =  next(wlist.get_words("diosa", "n"))
     #assert diosa.is_lemma == False
 

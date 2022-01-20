@@ -43,6 +43,9 @@ def test_word():
     assert word.pos == "prop"
     assert word.genders == "m"
     assert word.forms == {'f': ['Fulana'], 'fpl': ['Fulanas'], 'pl': ['Fulanos']}
+    assert list(word.get_formtypes("Fulanas")) == ["fpl"]
+    assert list(word.get_formtypes("Fulana")) == ["f"]
+    assert list(word.get_formtypes("none")) == []
 
     word = Word("-ito", [ ("pos", "suffix"), ("meta", "{{es-suffix|m|f=-ita}}") ])
     assert word.pos == "suffix"

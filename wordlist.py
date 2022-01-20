@@ -224,6 +224,10 @@ class Wordlist():
 
         return lemmas
 
+    def get_formtypes(self, lemma, pos, form):
+        """ Returns the possible formtypes of a given form in lemma,pos """
+        for word in self.get_words(lemma, pos):
+            yield from word.get_formtypes(form)
 
     @staticmethod
     def parse_line(line):
