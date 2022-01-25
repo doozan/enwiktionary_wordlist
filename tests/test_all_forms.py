@@ -10,24 +10,20 @@ _____
 protector
 pos: n
   meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
-  forms: f=protectora; f=protectriz; fpl=protectoras; fpl=protectrices; pl=protectores
   g: m
   gloss: protector (someone who protects or guards)
 pos: n
   meta: {{es-noun|m}}
-  forms: pl=protectores
   g: m
   gloss: protector (a device or mechanism which is designed to protect)
 _____
 protectora
 pos: n
   meta: {{es-noun|f|m=protector}}
-  forms: m=protector; mpl=protectores; pl=protectoras
   g: f
   gloss: female equivalent of "protector"
 pos: n
   meta: {{es-noun|f}}
-  forms: pl=protectoras
   g: f
   gloss: animal shelter (an organization that provides temporary homes for stray pet animals)
     syn: protectora de animales
@@ -36,24 +32,23 @@ protectoras
 pos: n
   meta: {{head|es|noun plural form|g=f-p}}
   g: f-p
-  gloss: inflection of "protector"
+  gloss: plural of "protectora"
 _____
 protectores
 pos: n
   meta: {{head|es|noun plural form|g=m-p}}
   g: m-p
-  gloss: inflection of "protector"
+  gloss: plural of "protector"
 _____
 protectrices
 pos: n
   meta: {{head|es|noun plural form|g=f-p}}
   g: f-p
-  gloss: inflection of "protector"
+  gloss: plural of "protectriz"
 _____
 protectriz
 pos: n
   meta: {{es-noun|f|m=protector}}
-  forms: m=protector; mpl=protectores; pl=protectrices
   g: f
   gloss: alternative form of "protectora"
     q: uncommon
@@ -63,12 +58,16 @@ pos: n
 'protectora': ['n|protector', 'n|protectora'],
 'protectoras': ['n|protector', 'n|protectora'],
 'protectores': ['n|protector'],
-'protectrices': ['n|protector'],
-'protectriz': ['n|protector'],
+'protectrices': ['n|protector', 'n|protectora'],
+'protectriz': ['n|protector', 'n|protectora'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert dict(AllForms.from_wordlist(wordlist).all_forms) == expected
+    for word in wordlist.get_words("protectora"):
+        print("###", [word.word, word.pos, word.forms, word.form_of])
+    res = dict(AllForms.from_wordlist(wordlist).all_forms)
+    print(res)
+    assert res == expected
 
 
 def test_secondary_lemma_unique_forms():
@@ -597,21 +596,53 @@ pos: adj
     wordlist = Wordlist(wordlist_data.splitlines())
     assert AllForms.from_wordlist(wordlist).all_forms == expected
 
-def test_ninguno():
+def test_nonlemma():
+
+    # lemmas can use meta to make forms
     wordlist_data = """\
 _____
 ningún
-pos: adj
-  meta: {{head|es|adjective form|g=m|apocopate||standard form|ninguno}}
+pos: determiner
+  meta: {{head|es|determiner|g=m|masculine|ninguno|feminine|ninguna}}
   gloss: test
 """
-    expected = {
-'ninguno': ['adj|ningún'],
-'ningún': ['adj|ningún']
-}
-
+    expected = {'ningún': ['determiner|ningún']}
     wordlist = Wordlist(wordlist_data.splitlines())
     assert AllForms.from_wordlist(wordlist).all_forms == expected
+
+    # but forms can't
+    wordlist_data = """\
+_____
+ningún
+pos: determiner
+  meta: {{head|es|determiner form|g=m|masculine|ninguno|feminine|ninguna}}
+  gloss: test
+"""
+    expected = {}
+    wordlist = Wordlist(wordlist_data.splitlines())
+    assert AllForms.from_wordlist(wordlist).all_forms == expected
+
+    # however, forms can declare themselves forms of existing lemmas
+    wordlist_data = """\
+_____
+ninguno
+pos: determiner
+  meta: {{head|es|determiner|g=m|feminine|ninguna}}
+  gloss: no; none
+_____
+ningún
+pos: determiner
+  meta: {{head|es|determiner form|g=m|masculine|ninguno|feminine|ninguna}}
+  gloss: apocopic form of "ninguno"
+"""
+    expected = {
+            'ninguno': ['determiner|ninguno'],
+            'ninguna': ['determiner|ninguno'],
+            'ningún': ['determiner|ninguno']}
+    wordlist = Wordlist(wordlist_data.splitlines())
+    assert AllForms.from_wordlist(wordlist).all_forms == expected
+
+
 
 
 def test_mmap(tmpdir):
@@ -914,3 +945,105 @@ pos: n
     forms = AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms
     assert forms == expected
 
+
+def test_redirection():
+    data="""\
+_____
+test1
+pos: n
+  g: m
+  gloss: test
+_____
+test2
+pos: n
+  gloss: alternate form of "test1"
+_____
+test3
+pos: n
+  gloss: alternate form of "test2"
+_____
+test4
+pos: n
+  gloss: misspelling of "test3"
+_____
+test5
+pos: n
+  gloss: alternative form of "test6"
+_____
+test6
+pos: n
+  gloss: alternative form of "test5"
+_____
+test7
+pos: n
+  gloss: alternative form of "test-none"
+_____
+test8
+pos: n
+  gloss: alternative form of "test4"
+_____
+test9
+pos: n
+  gloss: alternative form of "test8"
+"""
+
+    wlist = Wordlist(data.splitlines())
+    allforms = AllForms.from_wordlist(wlist, resolve_true_lemmas=True)
+
+    assert wlist.has_word("test1", "n") == True
+    assert wlist.has_word("test2", "n") == True
+
+    test1 = next(wlist.get_words("test1", "n"))
+    test2 = next(wlist.get_words("test2", "n"))
+    test3 = next(wlist.get_words("test3", "n"))
+    test4 = next(wlist.get_words("test4", "n"))
+    test5 = next(wlist.get_words("test5", "n"))
+    test6 = next(wlist.get_words("test6", "n"))
+    test7 = next(wlist.get_words("test7", "n"))
+    test8 = next(wlist.get_words("test8", "n"))
+    test9 = next(wlist.get_words("test9", "n"))
+
+    assert test1.word == "test1"
+    assert test1.pos == "n"
+    assert test1.genders == "m"
+
+    assert allforms._resolve_lemmas(wlist, test1) == {'test1': ['m']}
+    assert allforms._resolve_lemmas(wlist, test2) == {'test1': ['alt']}
+    assert allforms._resolve_lemmas(wlist, test3) == {'test1': ['alt']}
+    assert allforms._resolve_lemmas(wlist, test3, 0) == {}
+    assert allforms._resolve_lemmas(wlist, test4) == {'test1': ['alt']}
+    assert allforms._resolve_lemmas(wlist, test5) == {}
+    assert allforms._resolve_lemmas(wlist, test6) == {}
+    assert allforms._resolve_lemmas(wlist, test7) == {}
+
+    assert allforms._resolve_lemmas(wlist, test8) == {'test1': ['alt']}
+
+    assert allforms._resolve_lemmas(wlist, test9) == {}
+    assert allforms._resolve_lemmas(wlist, test9, 4) == {'test1': ['alt']}
+
+
+def test_condense_verbs_wrong_existing_form():
+
+    wordlist_data = """\
+_____
+aborregas
+pos: v
+  meta: {{head|es|verb form}}
+  gloss: pres_2s of "aborregar"
+_____
+aborregar
+pos: v
+  meta: {{head|es|verb form}}
+  gloss: infinitive of "aborregarse"
+_____
+aborregarse
+pos: v
+  meta: {{es-verb}} {{es-conj}}
+  gloss: verb
+"""
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+#    assert "te aborregas" in AllForms.from_wordlist(wordlist).all_forms
+    assert "aborregas" in AllForms.from_wordlist(wordlist).all_forms
+    assert AllForms.from_wordlist(wordlist).all_forms["aborregas"] == ['v|aborregarse']
+    assert AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms["aborregas"] == ['v|aborregas', 'v|aborregar', 'v|aborregarse']

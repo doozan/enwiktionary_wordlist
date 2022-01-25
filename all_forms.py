@@ -15,7 +15,7 @@ class AllForms:
         self.all_forms = collections.defaultdict(list)
         self.resolve_true_lemmas = resolve_true_lemmas
 
-    def get_lemmas(self, word):
+    def get_lemmas(self, word, filter_pos=[]):
         if hasattr(self, 'mmap_obj'):
             if word not in self.all_forms:
                 return []
@@ -30,6 +30,8 @@ class AllForms:
                 form,pos,*lemmas = row
                 if form != word:
                     break
+                if filter_pos and pos not in filter_pos:
+                    continue
 
                 for lemma in lemmas:
                     value = f"{pos}|{lemma}"
@@ -38,7 +40,9 @@ class AllForms:
 
             return results
         else:
-            return self.all_forms.get(word, [])
+            if not filter_pos:
+                return self.all_forms.get(word, [])
+            return [x for x in self.all_forms.get(word, []) if x.split("|")[0] in filter_pos]
 
     @classmethod
     def from_data(cls, allforms_data):
@@ -86,17 +90,71 @@ class AllForms:
         for word in wordlist.iter_all_words():
             self._process_word_forms(word, wordlist)
 
+    def is_lemma(self, word):
+
+        """
+        Returns True if
+           + " form" not in meta
+           + the first gloss is not a "form of"
+        else False
+
+        Note, there's a similar implementation in dump_lemmas,
+        any major improvements should be ported there
+        """
+
+        if not word.senses:
+            return False
+
+        if word.meta and " form" in word.meta and " form" not in word.word:
+            return False
+
+        # If the first sense is a form-of, it's not a lemma
+        for sense in word.senses:
+            if sense.formtype:
+                return False
+            break # Only look at the first sense
+
+        return True
+
+
+    def _resolve_lemmas(self, wordlist, word, max_depth=3):
+        """
+        follows a wordform to its final lemma
+        word is a Word object
+        Returns a dict: { lemma1: [formtypes], .. }
+        """
+
+        if self.is_lemma(word):
+            return {word.word: [word.genders]}
+
+        lemmas = {}
+        for lemma, formtypes in word.form_of.items():
+
+            if any(self.is_lemma(w) for w in wordlist.get_words(lemma, word.pos)):
+                lemmas[lemma] = formtypes
+
+            elif max_depth>0:
+                for redirect in wordlist.get_words(lemma, word.pos):
+                    lemmas.update(self._resolve_lemmas(wordlist, redirect, max_depth-1))
+                    break # Only look at the first word
+
+            else:
+                print(f"Lemma recursion exceeded: {word.word} {word.pos} -> {lemma}", file=sys.stderr)
+                return {}
+
+        return lemmas
+
     def _process_word_forms(self, word, wordlist):
 
         if not len(word.senses):
             return
 
         if self.resolve_true_lemmas:
-            if word.is_lemma:
+            if self.is_lemma(word):
                 self._add_form(word.word, word.pos, word.word)
                 self._add_word_forms(word, word.word, wordlist)
 
-            for lemma, formtypes in wordlist.get_lemmas(word).items():
+            for lemma, formtypes in self._resolve_lemmas(wordlist, word).items():
                 self._add_form(word.word, word.pos, lemma)
                 self._add_word_forms(word, lemma, wordlist)
 
@@ -122,8 +180,8 @@ class AllForms:
 
             # If this is a lemma, restrict overrides to opposite lemmas
             # Conversely, if this is a form, allow opposite gendered forms to override it
-            if word.is_lemma:
-                opposite_words = [ w for w in opposite_words if w.is_lemma ]
+            if self.is_lemma(word):
+                opposite_words = [ w for w in opposite_words if self.is_lemma(w) ]
         else:
             opposite_words=[]
 
