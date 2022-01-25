@@ -1,0 +1,102 @@
+#!/usr/bin/python3
+
+import argparse
+import csv
+import io
+import sys
+from enwiktionary_wordlist.wordlist import Wordlist
+from collections import defaultdict
+
+
+verb_types = [
+    "auxiliar",
+    "copulativo",
+    "impersonal",
+    "intransitivo",
+    "pronominal",
+    "transitivo",
+]
+
+
+def is_lemma(word):
+
+    """
+    This differs slightly from wiktionary's concept of a lemma.
+    Wiktionary:
+       + " form" not in meta
+    This:
+       + " form" not in meta
+       + any gloss is not a "form of"
+
+    Mainly this means that we consider "feminine equivalent" nouns to be forms and not lemmas unless they have definitions
+
+    Note, there's a similar implementation in all_forms,
+    any major improvements should be ported there
+    """
+
+    if not word.senses:
+        return False
+
+    # TODO: deeper/better search if " form" in self.word (maybe "pos form")?
+    if word.meta and " form" in word.meta and " form" not in word.word:
+        return False
+
+    # singular nouns are always lemmas, even "feminine of"
+#    if (self.pos == "n" and self.genders in ["m", "f"]):
+#        return True
+
+    for sense in word.senses:
+        if not sense.formtype:
+            return True
+
+        if "_" not in sense.formtype \
+                and sense.formtype not in ["f", "fpl", "mpl", "pl", "form", "gerund", "infinitive", "reflexive"]:
+            return True
+
+    return False
+
+
+
+if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate forms-to-lemmas data from wordlist")
+    parser.add_argument("--only-unqualified", action='store_true', help="Only export lemmas that contain a gloss without qualifiers")
+    parser.add_argument("wordlist", help="wordlist")
+    args = parser.parse_args()
+
+    with open(args.wordlist) as wordlist_data:
+        wordlist = Wordlist(wordlist_data, cache_words=True)
+
+#    for word in wordlist.get_words("me"):
+#        print(word.word, word.pos, word.is_lemma, len(word.senses), word.form_of)
+#    exit()
+
+
+    items = defaultdict(list)
+
+    lemmas = set()
+    values = []
+    for word in wordlist.iter_all_words():
+
+        if args.only_unqualified:
+            sense = word.senses[0]
+            if sense.regions:
+                continue
+            if sense.qualifier:
+                if word.pos != "v":
+                    continue
+                if any([q for q in sense.qualifier.split(",") if q not in verb_types]):
+                    continue
+
+        # TODO: Since we want to use wiktionary's definition of a lemma, we should implement it here
+        # or do we? - isn't it better to have "niña" as a form and not a lemma, especially for finding DRAE differences
+        # either way, better to build our own definition of is_lemma and keep it here
+        if is_lemma(word) or any(x for x in ["alt", "old", "rare", "spell"] for f in word.form_of.values() if x in f):
+            if word.word not in lemmas:
+                lemmas.add(word.word)
+                print(word.word)
+#
+#    for lemma in sorted(lemmas):
+#        print(lemma)
