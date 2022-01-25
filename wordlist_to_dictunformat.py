@@ -51,12 +51,18 @@ def mem_use():
 
     return int(memusage.strip())
 
+
+def is_lemma(word):
+    if word.meta and " form" in word.meta:
+        return False
+    return True
+
 def get_primary_word(words):
     """ Returns the first item in a list that is a lemma
     If nothing found, returns the first word in the list
     """
     for word in words:
-        if wordlist.has_lemma(word):
+        if any(is_lemma(w) for w in wordlist.get_words(word)):
             return word
 
     words.sort()

@@ -57,6 +57,14 @@ asco|ascos
 </ol>\
 """
     print("\n".join(exporter.export(data.splitlines(), None, "es", "test")))
+
+    from ..wordlist import Wordlist
+    wordlist = Wordlist(data.splitlines())
+    for word in wordlist.iter_all_words():
+        print(word.word, word.pos)
+        for sense in word.senses:
+            print("  ",sense.gloss)
+
     assert "\n".join(exporter.export(data.splitlines(), None, "es", "test")) == expected.strip()
 
 
