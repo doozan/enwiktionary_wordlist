@@ -169,7 +169,7 @@ class Wordlist():
 
     def get_words(self, title, pos=None):
         if title not in self.all_entries:
-            return
+            return []
 
         if self.cache_words:
             if title not in self._cached:
