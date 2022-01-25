@@ -161,18 +161,6 @@ class Wordlist():
 #                break
             yield from self.get_words(word)
 
-    def has_lemma(self, lemma, pos=None):
-        """
-        lemma is a string
-        pos is a string
-        Check if a given word, pos is a lemma
-        """
-
-        # only consider it a lemma if the first usage is as a lemma
-        for word in self.get_words(lemma, pos):
-            return word.is_lemma
-        return False
-
     def has_entry(self, word):
         return word in self.all_entries
 
@@ -200,29 +188,6 @@ class Wordlist():
 
     def _get_words(self, word, pos=None):
         yield from self.get_entry_words(word, self.all_entries.get(word,[]), pos)
-
-    def get_lemmas(self, word, max_depth=3):
-        """
-        word is a Word object
-        Returns a dict: { lemma1: [formtypes], .. }
-        """
-
-        if word.is_lemma:
-            return {word.word: [word.genders]}
-
-        lemmas = {}
-        for lemma, formtypes in word.form_of.items():
-            if self.has_lemma(lemma, word.pos):
-                lemmas[lemma] = formtypes
-            elif max_depth>0:
-                for redirect in self.get_words(lemma, word.pos):
-                    lemmas.update(self.get_lemmas(redirect, max_depth-1))
-                    break # Only look at the first word
-            else:
-                print(f"Lemma recursion exceeded: {word.word} {word.pos} -> {lemma}", file=sys.stderr)
-                return {}
-
-        return lemmas
 
     def get_formtypes(self, lemma, pos, form):
         """ Returns the possible formtypes of a given form in lemma,pos """
