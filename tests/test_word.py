@@ -50,3 +50,30 @@ def test_word():
     word = Word("-ito", [ ("pos", "suffix"), ("meta", "{{es-suffix|m|f=-ita}}") ])
     assert word.pos == "suffix"
     assert word.forms == {'f': ['-ita']}
+
+
+    word = Word("protectriz", [ ("pos", "n"), ("meta", "{{es-noun|f|m=protector}}") ])
+    word.add_sense([("gloss",'alternative form of "protectora"'),("q","uncommon")])
+    assert word.forms == {'m': ['protector'], 'mpl': ['protectores'], 'pl': ['protectrices']}
+    assert word.form_of == {'protectora': ['alt']}
+
+
+    word = Word("aquellos", [ ("pos", "m-p"), ("meta", "{{head|es|pronoun|demonstrative|g=m-p}}") ])
+    word.add_sense([("gloss",'alternative spelling of "aquéllos"')])
+    assert word.form_of == {'aquéllos': ['alt']}
+
+    # Assure form_of parses senses
+    word = Word("aquellos", [
+        ("pos", "m-p"),
+        ("meta", "{{head|es|pronoun|demonstrative|g=m-p}}"),
+        ("gloss",'alternative spelling of "aquéllos"'),
+        ])
+    assert word.form_of == {'aquéllos': ['alt']}
+
+    word = Word("asco", [
+        ('pos', 'n'),
+        ('meta', '{{es-noun|m}}'),
+        ('g', 'm'),
+        ('gloss', 'alternative form of "asca"'),
+        ])
+    assert len(word.senses) == 1

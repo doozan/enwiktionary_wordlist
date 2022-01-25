@@ -25,7 +25,8 @@ class Word():
         self._pos = None
         # accessed as .forms
         self._forms = None # { formtype: [form1, ..] }
-        self.form_of = {} # { lemma: [formtype1, formtype2 ..] }
+        # accessed as .form_of
+        self._form_of = None # { lemma: [formtype1, formtype2 ..] }
         self._sense_data = None
         self._senses = None
         self.meta = None
@@ -55,12 +56,6 @@ class Word():
             # Term labels
             elif key == "q":
                 self.qualifier = value
-
-    @property
-    def is_lemma(self):
-        #return not (self.genders == "f" and "m" in self.forms) and \
-        return \
-            self.senses and not self.form_of
 
     def add_form(self, formtype, form):
         if self._forms is None:
@@ -145,15 +140,22 @@ class Word():
 
     @property
     def senses(self):
-        if self._sense_data:
-            self.parse_sense_data()
+        self._parse_sense_data()
         if self._senses:
             return self._senses
         return []
 
-    def parse_sense_data(self):
+    def _parse_sense_data(self):
+        if not self._sense_data:
+            return
+
+        # Unset sense_data quickly so it doesn't get called recursively if
+        # something reads .forms or .form_of
+        data = self._sense_data
+        self._sense_data = None
+
         sense = []
-        for kv in self._sense_data:
+        for kv in data:
             key, value = kv
             if key == "gloss":
                 if sense:
@@ -164,7 +166,6 @@ class Word():
         if sense:
             self.add_sense(sense)
 
-        self._sense_data = None
 
     def add_sense(self, data): # pos, qualifier, gloss, syndata):
         sense = Sense(data) # pos, qualifier, gloss, syndata)
@@ -185,13 +186,24 @@ class Word():
 #        self.senses.append(sense)
 
     @property
-    def forms(self):
-        if not self._forms and not self._meta_parsed and self.meta:
+    def form_of(self):
+        self._parse_meta()
+        self._parse_sense_data()
+        return self._form_of
 
-            self.get_forms_from_meta()
+    def _parse_meta(self):
+        if not self._forms:
+            self._forms = {}
+        if not self._form_of:
+            self._form_of = {}
+        if not self._meta_parsed and self.meta:
             self._meta_parsed = True
-            if not self._forms:
-                return {}
+            self.get_forms_from_meta()
+
+    @property
+    def forms(self):
+        if self._forms is None:
+            self._parse_meta()
 
             # Only do this if there are no non-form senses?
 #            if self.genders == "f":
@@ -200,9 +212,6 @@ class Word():
             if self.genders == "fp":
                 for form in self._forms.get("mpl", []):
                     self.add_lemma(form, "fpl")
-
-        if not self._forms:
-            return {}
 
         return self._forms
 
