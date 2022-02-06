@@ -318,7 +318,8 @@ class WordlistBuilder:
 
             lemmas = wordlist.get_words(sense.lemma, word.pos)
 
-            if not any(l for l in lemmas if word.word in l.forms.get(sense.formtype, [])):
+            formtype = "pl" if word.pos == "adj" and sense.formtype == "mpl" else sense.formtype
+            if not any(l for l in lemmas if word.word in l.forms.get(formtype, [])):
                 return False
 
         return True
@@ -413,19 +414,36 @@ def main():
         wordlist.all_entries[title] = map(str.lstrip, entry)
 
     for word in sorted(wordlist.all_entries.keys()):
+        skipped = []
+        skipped_pos = None
         header = False
         for word_obj in wordlist.get_words(word):
+
+            # Words with forms before lemmas are forms
+            # eg, piernas is usually a form of pierna, not the less-frequenly used piernas
+            # because its words are listed in the order (piernas, form of pierna), (piernas, lemma)
+            # For these rare cases, it's important to preserve the "form of", even if it's a
+            # generated form of
+
+            if word_obj.pos != skipped_pos:
+                skipped = []
+                skipped_pos = word_obj.pos
+
             if args.exclude_generated_forms and WordlistBuilder.is_generated(word_obj, wordlist):
+                skipped.append(word_obj)
                 continue
 
-            word_lines = WordlistBuilder.word_to_text(word_obj, args.exclude_verb_forms)
-            if not word_lines:
-                continue
-            if not header:
-                header = True
-                print("_____")
-                print(word)
-            print("\n".join(word_lines))
+            queue = skipped + [word_obj]
+            skipped = []
+            for word_obj in queue:
+                word_lines = WordlistBuilder.word_to_text(word_obj, args.exclude_verb_forms)
+                if not word_lines:
+                    continue
+                if not header:
+                    header = True
+                    print("_____")
+                    print(word)
+                print("\n".join(word_lines))
 
     print(count, "entries processed", file=sys.stderr)
 
