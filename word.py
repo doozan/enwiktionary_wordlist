@@ -64,6 +64,11 @@ class Word():
         if "[[" in form or "</" in form:
             form = wiki_to_text(form, self.word)
 
+        # strip "no" and direct objects that preceed the verb conjugation
+        # "no te metes" -> "metes"
+        if self.pos == "v" and " " in form:
+            form = re.sub(f"^(?:no )?(?:(?:me|te|se|nos|os) )?(.*)", r'\1', form)
+
         if formtype not in self._forms:
             self._forms[formtype] = [form]
         else:
