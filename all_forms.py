@@ -3,92 +3,89 @@
 import argparse
 import collections
 import csv
-import mmap
+import os
+import pickle
+import sqlite3
 import sys
 
 from .wordlist import Wordlist
 
 class AllForms:
 
-    def __init__(self, resolve_true_lemmas=True):
-        #self.count_formtype = collections.defaultdict(lambda: 0)
-        self.all_forms = collections.defaultdict(list)
-        self.resolve_true_lemmas = resolve_true_lemmas
+    def __init__(self, db=None):
 
-    def get_lemmas(self, word, filter_pos=[]):
-        if hasattr(self, 'mmap_obj'):
-            if word not in self.all_forms:
-                return []
-            offset = self.all_forms[word]
-            self.mmap_obj.seek(offset)
-
-            results = []
-            for line in iter(self.mmap_obj.readline, b''):
-
-                line = line.decode('utf-8').strip()
-                row = next(csv.reader([line]), None)
-                form,pos,*lemmas = row
-                if form != word:
-                    break
-                if filter_pos and pos not in filter_pos:
-                    continue
-
-                for lemma in lemmas:
-                    value = f"{pos}|{lemma}"
-                    if value not in results:
-                        results.append(f"{pos}|{lemma}")
-
-            return results
+        if db:
+            existing = os.path.exists(db)
+            # TODO check if file exists
+            self.dbcon = sqlite3.connect(db)
+            self.dbcon.execute('PRAGMA synchronous = OFF')
+            if not existing:
+                self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
         else:
-            if not filter_pos:
-                return self.all_forms.get(word, [])
-            return [x for x in self.all_forms.get(word, []) if x.split("|")[0] in filter_pos]
+            self.dbcon = sqlite3.connect(":memory:")
+            self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
+
+    def get_lemmas(self, word, filter_pos=None):
+        if filter_pos:
+            res = self.dbcon.execute("SELECT pos || '|' || lemma FROM forms WHERE form=? AND pos=? ORDER BY pos, lemma", (word, filter_pos))
+        else:
+            res = self.dbcon.execute("SELECT pos || '|' || lemma FROM forms WHERE form=? ORDER BY pos, lemma", (word,))
+
+        return [x[0] for x in res]
+
+    @property
+    def all_forms(self):
+        for x in self.dbcon.execute("SELECT DISTINCT form FROM forms ORDER BY form"):
+            yield x[0]
+
+    @property
+    def all(self):
+        return self.dbcon.execute("SELECT form, pos, lemma  FROM forms ORDER BY form, pos, lemma")
 
     @classmethod
-    def from_data(cls, allforms_data):
-        self = cls()
+    def from_data(cls, allforms_data, db=None):
+        self = cls(db)
+
+        self.dbcon.execute("BEGIN TRANSACTION;")
 
         cr = csv.reader(allforms_data)
         for form,pos,*lemmas in cr:
             for lemma in lemmas:
                 self._add_form(form, pos, lemma)
 
+        self.dbcon.execute('''CREATE INDEX idx_form_pos ON forms (form, pos)''')
+        self.dbcon.execute("COMMIT;")
         return self
 
     @classmethod
-    def from_file(cls, filename):
+    def from_file(cls, filename, cache_words=True):
+        # check for cached version
+        cached = filename + ".sqlite"
+        if os.path.exists(cached) and os.path.getctime(cached) > os.path.getctime(filename):
+            self = cls(cached)
+            return self
+
+        with open(filename) as infile:
+            print("compiling", cached, file=sys.stderr)
+            return cls.from_data(infile, cached)
+
+    @classmethod
+    def from_wordlist(cls, wordlist, resolve_lemmas=True):
         self = cls()
 
-        self.file_obj = open(filename, mode="rb")
-        self.mmap_obj = mmap.mmap(self.file_obj.fileno(), length=0, access=mmap.ACCESS_READ)
-
-        offset = self.mmap_obj.tell()
-        for line in iter(self.mmap_obj.readline, b''):
-
-            line = line.decode('utf-8').strip()
-            row = next(csv.reader([line]), None)
-            if not row:
-                continue
-            form,pos,*lemmas = row
-            if form not in self.all_forms:
-                self.all_forms[form] = offset
-            offset = self.mmap_obj.tell()
-
-        return self
-
-    @classmethod
-    def from_wordlist(cls, wordlist, resolve_true_lemmas=True):
-        self = cls(resolve_true_lemmas)
-        self._load_wordlist_forms(wordlist)
+        self.dbcon.execute("BEGIN TRANSACTION;")
+        self._load_wordlist_forms(wordlist, resolve_lemmas)
+        self.dbcon.execute('''CREATE INDEX idx_form_pos ON forms (form, pos)''')
+        self.dbcon.execute("COMMIT;")
 
 #        for formtype, count in self.count_formtype.items():
 #            print(formtype, count, file=sys.stderr)
 
         return self
 
-    def _load_wordlist_forms(self, wordlist):
+    def _load_wordlist_forms(self, wordlist, resolve_lemmas):
         for word in wordlist.iter_all_words():
-            self._process_word_forms(word, wordlist)
+            self._process_word_forms(word, wordlist, resolve_lemmas)
 
     def is_lemma(self, word):
 
@@ -130,8 +127,12 @@ class AllForms:
         lemmas = {}
         for lemma, formtypes in word.form_of.items():
 
-            if any(self.is_lemma(w) for w in wordlist.get_words(lemma, word.pos)):
+            w = next(wordlist.get_words(lemma, word.pos), None)
+            if w and self.is_lemma(w):
                 lemmas[lemma] = formtypes
+
+#            if any(self.is_lemma(w) for w in wordlist.get_words(lemma, word.pos)):
+#                lemmas[lemma] = formtypes
 
             elif max_depth>0:
                 for redirect in wordlist.get_words(lemma, word.pos):
@@ -144,12 +145,12 @@ class AllForms:
 
         return lemmas
 
-    def _process_word_forms(self, word, wordlist):
+    def _process_word_forms(self, word, wordlist, resolve_lemmas):
 
         if not len(word.senses):
             return
 
-        if self.resolve_true_lemmas:
+        if resolve_lemmas:
             if self.is_lemma(word):
                 self._add_form(word.word, word.pos, word.word)
                 self._add_word_forms(word, word.word, wordlist)
@@ -208,6 +209,8 @@ class AllForms:
         if form == "-":
             return
 
-        value = f"{pos}|{lemma}"
-        if value not in self.all_forms[form]:
-            self.all_forms[form].append(value)
+        self.dbcon.execute("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [form, pos, lemma])
+
+#        value = f"{pos}|{lemma}"
+#        if value not in self.all_forms[form]:
+#            self.all_forms[form].append(value)

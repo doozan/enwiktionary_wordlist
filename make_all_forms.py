@@ -7,21 +7,26 @@ import sys
 from .wordlist import Wordlist
 from .all_forms import AllForms
 
-def export(forms):
+def export(allforms):
 
-    for form, poslemmas in sorted(forms.all_forms.items()):
-        data = {}
-        for poslemma in poslemmas:
-            pos, lemma = poslemma.split("|")
-            if pos not in data:
-                data[pos] = [lemma]
-            elif lemma not in data[pos]:
-                data[pos].append(lemma)
+    line_data = []
+    lemmas = []
+    prev_pos = None
+    prev_form = None
+    for form, pos, lemma in sorted(allforms.all):
+        if form != prev_form or pos != prev_pos:
+            if lemmas:
+                line_data.append((prev_form, prev_pos, lemmas))
+            lemmas = []
+        lemmas.append(lemma)
+        prev_form = form
+        prev_pos = pos
+    line_data.append((prev_form, prev_pos, lemmas))
 
-        yield from make_lines(form, data)
+    yield from make_lines(line_data)
 
-def make_lines(form, data):
-    for pos, lemmas in sorted(data.items()):
+def make_lines(line_data):
+    for form, pos, lemmas in line_data:
         si = io.StringIO()
         cw = csv.writer(si)
         cw.writerow([form,pos]+sorted(lemmas))

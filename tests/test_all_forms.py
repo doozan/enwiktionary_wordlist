@@ -58,16 +58,18 @@ pos: n
 'protectora': ['n|protector', 'n|protectora'],
 'protectoras': ['n|protector', 'n|protectora'],
 'protectores': ['n|protector'],
-'protectrices': ['n|protector', 'n|protectora'],
-'protectriz': ['n|protector', 'n|protectora'],
+'protectrices': ['n|protector'],
+'protectriz': ['n|protector'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
     for word in wordlist.get_words("protectora"):
         print("###", [word.word, word.pos, word.forms, word.form_of])
-    res = dict(AllForms.from_wordlist(wordlist).all_forms)
-    print(res)
-    assert res == expected
+
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_secondary_lemma_unique_forms():
@@ -98,7 +100,10 @@ pos: n
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_secondary_lemma_no_unique_forms():
@@ -127,7 +132,10 @@ pos: n
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_forms_text():
@@ -149,7 +157,10 @@ testa {f} :: feminine noun of "testo"
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 def test_forms_redirection():
 
@@ -172,7 +183,10 @@ test4 {m} :: alternate form of "test3"
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_asco_forms():
@@ -206,12 +220,15 @@ pos: n
     expected = {
 'asca': ['n|asca'],
 'ascas': ['n|asca'],
-'asco': ['n|asco', 'n|asca'],
-'ascos': ['n|asco', 'n|asca']
+'asco': ['n|asca', 'n|asco'],
+'ascos': ['n|asca', 'n|asco']
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_verb_forms():
@@ -574,8 +591,10 @@ pos: verb
 'se bifurcó': ['verb|bifurcarse']
 }
     wordlist = Wordlist(wordlist_data.splitlines())
-    print(AllForms.from_wordlist(wordlist).all_forms)
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_afecto():
@@ -594,7 +613,10 @@ pos: adj
 'afecto': ['adj|afecto']}
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 def test_nonlemma():
 
@@ -608,7 +630,10 @@ pos: determiner
 """
     expected = {'ningún': ['determiner|ningún']}
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
     # but forms can't
     wordlist_data = """\
@@ -620,7 +645,10 @@ pos: determiner
 """
     expected = {}
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
     # however, forms can declare themselves forms of existing lemmas
     wordlist_data = """\
@@ -640,7 +668,10 @@ pos: determiner
             'ninguna': ['determiner|ninguno'],
             'ningún': ['determiner|ninguno']}
     wordlist = Wordlist(wordlist_data.splitlines())
-    assert AllForms.from_wordlist(wordlist).all_forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 
@@ -656,7 +687,7 @@ test,noun,n1,n2,n3
     p.write(allforms_data)
 
     allforms = AllForms.from_file(p)
-    assert allforms.all_forms == {'test': 0, 'test1,test2': 37}
+#    assert allforms.all_forms == {'test': 0, 'test1,test2': 37}
 
     assert allforms.get_lemmas('test') == ['adj|a1', 'adj|a2', 'adj|a3', 'noun|n1', 'noun|n2', 'noun|n3']
     assert allforms.get_lemmas('test1,test2') == ['noun|test1', 'noun|test2', 'noun|test3']
@@ -689,9 +720,10 @@ pos: n
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    print(forms)
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 def test_female_lemma():
 
@@ -713,9 +745,10 @@ pos: n
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    print(forms)
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 def test_latine():
 
@@ -755,9 +788,10 @@ pos: n
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    print(forms)
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_clientes():
@@ -793,9 +827,10 @@ pos: n
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    print(forms)
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_nosotres():
@@ -834,9 +869,10 @@ pos: pron
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    print(forms)
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_bosniacas():
@@ -885,13 +921,15 @@ pos: n
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    print(forms)
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
-    forms = AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms
-    print(forms)
-    assert forms == expected_unresolved
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected_unresolved.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_acapulco():
@@ -909,11 +947,15 @@ pos: prop
     expected = {'Acapulco': ['prop|Acapulco']}
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
-    forms = AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 def test_fulana():
 
@@ -939,11 +981,10 @@ pos: n
               'fulanos': ['n|fulana']}
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    forms = AllForms.from_wordlist(wordlist).all_forms
-    assert forms == expected
-
-    forms = AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms
-    assert forms == expected
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_redirection():
@@ -988,7 +1029,7 @@ pos: n
 """
 
     wlist = Wordlist(data.splitlines())
-    allforms = AllForms.from_wordlist(wlist, resolve_true_lemmas=True)
+    allforms = AllForms.from_wordlist(wlist, resolve_lemmas=True)
 
     assert wlist.has_word("test1", "n") == True
     assert wlist.has_word("test2", "n") == True
@@ -1045,5 +1086,5 @@ pos: v
     wordlist = Wordlist(wordlist_data.splitlines())
 #    assert "te aborregas" in AllForms.from_wordlist(wordlist).all_forms
     assert "aborregas" in AllForms.from_wordlist(wordlist).all_forms
-    assert AllForms.from_wordlist(wordlist).all_forms["aborregas"] == ['v|aborregarse']
-    assert AllForms.from_wordlist(wordlist, resolve_true_lemmas=False).all_forms["aborregas"] == ['v|aborregas', 'v|aborregar', 'v|aborregarse']
+    assert AllForms.from_wordlist(wordlist).get_lemmas("aborregas") == ['v|aborregarse']
+    assert AllForms.from_wordlist(wordlist, resolve_lemmas=False).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse', 'v|aborregas']
