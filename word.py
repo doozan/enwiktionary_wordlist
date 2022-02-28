@@ -61,6 +61,9 @@ class Word():
         if self._forms is None:
             self._forms = {}
 
+        if formtype == "infinitive_linked":
+            return
+
         if "[[" in form or "</" in form:
             form = wiki_to_text(form, self.word)
 
