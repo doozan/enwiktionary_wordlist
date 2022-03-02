@@ -1,4 +1,6 @@
 import itertools
+import os
+import pickle
 import re
 import sys
 
@@ -31,9 +33,19 @@ class Wordlist():
             self.all_entries = {title: entry for title, entry in self._iter_entries(iter_data)}
 
     @classmethod
-    def from_file(cls, filename):
+    def from_file(cls, filename, cache_words=True):
+        # check for cached version
+        cached = filename + ".~db"
+        if os.path.exists(cached) and os.path.getctime(cached) > os.path.getctime(filename):
+            with open(cached, "rb") as infile:
+                res = pickle.load(infile)
+            return res
+
         with open(filename) as infile:
-            return cls(infile)
+            res = cls(infile, cache_words)
+            with open(cached, "wb") as outfile:
+                pickle.dump(res, outfile)
+            return res
 
     @staticmethod
     def _iter_entries(data):
