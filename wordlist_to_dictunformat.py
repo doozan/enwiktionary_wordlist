@@ -334,17 +334,23 @@ def iter_allforms(allforms_data, wordlist):
     if allforms_data:
         yield from csv.reader(allforms_data)
     else:
-        all_forms = AllForms.from_wordlist(wordlist)
+        allforms = AllForms.from_wordlist(wordlist)
 
-        for form, poslemmas in all_forms.all_forms.items():
-            data = collections.defaultdict(list)
-            for poslemma in poslemmas:
-                pos, lemma = poslemma.split("|")
-                data[pos].append(lemma)
+        line_data = []
+        lemmas = []
+        prev_form = None
+        prev_pos = None
+        for form, pos, lemma in sorted(allforms.all):
+            if form != prev_form or pos != prev_pos:
+                if lemmas:
+                    yield [prev_form, prev_pos] + lemmas
+                lemmas = []
+            lemmas.append(lemma)
+            prev_pos = pos
+            prev_form = form
+        yield [prev_form, prev_pos] + lemmas
 
-            for pos, lemmas in data.items():
-                yield [form, pos] + lemmas
-
+    return
 
 def export(wordlist_data, allforms_data, low_memory=False, verbose=False):
 
