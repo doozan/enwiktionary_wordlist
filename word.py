@@ -1,3 +1,4 @@
+from collections import defaultdict
 import enwiktionary_templates as templates
 import re
 from .sense import Sense
@@ -24,9 +25,9 @@ class Word():
         self.word = word
         self._pos = None
         # accessed as .forms
-        self._forms = None # { formtype: [form1, ..] }
+        self._forms = defaultdict(list) # { formtype: [form1, ..] }
         # accessed as .form_of
-        self._form_of = None # { lemma: [formtype1, formtype2 ..] }
+        self._form_of = defaultdict(list) # { lemma: [formtype1, formtype2 ..] }
         self._sense_data = None
         self._senses = None
         self.meta = None
@@ -58,8 +59,6 @@ class Word():
                 self.qualifier = value
 
     def add_form(self, formtype, form):
-        if self._forms is None:
-            self._forms = {}
 
         if formtype == "infinitive_linked":
             return
@@ -72,11 +71,8 @@ class Word():
         if self.pos == "v" and " " in form:
             form = re.sub(f"^(?:no )?(?:(?:me|te|se|nos|os) )?(.*)", r'\1', form)
 
-        if formtype not in self._forms:
-            self._forms[formtype] = [form]
-        else:
-            if form not in self._forms[formtype]:
-                self._forms[formtype].append(form)
+        if form not in self._forms[formtype]:
+            self._forms[formtype].append(form)
 
         # Feminine nouns are a "form of" their masculine counterpart
 #        if formtype == "m" and self.genders == "f":
@@ -84,28 +80,14 @@ class Word():
         if formtype == "mpl" and self.genders == "fp":
             self.add_lemma(form, "fpl")
 
-    def add_forms(self, data):
-        """ Add forms from a dictionary object
-        { formtype: [ form1, form2, ..] }
-        """
-        for formtype,forms in data.items():
-            for form in forms:
-                self.add_form(formtype, form)
-
     def get_formtypes(self, word):
        for formtype, forms in self.forms.items():
            if word in forms:
                yield formtype
 
     def add_lemma(self, lemma, formtype):
-        if lemma not in self.form_of:
-            self.form_of[lemma] = [formtype]
-        else:
-            if formtype not in self.form_of[lemma]:
-                self.form_of[lemma].append(formtype)
-
-    def parse_forms(self, data):
-        self.add_forms(self.parse_list(data))
+        if formtype not in self.form_of[lemma]:
+            self.form_of[lemma].append(formtype)
 
     @staticmethod
     def parse_list(line):
@@ -113,12 +95,7 @@ class Word():
         for match in re.finditer(r"\s*(.*?)=(.*?)(; |$)", line):
             k = match.group(1)
             v = match.group(2)
-            if k not in items:
-                items[k] = [v]
-            else:
-                items[k].append(v)
-
-        return items
+            yield k,v
 
     @property
     def pos(self):
@@ -193,43 +170,35 @@ class Word():
 #            self.add_lemma(sense.lemma, sense.formtype)
 #        self.senses.append(sense)
 
+    def _parse_meta(self):
+        if not self._meta_parsed and self.meta:
+            self._meta_parsed = True
+            self.add_forms_from_meta()
+
+            if self.genders == "fp":
+                for form in self._forms.get("mpl", []):
+                    self.add_lemma(form, "fpl")
+
     @property
     def form_of(self):
         self._parse_meta()
         self._parse_sense_data()
         return self._form_of
 
-    def _parse_meta(self):
-        if not self._forms:
-            self._forms = {}
-        if not self._form_of:
-            self._form_of = {}
-        if not self._meta_parsed and self.meta:
-            self._meta_parsed = True
-            self.get_forms_from_meta()
-
     @property
     def forms(self):
-        if self._forms is None:
-            self._parse_meta()
-
-            # Only do this if there are no non-form senses?
-#            if self.genders == "f":
-#                for form in self._forms.get("m", []):
-#                    self.add_lemma(form, "f")
-            if self.genders == "fp":
-                for form in self._forms.get("mpl", []):
-                    self.add_lemma(form, "fpl")
-
+        self._parse_meta()
         return self._forms
 
-    def get_forms_from_meta(self):
+    def add_forms_from_meta(self):
         for template in templates.iter_templates(self.meta):
             if template.name == "head":
                 data = self.get_head_forms(template)
             else:
                 data = templates.expand_template(template, self.word)
-            self.add_forms(self.parse_list(data))
+
+            for formtype, form in self.parse_list(data):
+                self.add_form(formtype, form)
 
     @staticmethod
     def get_head_forms(template):
