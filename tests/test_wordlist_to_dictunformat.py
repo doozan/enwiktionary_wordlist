@@ -1,8 +1,8 @@
-import enwiktionary_wordlist.wordlist_to_dictunformat as exporter
+from enwiktionary_wordlist.wordlist import Wordlist
+from enwiktionary_wordlist.wordlist_to_dictunformat import WordlistToDictunformat
+
 
 def test_forms_text():
-    exporter.all_pages = {}
-
     data = """\
 _____
 asca
@@ -30,17 +30,13 @@ pos: n
 ##:pagecount:2
 ##:formcount:4
 _____
-asca|ascas
+asca;   ascas
 <b>asca</b> <i>noun, m</i> (<i>pl</i> ascas)
 <ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
 <li>[<i>mycology</i>] ascus<div style="font-size: 80%">Synonyms: teca</div></li>
 </ol>
 _____
-asco|ascos
-<b>asca</b> <i>noun, m</i> (<i>pl</i> ascas)
-<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
-<li>[<i>mycology</i>] ascus<div style="font-size: 80%">Synonyms: teca</div></li>
-</ol>
+asco;   ascos
 <b>asco</b> <i>noun, m</i> (<i>pl</i> ascos)
 <ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
 <li>disgust</li>
@@ -56,22 +52,16 @@ asco|ascos
 <li>[<i>mycology</i>] ascus<div style="font-size: 80%">Synonyms: teca</div></li>
 </ol>\
 """
-    print("\n".join(exporter.export(data.splitlines(), None, "es", "test")))
 
-    from ..wordlist import Wordlist
     wordlist = Wordlist(data.splitlines())
-    for word in wordlist.iter_all_words():
-        print(word.word, word.pos)
-        for sense in word.senses:
-            print("  ",sense.gloss)
-
-    assert "\n".join(exporter.export(data.splitlines(), None, "es", "test")) == expected.strip()
+    exporter = WordlistToDictunformat(wordlist)
+    res = "\n".join(exporter.export())
+    assert res == expected
 
 
 def test_forms_bifurcar():
-    exporter.all_pages = {}
 
-    wordlist_data = """\
+    data = """\
 _____
 bifurcar
 pos: v
@@ -91,14 +81,14 @@ pos: v
 ##:pagecount:3
 ##:formcount:275
 _____
-bifurcar|bifurcad|bifurcadla|bifurcadlas|bifurcadle|bifurcadles|bifurcadlo|bifurcadlos|bifurcadme|bifurcadnos|bifurcando|bifurcá|bifurcádmela|bifurcádmelas|bifurcádmele|bifurcádmeles|bifurcádmelo|bifurcádmelos|bifurcádnosla|bifurcádnoslas|bifurcádnosle|bifurcádnosles|bifurcádnoslo|bifurcádnoslos|bifurcádosla|bifurcádoslas|bifurcádosle|bifurcádosles|bifurcádoslo|bifurcádoslos|bifurquémoos|bifurquémosla|bifurquémoslas|bifurquémosle|bifurquémosles|bifurquémoslo|bifurquémoslos|bifurquémosnosla|bifurquémosnoslas|bifurquémosnosle|bifurquémosnosles|bifurquémosnoslo|bifurquémosnoslos|bifurquémososla|bifurquémososlas|bifurquémososle|bifurquémososles|bifurquémososlo|bifurquémososlos|bifurquémoste|bifurquémostela|bifurquémostelas|bifurquémostele|bifurquémosteles|bifurquémostelo|bifurquémostelos|bifúrcala|bifúrcalas|bifúrcale|bifúrcales|bifúrcalo|bifúrcalos|bifúrcame|bifúrcamela|bifúrcamelas|bifúrcamele|bifúrcameles|bifúrcamelo|bifúrcamelos|bifúrcanos|bifúrcanosla|bifúrcanoslas|bifúrcanosle|bifúrcanosles|bifúrcanoslo|bifúrcanoslos|bifúrcatela|bifúrcatelas|bifúrcatele|bifúrcateles|bifúrcatelo|bifúrcatelos|bifúrquela|bifúrquelas|bifúrquele|bifúrqueles|bifúrquelo|bifúrquelos|bifúrqueme|bifúrquemela|bifúrquemelas|bifúrquemele|bifúrquemeles|bifúrquemelo|bifúrquemelos|bifúrquenla|bifúrquenlas|bifúrquenle|bifúrquenles|bifúrquenlo|bifúrquenlos|bifúrquenme|bifúrquenmela|bifúrquenmelas|bifúrquenmele|bifúrquenmeles|bifúrquenmelo|bifúrquenmelos|bifúrquennos|bifúrquennosla|bifúrquennoslas|bifúrquennosle|bifúrquennosles|bifúrquennoslo|bifúrquennoslos|bifúrquenos|bifúrquenosla|bifúrquenoslas|bifúrquenosle|bifúrquenosles|bifúrquenoslo|bifúrquenoslos|bifúrquensela|bifúrquenselas|bifúrquensele|bifúrquenseles|bifúrquenselo|bifúrquenselos|bifúrquesela|bifúrqueselas|bifúrquesele|bifúrqueseles|bifúrqueselo|bifúrqueselos
+bifurcar;   bifurcad;   bifurcadla;   bifurcadlas;   bifurcadle;   bifurcadles;   bifurcadlo;   bifurcadlos;   bifurcadme;   bifurcadnos;   bifurcando;   bifurcá;   bifurcádmela;   bifurcádmelas;   bifurcádmele;   bifurcádmeles;   bifurcádmelo;   bifurcádmelos;   bifurcádnosla;   bifurcádnoslas;   bifurcádnosle;   bifurcádnosles;   bifurcádnoslo;   bifurcádnoslos;   bifurcádosla;   bifurcádoslas;   bifurcádosle;   bifurcádosles;   bifurcádoslo;   bifurcádoslos;   bifurquémoos;   bifurquémosla;   bifurquémoslas;   bifurquémosle;   bifurquémosles;   bifurquémoslo;   bifurquémoslos;   bifurquémosnosla;   bifurquémosnoslas;   bifurquémosnosle;   bifurquémosnosles;   bifurquémosnoslo;   bifurquémosnoslos;   bifurquémososla;   bifurquémososlas;   bifurquémososle;   bifurquémososles;   bifurquémososlo;   bifurquémososlos;   bifurquémoste;   bifurquémostela;   bifurquémostelas;   bifurquémostele;   bifurquémosteles;   bifurquémostelo;   bifurquémostelos;   bifúrcala;   bifúrcalas;   bifúrcale;   bifúrcales;   bifúrcalo;   bifúrcalos;   bifúrcame;   bifúrcamela;   bifúrcamelas;   bifúrcamele;   bifúrcameles;   bifúrcamelo;   bifúrcamelos;   bifúrcanos;   bifúrcanosla;   bifúrcanoslas;   bifúrcanosle;   bifúrcanosles;   bifúrcanoslo;   bifúrcanoslos;   bifúrcatela;   bifúrcatelas;   bifúrcatele;   bifúrcateles;   bifúrcatelo;   bifúrcatelos;   bifúrquela;   bifúrquelas;   bifúrquele;   bifúrqueles;   bifúrquelo;   bifúrquelos;   bifúrqueme;   bifúrquemela;   bifúrquemelas;   bifúrquemele;   bifúrquemeles;   bifúrquemelo;   bifúrquemelos;   bifúrquenla;   bifúrquenlas;   bifúrquenle;   bifúrquenles;   bifúrquenlo;   bifúrquenlos;   bifúrquenme;   bifúrquenmela;   bifúrquenmelas;   bifúrquenmele;   bifúrquenmeles;   bifúrquenmelo;   bifúrquenmelos;   bifúrquennos;   bifúrquennosla;   bifúrquennoslas;   bifúrquennosle;   bifúrquennosles;   bifúrquennoslo;   bifúrquennoslos;   bifúrquenos;   bifúrquenosla;   bifúrquenoslas;   bifúrquenosle;   bifúrquenosles;   bifúrquenoslo;   bifúrquenoslos;   bifúrquensela;   bifúrquenselas;   bifúrquensele;   bifúrquenseles;   bifúrquenselo;   bifúrquenselos;   bifúrquesela;   bifúrqueselas;   bifúrquesele;   bifúrqueseles;   bifúrqueselo;   bifúrqueselos
 <b>bifurcar</b> <i>verb</i>
 <ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
 <li>[<i>transitive</i>] to bifurcate, to cause to fork off</li>
 <li>[<i>reflexive</i>] to diverge, fork off</li>
 </ol>
 _____
-bifurcarse|bifurca|bifurcaba|bifurcabais|bifurcaban|bifurcabas|bifurcada|bifurcadas|bifurcado|bifurcados|bifurcamos|bifurcan|bifurcaos|bifurcara|bifurcarais|bifurcaran|bifurcaras|bifurcare|bifurcareis|bifurcaremos|bifurcaren|bifurcares|bifurcarla|bifurcarlas|bifurcarle|bifurcarles|bifurcarlo|bifurcarlos|bifurcarme|bifurcarnos|bifurcaron|bifurcaros|bifurcarte|bifurcará|bifurcarán|bifurcarás|bifurcaré|bifurcaréis|bifurcaría|bifurcaríais|bifurcaríamos|bifurcarían|bifurcarías|bifurcas|bifurcase|bifurcaseis|bifurcasen|bifurcases|bifurcaste|bifurcasteis|bifurco|bifurcábamos|bifurcáis|bifurcándola|bifurcándolas|bifurcándole|bifurcándoles|bifurcándolo|bifurcándolos|bifurcándome|bifurcándomela|bifurcándomelas|bifurcándomele|bifurcándomeles|bifurcándomelo|bifurcándomelos|bifurcándonos|bifurcándonosla|bifurcándonoslas|bifurcándonosle|bifurcándonosles|bifurcándonoslo|bifurcándonoslos|bifurcándoos|bifurcándoosla|bifurcándooslas|bifurcándoosle|bifurcándoosles|bifurcándooslo|bifurcándooslos|bifurcándose|bifurcándosela|bifurcándoselas|bifurcándosele|bifurcándoseles|bifurcándoselo|bifurcándoselos|bifurcándote|bifurcándotela|bifurcándotelas|bifurcándotele|bifurcándoteles|bifurcándotelo|bifurcándotelos|bifurcáramos|bifurcáremos|bifurcármela|bifurcármelas|bifurcármele|bifurcármeles|bifurcármelo|bifurcármelos|bifurcárnosla|bifurcárnoslas|bifurcárnosle|bifurcárnosles|bifurcárnoslo|bifurcárnoslos|bifurcárosla|bifurcároslas|bifurcárosle|bifurcárosles|bifurcároslo|bifurcároslos|bifurcársela|bifurcárselas|bifurcársele|bifurcárseles|bifurcárselo|bifurcárselos|bifurcártela|bifurcártelas|bifurcártele|bifurcárteles|bifurcártelo|bifurcártelos|bifurcás|bifurcásemos|bifurcó|bifurque|bifurquemos|bifurquen|bifurques|bifurqué|bifurquéis|bifurquémonos|bifurqués|bifúrcate|bifúrquense|bifúrquese
+bifurcarse;   bifurca;   bifurcaba;   bifurcabais;   bifurcaban;   bifurcabas;   bifurcada;   bifurcadas;   bifurcado;   bifurcados;   bifurcamos;   bifurcan;   bifurcaos;   bifurcara;   bifurcarais;   bifurcaran;   bifurcaras;   bifurcare;   bifurcareis;   bifurcaremos;   bifurcaren;   bifurcares;   bifurcarla;   bifurcarlas;   bifurcarle;   bifurcarles;   bifurcarlo;   bifurcarlos;   bifurcarme;   bifurcarnos;   bifurcaron;   bifurcaros;   bifurcarte;   bifurcará;   bifurcarán;   bifurcarás;   bifurcaré;   bifurcaréis;   bifurcaría;   bifurcaríais;   bifurcaríamos;   bifurcarían;   bifurcarías;   bifurcas;   bifurcase;   bifurcaseis;   bifurcasen;   bifurcases;   bifurcaste;   bifurcasteis;   bifurco;   bifurcábamos;   bifurcáis;   bifurcándola;   bifurcándolas;   bifurcándole;   bifurcándoles;   bifurcándolo;   bifurcándolos;   bifurcándome;   bifurcándomela;   bifurcándomelas;   bifurcándomele;   bifurcándomeles;   bifurcándomelo;   bifurcándomelos;   bifurcándonos;   bifurcándonosla;   bifurcándonoslas;   bifurcándonosle;   bifurcándonosles;   bifurcándonoslo;   bifurcándonoslos;   bifurcándoos;   bifurcándoosla;   bifurcándooslas;   bifurcándoosle;   bifurcándoosles;   bifurcándooslo;   bifurcándooslos;   bifurcándose;   bifurcándosela;   bifurcándoselas;   bifurcándosele;   bifurcándoseles;   bifurcándoselo;   bifurcándoselos;   bifurcándote;   bifurcándotela;   bifurcándotelas;   bifurcándotele;   bifurcándoteles;   bifurcándotelo;   bifurcándotelos;   bifurcáramos;   bifurcáremos;   bifurcármela;   bifurcármelas;   bifurcármele;   bifurcármeles;   bifurcármelo;   bifurcármelos;   bifurcárnosla;   bifurcárnoslas;   bifurcárnosle;   bifurcárnosles;   bifurcárnoslo;   bifurcárnoslos;   bifurcárosla;   bifurcároslas;   bifurcárosle;   bifurcárosles;   bifurcároslo;   bifurcároslos;   bifurcársela;   bifurcárselas;   bifurcársele;   bifurcárseles;   bifurcárselo;   bifurcárselos;   bifurcártela;   bifurcártelas;   bifurcártele;   bifurcárteles;   bifurcártelo;   bifurcártelos;   bifurcás;   bifurcásemos;   bifurcó;   bifurque;   bifurquemos;   bifurquen;   bifurques;   bifurqué;   bifurquéis;   bifurquémonos;   bifurqués;   bifúrcate;   bifúrquense;   bifúrquese
 <b>bifurcar</b> <i>verb</i>
 <ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
 <li>[<i>transitive</i>] to bifurcate, to cause to fork off</li>
@@ -115,17 +105,14 @@ bifurcate
 <li>to split, divide, fork, branch off</li>
 </ol>"""
 
-    v1 = "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test"))
-    v2 = "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test"))
-    v3 = "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test"))
-    assert v1 == v2 == v3
-
-    print("\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test")))
-    assert "\n".join(exporter.export(wordlist_data.splitlines(), None, "es", "test")) == expected.strip()
+    wordlist = Wordlist(data.splitlines())
+    exporter = WordlistToDictunformat(wordlist)
+    res = "\n".join(exporter.export())
+    print(res)
+    assert res == expected
 
 
 def test_lentes():
-    exporter.all_pages = {}
 
     data = """\
 _____
@@ -172,5 +159,8 @@ lentes
 </ol>
 <p style="margin-top: 1em"><i>Etymology:</i> Borrowed from Latin &quot;lēns, lentem&quot; (“lentil”), in Medieval Latin later taking on the sense of &quot;lens&quot;. Cognate with English &quot;lens&quot;.</p>\
 """
-    print("\n".join(exporter.export(data.splitlines(), None, "es", "test")))
-    assert "\n".join(exporter.export(data.splitlines(), None, "es", "test")) == expected.strip()
+
+    wordlist = Wordlist(data.splitlines())
+    exporter = WordlistToDictunformat(wordlist)
+    res = "\n".join(exporter.export())
+    assert res == expected

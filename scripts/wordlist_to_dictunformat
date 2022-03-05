@@ -1,0 +1,47 @@
+#!/usr/bin/python3
+
+import csv
+import collections
+import html
+import os
+import re
+import sys
+
+from enwiktionary_wordlist.wordlist_to_dictunformat import WordlistToDictunformat
+from enwiktionary_wordlist.wordlist import Wordlist
+from enwiktionary_wordlist.all_forms import AllForms
+
+def main():
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Convert wordlist to dictunformat")
+    parser.add_argument("wordlist", help="wordlist")
+    parser.add_argument("allforms", help="all_forms csv file")
+    parser.add_argument("--name", help="dictionary name", required=True)
+    parser.add_argument("--from-lang-id", help="from language id", required=True)
+    parser.add_argument("--to-lang-id", help="to language id", required=True)
+    parser.add_argument("--description", help="description", default="", required=True)
+    parser.add_argument("--url", help="source url")
+    args = parser.parse_args()
+
+    wordlist = Wordlist.from_file(args.wordlist)
+    allforms = AllForms.from_file(args.allforms)
+
+    converter = WordlistToDictunformat(wordlist, allforms)
+
+    name = f"{args.name} ({args.from_lang_id}-{args.to_lang_id})"
+
+    print("_____")
+    print("00-database-info")
+    print(f"##:name:{name}")
+    if args.url:
+        print(f"##:url:{args.url}")
+    if args.description:
+        print(f"##:description:{args.description}")
+
+    for line in converter.export():
+        print(line)
+
+if __name__ == "__main__":
+    main()

@@ -7,340 +7,337 @@ import os
 import re
 import sys
 
-from .wordlist import Wordlist
-from .all_forms import AllForms
+from enwiktionary_wordlist.wordlist import Wordlist
+from enwiktionary_wordlist.all_forms import AllForms
 
-wordlist = None
+class WordlistToDictunformat():
 
-formtypes = {
-    "pl": "pl",
-    "m": "m",
-    "mpl": "m pl",
-    "f": "f",
-    "fpl": "f pl",
-}
+    def __init__(self, wordlist, allforms=None):
+        self.wordlist = wordlist
+        self.allforms = allforms if allforms else AllForms.from_wordlist(wordlist)
 
-display_gender = {
-    'm': 'm',
-    'f': 'f',
-    'm-s': 'm',
-    'f-s': 'f',
-    'p': 'pl',
-    'f; m': 'f or m',
-    'm; f': 'm or f',
-    'm; p': 'm or pl',
-    'mf': 'm or f',
-    'm-f': 'm or f',
-    'mfbysense': 'm or f',
-    'm-p': 'm pl',
-    'f-p': 'f pl',
-    'm-p; f-p': 'm pl or f pl',
-    'f-p; m-p': 'f pl or m pl',
-    '?': '?',
-}
+    formtypes = {
+        "pl": "pl",
+        "m": "m",
+        "mpl": "m pl",
+        "f": "f",
+        "fpl": "f pl",
+    }
 
-#'adj', 'adv', 'affix', 'art', 'conj', 'contraction', 'determiner', 'diacrit', 'interj', 'letter', 'n', 'num', 'particle', 'phrase', 'prefix', 'prep', 'pron', 'prop', 'proverb', 'punct', 'suffix', 'symbol', 'v']
-display_pos = {
-    'v': 'verb',
-    'n': 'noun'
-}
+    display_gender = {
+        'm': 'm',
+        'f': 'f',
+        'm-s': 'm',
+        'f-s': 'f',
+        'p': 'pl',
+        'f; m': 'f or m',
+        'm; f': 'm or f',
+        'm; p': 'm or pl',
+        'mf': 'm or f',
+        'm-f': 'm or f',
+        'mfbysense': 'm or f',
+        'm-p': 'm pl',
+        'f-p': 'f pl',
+        'm-p; f-p': 'm pl or f pl',
+        'f-p; m-p': 'f pl or m pl',
+        '?': '?',
+    }
 
-def mem_use():
-    with open('/proc/self/status') as f:
-        memusage = f.read().split('VmRSS:')[1].split('\n')[0][:-3]
+    #'adj', 'adv', 'affix', 'art', 'conj', 'contraction', 'determiner', 'diacrit', 'interj', 'letter', 'n', 'num', 'particle', 'phrase', 'prefix', 'prep', 'pron', 'prop', 'proverb', 'punct', 'suffix', 'symbol', 'v']
+    display_pos = {
+        'v': 'verb',
+        'n': 'noun'
+    }
 
-    return int(memusage.strip())
+    def is_lemma(self, word):
+        if word.meta and " form" in word.meta:
+            return False
+        return True
 
+    def get_primary_word(self, words):
+        """ Returns the first item in a list that is a lemma
+        If nothing found, returns the first word in the list
+        """
+        for word in words:
+            if any(self.is_lemma(w) for w in self.wordlist.get_words(word)):
+                return word
 
-def is_lemma(word):
-    if word.meta and " form" in word.meta:
-        return False
-    return True
+        words.sort()
+        return words[0]
 
-def get_primary_word(words):
-    """ Returns the first item in a list that is a lemma
-    If nothing found, returns the first word in the list
-    """
-    for word in words:
-        if any(is_lemma(w) for w in wordlist.get_words(word)):
-            return word
+    def format_word(self, word_obj):
+        items = []
+        items += self.format_header(word_obj)
 
-    words.sort()
-    return words[0]
+        items.append('<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
+        for i,sense in enumerate(word_obj.senses, 1):
+            items += self.format_sense_data(i, sense)
+        items.append('</ol>\n')
 
-def format_word(word_obj):
-    items = []
-    items += format_header(word_obj)
+        if word_obj.use_notes:
+            items += self.format_use_notes(word_obj.use_notes)
+        items.append("")
 
-    items.append('<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
-    for i,sense in enumerate(word_obj.senses, 1):
-        items += format_sense_data(i, sense)
-    items.append('</ol>\n')
+    #    if word_obj.etymology:
+    #        items.append(format_etymology(word_obj.etymology))
 
-    if word_obj.use_notes:
-        items += format_use_notes(word_obj.use_notes)
-    items.append("")
+        return items
 
-#    if word_obj.etymology:
-#        items.append(format_etymology(word_obj.etymology))
+    def format_header(self, word_obj):
+        line = [f"<b>{word_obj.word}</b>"]
 
-    return items
+        line.append(" <i>")
+        line.append(self.display_pos.get(word_obj.pos, word_obj.pos))
+        if word_obj.genders:
+            if word_obj.genders not in self.display_gender:
+                print(f"Unknown gender {word_obj.word}: '{word_obj.genders}'", file=sys.stderr)
+            line.append(f", {self.display_gender.get(word_obj.genders, word_obj.genders)}")
+        line.append("</i>")
 
-def format_header(word_obj):
-    line = [f"<b>{word_obj.word}</b>"]
+        if word_obj.pos != "v" and word_obj.forms:
+            form_items = []
+            for formtype in self.formtypes.keys():
+                forms = word_obj.forms.get(formtype)
+                if forms:
+                    if formtype not in self.formtypes:
+                        print(f"Unknown formtype {word_obj.word}: '{formtype}'", file=sys.stderr)
+                    else:
+                        form_items.append(f'<i>{self.formtypes[formtype]}</i> {" <i>or</i> ".join(forms)}')
 
-    line.append(" <i>")
-    line.append(display_pos.get(word_obj.pos, word_obj.pos))
-    if word_obj.genders:
-        if word_obj.genders not in display_gender:
-            print(f"Unknown gender {word_obj.word}: '{word_obj.genders}'", file=sys.stderr)
-        line.append(f", {display_gender.get(word_obj.genders, word_obj.genders)}")
-    line.append("</i>")
+            if form_items:
+                line.append(" (")
+                line.append(", ".join(form_items))
+                line.append(")")
 
-    if word_obj.pos != "v" and word_obj.forms:
-        form_items = []
-        for formtype in formtypes.keys():
-            forms = word_obj.forms.get(formtype)
-            if forms:
-                if formtype not in formtypes:
-                    print(f"Unknown formtype {word_obj.word}: '{formtype}'", file=sys.stderr)
-                else:
-                    form_items.append(f'<i>{formtypes[formtype]}</i> {" <i>or</i> ".join(forms)}')
+        line.append("\n")
 
-        if form_items:
-            line.append(" (")
-            line.append(", ".join(form_items))
-            line.append(")")
+        return line
 
-    line.append("\n")
+    @staticmethod
+    def format_sense_data(idx, sense):
 
-    return line
+        line = [f"<li>"]
+        if sense.qualifier:
+            line.append(f"[<i>{sense.qualifier}</i>] ")
 
-def format_sense_data(idx, sense):
+        line.append(html.escape(sense.gloss))
 
-    line = [f"<li>"]
-    if sense.qualifier:
-        line.append(f"[<i>{sense.qualifier}</i>] ")
+        if sense.synonyms:
+            line.append('<div style="font-size: 80%">')
+            line.append("Synonyms: " + "; ".join(sense.synonyms))
+            line.append('</div>')
+        line.append('</li>\n')
 
-    line.append(html.escape(sense.gloss))
+        return line
 
-    if sense.synonyms:
-        line.append('<div style="font-size: 80%">')
-        line.append("Synonyms: " + "; ".join(sense.synonyms))
-        line.append('</div>')
-    line.append('</li>\n')
+    @staticmethod
+    def format_etymology(ety):
+        # TODO: better formatting
+        return '<p style="margin-top: 1em"><i>Etymology:</i> ' + html.escape(ety.encode('latin-1', 'backslashreplace').decode('unicode-escape')) + "</p>\n"
 
-    return line
+    @staticmethod
+    def format_use_notes(usage):
 
-def format_etymology(ety):
-    # TODO: better formatting
-    return '<p style="margin-top: 1em"><i>Etymology:</i> ' + html.escape(ety.encode('latin-1', 'backslashreplace').decode('unicode-escape')) + "</p>\n"
+        if r"\n" not in usage:
+            return [f'<p style="margin-top: 1em"><i>Note:</i> {usage}</p>']
 
-def format_use_notes(usage):
+        item = [f'<p style="margin-top: 1em"><i>Note:</i> ']
+        first = True
+        for line in re.split(r"\\n", usage):
+            if first:
+                first = False
+            else:
+                item.append("<p>")
+            item.append(f'{line.lstrip(" *#:")}</p>\n')
+        return item
 
-    if r"\n" not in usage:
-        return [f'<p style="margin-top: 1em"><i>Note:</i> {usage}</p>']
+    def format_forms_text(self, formtype, forms):
+        return self.formtypes[formtype] + ' "' + \
+                '" or "'.join(forms) \
+                + '"'
 
-    item = [f'<p style="margin-top: 1em"><i>Note:</i> ']
-    first = True
-    for line in re.split(r"\\n", usage):
-        if first:
-            first = False
+    @staticmethod
+    def format_etymology_text(ety):
+        return ety.encode('latin-1', 'backslashreplace').decode('unicode-escape')
+
+    @staticmethod
+    def format_use_notes_text(usage):
+        if r"\n" not in usage:
+            return "Note: " + re.sub(r"\*\s+]*","", usage)
         else:
-            item.append("<p>")
-        item.append(f'{line.lstrip(" *#:")}</p>\n')
-    return item
-
-def format_forms_text(formtype, forms):
-    return formtypes[formtype] + ' "' + \
-            '" or "'.join(forms) \
-            + '"'
-
-def format_etymology_text(ety):
-    return ety.encode('latin-1', 'backslashreplace').decode('unicode-escape')
-
-def format_use_notes_text(usage):
-    if r"\n" not in usage:
-        return "Note: " + re.sub(r"\*\s+]*","", usage)
-    else:
-        return "Note:\n" + re.sub(r"\\n", "\n", usage)
+            return "Note:\n" + re.sub(r"\\n", "\n", usage)
 
 
-def format_header_text(word_obj):
-    line = [f"{word_obj.word}"]
-    if word_obj.genders:
-        # TODO: pretty format genders
-        line.append(f" ({word_obj.pos}, {display_gender[word_obj.genders]})")
-    else:
-        line.append(f" ({word_obj.pos})")
+    @staticmethod
+    def format_header_text(word_obj):
+        line = [f"{word_obj.word}"]
+        if word_obj.genders:
+            # TODO: pretty format genders
+            line.append(f" ({word_obj.pos}, {self.display_gender[word_obj.genders]})")
+        else:
+            line.append(f" ({word_obj.pos})")
 
-    if word_obj.pos != "v" and word_obj.forms:
-        form_items = []
-        for formtype in formtypes.keys():
-            forms = word_obj.forms.get(formtype)
-            if forms:
-                form_items.append(format_forms_text(formtype, forms))
+        if word_obj.pos != "v" and word_obj.forms:
+            form_items = []
+            for formtype in self.formtypes.keys():
+                forms = word_obj.forms.get(formtype)
+                if forms:
+                    form_items.append(format_forms_text(formtype, forms))
 
-        if form_items:
-            line.append(", ")
-            line.append(", ".join(form_items))
+            if form_items:
+                line.append(", ")
+                line.append(", ".join(form_items))
 
-    return "".join(line).strip()
+        return "".join(line).strip()
 
-def format_sense_data_text(idx, sense):
-    lines = []
+    @staticmethod
+    def format_sense_data_text(idx, sense):
+        lines = []
 
-    line = [f"{idx}."]
-    if sense.qualifier:
-        line.append("("+sense.qualifier+")")
+        line = [f"{idx}."]
+        if sense.qualifier:
+            line.append("("+sense.qualifier+")")
 
-    line.append(sense.gloss)
-    lines.append(" ".join(line))
+        line.append(sense.gloss)
+        lines.append(" ".join(line))
 
-    if sense.synonyms:
-        lines.append("      Synonyms: " + "; ".join(sense.synonyms))
+        if sense.synonyms:
+            lines.append("      Synonyms: " + "; ".join(sense.synonyms))
 
-    return "\n".join(lines)
-
-
-def format_word_text(word_obj):
-    items = []
-    items.append(format_header_text(word_obj))
-    if word_obj.etymology:
-        items.append(format_etymology_text(word_obj.etymology))
-    for i,sense in enumerate(word_obj.senses, 1):
-        items.append(format_sense_data_text(i, sense))
-    if word_obj.use_notes:
-        items.append(format_use_notes_text(word_obj.use_notes))
-    items.append("")
-
-    return items
+        return "\n".join(lines)
 
 
-def get_word_page(word_obj, seen, follow_lemmas=True):
+    def format_word_text(self, word_obj):
+        items = []
+        items.append(self.format_header_text(word_obj))
+        if word_obj.etymology:
+            items.append(self.format_etymology_text(word_obj.etymology))
+        for i,sense in enumerate(word_obj.senses, 1):
+            items.append(self.format_sense_data_text(i, sense))
+        if word_obj.use_notes:
+            items.append(self.format_use_notes_text(word_obj.use_notes))
+        items.append("")
 
-    items = []
-    if not word_obj.senses:
-        return []
+        return items
 
-    items += format_word(word_obj)
 
-    if follow_lemmas:
-        for lemma in word_obj.form_of:
-            if not wordlist.has_word(lemma):
-                continue
-            for w in wordlist.get_words(lemma, word_obj.pos):
+    def get_word_page(self, word_obj, seen, follow_lemmas=True):
+
+        items = []
+        if not word_obj.senses:
+            return []
+
+        items += self.format_word(word_obj)
+
+        if follow_lemmas:
+            for lemma in word_obj.form_of:
+                if not self.wordlist.has_word(lemma):
+                    continue
+                for w in self.wordlist.get_words(lemma, word_obj.pos):
+                    if w not in seen:
+                        seen.add(w)
+                        items += self.get_word_page(w, seen, follow_lemmas=False)
+
+        return items
+
+
+    # Sort etymology groups
+    #   first, etymologies containing an exact match for target
+    #   second, by pos of the word matching target
+    #   finally, by the text of etymology
+    @staticmethod
+    def sort_ety(primary, options):
+        for option in options:
+            if option.word == primary:
+                return option.pos + "::" + (option.etymology or "")
+
+        return 'zzz' + "::" + (options[0].etymology or "")
+
+    def group_ety(self, primary, words):
+        groups = collections.defaultdict(list)
+        for word in words:
+            ety = word.etymology
+            groups[ety].append(word)
+
+        return sorted(groups.values(), key=lambda x: self.sort_ety(primary, x))
+
+    @staticmethod
+    def group_pos(words):
+        groups = {}
+        for word in words:
+            pos = word.pos
+            groups[pos] = groups.get(pos, [])
+            groups[pos].append(word)
+        return groups
+
+    def build_entry(self, primary, targets):
+        seen = set()
+        pages = []
+
+        words = []
+        for pos,word in targets:
+            for w in self.wordlist.get_words(word, pos):
                 if w not in seen:
+                    words.append(w)
                     seen.add(w)
-                    items += get_word_page(w, seen, follow_lemmas=False)
 
-    return items
+        etys = self.group_ety(primary, words)
+        for ety_words in etys:
+            for pos, pos_words in sorted(self.group_pos(ety_words).items()):
+                for w in pos_words:
+                    pages += self.get_word_page(w, seen)
 
+            if ety_words[0].etymology:
+                pages += self.format_etymology(ety_words[0].etymology)
 
-# Sort etymology groups
-#   first, etymologies containing an exact match for target
-#   second, by pos of the word matching target
-#   finally, by the text of etymology
-
-def sort_ety(primary, options):
-    for option in options:
-        if option.word == primary:
-            return option.pos + "::" + (option.etymology or "")
-
-    return 'zzz' + "::" + (options[0].etymology or "")
-
-def group_ety(primary, words):
-    groups = collections.defaultdict(list)
-    for word in words:
-        ety = word.etymology
-        groups[ety].append(word)
-
-    return sorted(groups.values(), key=lambda x: sort_ety(primary, x))
-
-def group_pos(words):
-    groups = {}
-    for word in words:
-        pos = word.pos
-        groups[pos] = groups.get(pos, [])
-        groups[pos].append(word)
-    return groups
-
-def build_entry(primary, targets):
-    seen = set()
-    pages = []
-
-    words = []
-    for pos,word in targets:
-        for w in wordlist.get_words(word, pos):
-            if w not in seen:
-                words.append(w)
-                seen.add(w)
-
-    etys = group_ety(primary, words)
-    for ety_words in etys:
-        for pos, pos_words in sorted(group_pos(ety_words).items()):
-            for w in pos_words:
-                pages += get_word_page(w, seen)
-
-        if ety_words[0].etymology:
-            pages += format_etymology(ety_words[0].etymology)
-
-    return "".join(pages).strip()
+        return "".join(pages).strip()
 
 
-def is_valid_target(word, pos):
-    """ Returns true if a given word, pos is in the wordlist and 
-    has a sense other than just a "form of" """
-    for word in wordlist.get_words(word,pos):
-        for sense in word.senses:
-            # If a sense is just a "form of", don't include it
-            if sense.formtype: # and not self.nonform:
-                continue
-            return True
-    return False
+    def is_valid_target(self, word, pos):
+        """ Returns true if a given word, pos is in the wordlist and 
+        has a sense other than just a "form of" """
+        for word in self.wordlist.get_words(word,pos):
+            for sense in word.senses:
+                # If a sense is just a "form of", don't include it
+                if sense.formtype: # and not self.nonform:
+                    continue
+                return True
+        return False
 
-def get_valid_targets(targets):
-    """ Take a list of [ (word, pos) ] and returns the same, minus any
-    entries that aren't in the wordlist or that don't contain useful information """
+    def get_valid_targets(self, targets):
+        """ Take a list of [ (word, pos) ] and returns the same, minus any
+        entries that aren't in the wordlist or that don't contain useful information """
 
-    valid_targets = []
-    for target in targets:
-        word, pos = target
-        if is_valid_target(word, pos):
-            valid_targets.append(target)
+        valid_targets = []
+        for target in targets:
+            word, pos = target
+            if self.is_valid_target(word, pos):
+                valid_targets.append(target)
 
-    return valid_targets
-
-
-def add_key(all_pages, key, targets):
-
-    targets = get_valid_targets(targets)
-
-    if not targets:
-        return
-
-    # Important to sort tagets so we can identify duplicates
-    # Sort by pos, then lemma so the page is ordered nicely
-    #target_key = ";".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets)])
-    target_key = ";".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets, key=lambda x: (x[1], x[0]))])
-
-    all_pages[target_key].append(key)
+        return valid_targets
 
 
-def iter_allforms(allforms_data, wordlist):
-    """ if allforms_data is supplied, treat it as a csv
-    otherwise, generate all_forms from wordlist """
+    def add_key(self, all_pages, key, targets):
 
-    if allforms_data:
-        yield from csv.reader(allforms_data)
-    else:
-        allforms = AllForms.from_wordlist(wordlist)
+        targets = self.get_valid_targets(targets)
 
+        if not targets:
+            return
+
+        # Important to sort tagets so we can identify duplicates
+        # Sort by pos, then lemma so the page is ordered nicely
+        #target_key = ";".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets)])
+        target_key = ";".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets, key=lambda x: (x[1], x[0]))])
+
+        all_pages[target_key].append(key)
+
+
+    def iter_allforms(self):
         line_data = []
         lemmas = []
         prev_form = None
         prev_pos = None
-        for form, pos, lemma in sorted(allforms.all):
+        for form, pos, lemma in self.allforms.all:
             if form != prev_form or pos != prev_pos:
                 if lemmas:
                     yield [prev_form, prev_pos] + lemmas
@@ -350,110 +347,60 @@ def iter_allforms(allforms_data, wordlist):
             prev_form = form
         yield [prev_form, prev_pos] + lemmas
 
-    return
+    def export(self, verbose=False):
 
-def export(wordlist_data, allforms_data, low_memory=False, verbose=False):
+        prev_form = None
+        form_targets = []
 
-    cache_words = not low_memory
-    global wordlist
-    wordlist = Wordlist(wordlist_data, cache_words)
+        all_pages = collections.defaultdict(list)
 
-    print("start memory", mem_use(), file=sys.stderr)
+        form_count = 0
+        for form, pos, *lemmas in self.iter_allforms():
+            form_count += 1
 
-    prev_form = None
-    form_targets = []
+            if form_count % 1000 == 0 and verbose:
+                print(form_count, file=sys.stderr, end="\r")
 
-    all_pages = collections.defaultdict(list)
+            if prev_form != form:
+                if prev_form:
+                    self.add_key(all_pages, prev_form, form_targets)
+                form_targets = [(form,pos)]
 
-    form_count = 0
-    for form, pos, *lemmas in iter_allforms(allforms_data, wordlist):
-        form_count += 1
+            for lemma in lemmas:
+                target = (lemma, pos)
+                if target not in form_targets:
 
-        if form_count == 1:
-            print("loop memory", mem_use(), file=sys.stderr)
-        if form_count % 1000 == 0 and verbose:
-            print(form_count, mem_use(), file=sys.stderr, end="\r")
-
-        if prev_form != form:
-            if prev_form:
-                add_key(all_pages, prev_form, form_targets)
-            form_targets = [(form,pos)]
-
-        for lemma in lemmas:
-            target = (lemma, pos)
-            if target not in form_targets:
-
-                if wordlist.has_word(lemma, pos):
-                    form_targets.append(target)
-                else:
-                    print(form,lemma,pos,"not found in db", file=sys.stderr)
-                    if not wordlist.has_word(lemma):
-                        print("XXX", form,lemma,pos,"not found in db", file=sys.stderr)
+                    if self.wordlist.has_word(lemma, pos):
+                        form_targets.append(target)
                     else:
-                        print("XXX", lemma, "is found in db", file=sys.stderr)
-                        for word in wordlist.get_words(lemma):
-                            print(word.word, word.pos, file=sys.stderr)
+                        print(form,lemma,pos,"not found in db", file=sys.stderr)
+                        if not self.wordlist.has_word(lemma):
+                            print("XXX", form,lemma,pos,"not found in db", file=sys.stderr)
+                        else:
+                            print("XXX", lemma, "is found in db", file=sys.stderr)
+                            for word in self.wordlist.get_words(lemma):
+                                print(word.word, word.pos, file=sys.stderr)
 
-                    raise ValueError("entry not found")
+                        raise ValueError("entry not found")
 
-        prev_form = form
+            prev_form = form
 
-    if prev_form:
-        add_key(all_pages, prev_form, form_targets)
+        if prev_form:
+            self.add_key(all_pages, prev_form, form_targets)
 
-    print("dumping memory", mem_use(), file=sys.stderr)
+        yield f"##:pagecount:{len(all_pages)}\n##:formcount:{form_count}"
 
-    yield f"##:pagecount:{len(all_pages)}\n##:formcount:{form_count}"
+        count = 0
+        for targets,keys in sorted(all_pages.items(), key=lambda x: self.get_primary_word(x[1])):
+            count += 1
+            if count % 1000 == 0 and verbose:
+                print(count, file=sys.stderr, end="\r")
 
+            primary = self.get_primary_word(keys)
+            entry = self.build_entry(primary, [t.split(":") for t in targets.split(";")])
 
-    count = 0
-    for targets,keys in sorted(all_pages.items(), key=lambda x: get_primary_word(x[1])):
-        count += 1
-        if count % 1000 == 0 and verbose:
-            print(count, mem_use(), file=sys.stderr, end="\r")
+            yield "_____"
+            keys.remove(primary)
 
-        primary = get_primary_word(keys)
-        entry = build_entry(primary, [t.split(":") for t in targets.split(";")])
-
-        yield "_____"
-        keys.remove(primary)
-
-        yield "|".join([primary] + sorted(keys))
-        yield entry
-
-if __name__ == "__main__":
-
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Convert wordlist to dictunformat")
-    parser.add_argument("wordlist", help="wordlist")
-    parser.add_argument("allforms", help="all_forms csv file")
-    parser.add_argument("--name", help="dictionary name", required=True)
-    parser.add_argument("--from-lang-id", help="from language id", required=True)
-    parser.add_argument("--to-lang-id", help="to language id", required=True)
-    parser.add_argument("--description", help="description", default="", required=True)
-    parser.add_argument("--url", help="source url")
-    parser.add_argument("--low-mem", help="Optimize for low memory devices", default=False, action='store_true')
-    parser.add_argument('--verbose', action='store_true')
-    args = parser.parse_args()
-
-    wordlist_data = open(args.wordlist)
-    if args.allforms:
-        allforms_data = open(args.allforms)
-
-    name = f"{args.name} ({args.from_lang_id}-{args.to_lang_id})"
-
-    print("_____")
-    print("00-database-info")
-    print(f"##:name:{name}")
-    if args.url:
-        print(f"##:url:{args.url}")
-    if args.description:
-        print(f"##:description:{args.description}")
-
-    for line in export(wordlist_data, allforms_data, args.low_mem, args.verbose):
-        print(line)
-
-    wordlist_data.close()
-    if args.allforms:
-        allforms_data.close()
+            yield ";   ".join([primary] + sorted(keys))
+            yield entry

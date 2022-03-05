@@ -16,22 +16,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This will build a dictionary from an english wiktionary dump
+Convert a wiktionary entries into wordlist entries
 """
 
 import os
-os.environ["PYWIKIBOT_NO_USER_CONFIG"]="2"
-from pywikibot import xmlreader
-from .language_extract import LanguageFile
 import re
 import sys
-from .utils import wiki_to_text, make_qualification, make_pos_tag
 
 import enwiktionary_parser as wtparser
-from enwiktionary_parser.languages.all_ids import languages as lang_ids
 from enwiktionary_parser.sections.usage import UsageSection
 from enwiktionary_parser.sections.etymology import EtymologySection
-from .wordlist import Wordlist
+
+from enwiktionary_wordlist.utils import wiki_to_text, make_qualification, make_pos_tag
 
 class WordlistBuilder:
     def __init__(self, lang_name, lang_id):
@@ -324,130 +320,3 @@ class WordlistBuilder:
                 return False
 
         return True
-
-
-def iter_langdata(datafile):
-
-    if not os.path.isfile(datafile):
-        raise FileNotFoundError(f"Cannot open: {datafile}")
-
-    yield from LanguageFile.iter_articles(datafile)
-
-def iter_xml(datafile, lang_section):
-
-    if not os.path.isfile(datafile):
-        raise FileNotFoundError(f"Cannot open: {datafile}")
-
-    dump = xmlreader.XmlDump(datafile)
-    parser = dump.parse()
-
-    langparser = LanguageFile(lang_section)
-
-    for entry in parser:
-
-        if ":" in entry.title or "/" in entry.title:
-            continue
-
-        lang_entry = langparser.get_language_entry(entry.text)
-
-        if not lang_entry:
-            continue
-
-        yield entry.title, lang_entry
-
-def main():
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Convert *nym sections to tags.")
-    parser.add_argument("--xml", help="Read entries from specified wiktionary XML dump")
-    parser.add_argument("--langdata", help="Read articles from specified language data file")
-    parser.add_argument("--wordlist", help="Read articles from existing wordlist")
-    parser.add_argument("--lang-id", help="Language id")
-    parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
-    parser.add_argument('--verbose', action='store_true')
-    parser.add_argument('--exclude-verb-forms', action='store_true', help="Exclude all verb forms")
-    parser.add_argument('--exclude-generated-forms', action='store_true', help="Exclude forms entries that can be generate automatically")
-    args = parser.parse_args()
-
-    count = 0
-    entries = {}
-
-    if args.langdata or args.xml:
-        if not args.lang_id:
-            raise ValueError("--lang-id is required when using --xml or --langdata")
-
-        elif args.lang_id not in lang_ids:
-            raise ValueError(f"Unknown language id: {args.lang_id}")
-
-        lang_section = lang_ids[args.lang_id]
-        builder = WordlistBuilder(lang_section, args.lang_id)
-
-        if args.langdata:
-            iter_entry = iter_langdata(args.langdata)
-        else:
-            iter_entry = iter_xml(args.xml, lang_section)
-
-        def _iter_entries():
-            for title, entry in iter_entry:
-                entry = builder.entry_to_text(entry, title)
-                if not entry:
-                    continue
-                yield title, entry
-
-        iter_entries = _iter_entries()
-
-    elif args.wordlist:
-        infile = open(args.wordlist)
-        iter_entries = Wordlist._iter_entries(infile)
-
-    else:
-        raise ValueError("No input file specified, use --xml or --lang-data or --wordlist")
-
-    # Build a Wordlist manually so later it can be used to validate entries
-    wordlist = Wordlist()
-    count = 0
-    for title, entry in iter_entries:
-        count += 1
-        if count % 1000 == 0 and args.verbose:
-            print(count, file=sys.stderr, end="\r")
-        if args.limit and count >= args.limit:
-            break
-        wordlist.all_entries[title] = map(str.lstrip, entry)
-
-    for word in sorted(wordlist.all_entries.keys()):
-        skipped = []
-        skipped_pos = None
-        header = False
-        for word_obj in wordlist.get_words(word):
-
-            # Words with forms before lemmas are forms
-            # eg, piernas is usually a form of pierna, not the less-frequenly used piernas
-            # because its words are listed in the order (piernas, form of pierna), (piernas, lemma)
-            # For these rare cases, it's important to preserve the "form of", even if it's a
-            # generated form of
-
-            if word_obj.pos != skipped_pos:
-                skipped = []
-                skipped_pos = word_obj.pos
-
-            if args.exclude_generated_forms and WordlistBuilder.is_generated(word_obj, wordlist):
-                skipped.append(word_obj)
-                continue
-
-            queue = skipped + [word_obj]
-            skipped = []
-            for word_obj in queue:
-                word_lines = WordlistBuilder.word_to_text(word_obj, args.exclude_verb_forms)
-                if not word_lines:
-                    continue
-                if not header:
-                    header = True
-                    print("_____")
-                    print(word)
-                print("\n".join(word_lines))
-
-    print(count, "entries processed", file=sys.stderr)
-
-if __name__ == "__main__":
-    main()
-
