@@ -3,6 +3,7 @@
 import argparse
 import collections
 import csv
+import io
 import os
 import pickle
 import sqlite3
@@ -12,12 +13,11 @@ from .wordlist import Wordlist
 
 class AllForms:
 
-    def __init__(self, db=None):
+    def __init__(self, dbfilename=None):
 
-        if db:
-            existing = os.path.exists(db)
-            # TODO check if file exists
-            self.dbcon = sqlite3.connect(db)
+        if dbfilename:
+            existing = os.path.exists(dbfilename)
+            self.dbcon = sqlite3.connect(dbfilename)
             self.dbcon.execute('PRAGMA synchronous = OFF')
             if not existing:
                 self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
@@ -43,8 +43,8 @@ class AllForms:
         return self.dbcon.execute("SELECT form, pos, lemma  FROM forms ORDER BY form, pos, lemma")
 
     @classmethod
-    def from_data(cls, allforms_data, db=None):
-        self = cls(db)
+    def from_data(cls, allforms_data, dbfilename=None):
+        self = cls(dbfilename)
 
         self.dbcon.execute("BEGIN TRANSACTION;")
 
@@ -61,12 +61,14 @@ class AllForms:
     def from_file(cls, filename, cache_words=True):
         # check for cached version
         cached = filename + ".sqlite"
-        if os.path.exists(cached) and os.path.getctime(cached) > os.path.getctime(filename):
-            self = cls(cached)
-            return self
+        if os.path.exists(cached):
+            if os.path.getctime(cached) > os.path.getctime(filename):
+                return cls(cached)
+
+            # delete the old cache
+            os.remove(cached)
 
         with open(filename) as infile:
-            print("compiling", cached, file=sys.stderr)
             return cls.from_data(infile, cached)
 
     @classmethod
@@ -78,25 +80,74 @@ class AllForms:
         self.dbcon.execute('''CREATE INDEX idx_form_pos ON forms (form, pos)''')
         self.dbcon.execute("COMMIT;")
 
-#        for formtype, count in self.count_formtype.items():
-#            print(formtype, count, file=sys.stderr)
-
         return self
 
     def _load_wordlist_forms(self, wordlist, resolve_lemmas):
-        for word in wordlist.iter_all_words():
-            self._process_word_forms(word, wordlist, resolve_lemmas)
 
-    def is_lemma(self, word):
+        prev_pos = None
+        prev_word = None
+        primary_lemma = True
+        for word in wordlist.iter_all_words():
+
+            if self.is_lemma(word):
+                self._add_form(word.word, word.pos, word.word)
+                self._add_word_forms(word, word.word, wordlist)
+            else:
+                for lemma, formtypes in word.form_of.items():
+                    self._add_form(word.word, word.pos, lemma)
+                    self._add_word_forms(word, lemma, wordlist)
+
+
+            old = """
+
+            secondary = bool(word.word == prev_word and word.pos == prev_pos)
+            prev_word = word.word
+            prev_pos = word.pos
+            if not secondary:
+                primary_lemma = True
+            is_lemma = self.is_lemma(word)
+            print(word.word, "is_lemma:", is_lemma)
+            primary_lemma = primary_lemma and is_lemma
+
+            if not len(word.senses):
+                continue
+
+            if False: #resolve_lemmas:
+                # Only add forms for primary lemmas (lemmas that occur before a nonlemma)
+                if primary_lemma:
+                    print("primary lemma", word.word, word.pos, word.genders)
+                    self._add_form(word.word, word.pos, word.word)
+                    self._add_word_forms(word, word.word, wordlist)
+                else:
+                    print("non-primary lemma", word.word)
+
+                    # Don't try to resolve secondary lemmas
+#                    if is_lemma:
+#                        continue
+
+                    for lemma, formtypes in self._resolve_lemmas(wordlist, word).items():
+                        print("  adding", lemma, formtypes)
+                        self._add_form(word.word, word.pos, lemma)
+                        self._add_word_forms(word, lemma, wordlist)
+
+            else:
+#                if not (word.pos == "v" and not word.is_lemma):
+                self._add_form(word.word, word.pos, word.word)
+                self._add_word_forms(word, word.word, wordlist)
+
+                for lemma, formtypes in word.form_of.items():
+                    self._add_form(word.word, word.pos, lemma)
+                    self._add_word_forms(word, lemma, wordlist)
+"""
+
+    @staticmethod
+    def is_lemma(word):
 
         """
-        Returns True if
+        This is based on wiktionary's concept of a lemma, which is that it doesn't declare a form of in header:
            + " form" not in meta
-           + the first gloss is not a "form of"
-        else False
 
-        Note, there's a similar implementation in dump_lemmas,
-        any major improvements should be ported there
+        This is different from the implementation in dump_lemmas, which is more strict
         """
 
         if not word.senses:
@@ -105,38 +156,41 @@ class AllForms:
         if word.meta and " form" in word.meta and " form" not in word.word:
             return False
 
+#        if word.pos == "n" and word.genders == "f" and "m" in word.forms and word.word not in FEM_LEMMAS:
+#            return False
+
         # If the first sense is a form-of, it's not a lemma
-        for sense in word.senses:
-            if sense.formtype:
-                return False
-            break # Only look at the first sense
+#        for sense in word.senses:
+#            if sense.formtype:
+#                return False
+#            break # Only look at the first sense
 
         return True
 
 
-    def _resolve_lemmas(self, wordlist, word, max_depth=3):
+#    @classmethod
+#    def _resolve_lemmas(cls, wordlist, word, max_depth=3):
         """
         follows a wordform to its final lemma
         word is a Word object
         Returns a dict: { lemma1: [formtypes], .. }
-        """
 
-        if self.is_lemma(word):
+        if cls.is_lemma(word):
             return {word.word: [word.genders]}
 
         lemmas = {}
         for lemma, formtypes in word.form_of.items():
 
             w = next(wordlist.get_words(lemma, word.pos), None)
-            if w and self.is_lemma(w):
+            if cls.is_lemma(w):
                 lemmas[lemma] = formtypes
 
-#            if any(self.is_lemma(w) for w in wordlist.get_words(lemma, word.pos)):
+#            if any(cls.is_lemma(w) for w in wordlist.get_words(lemma, word.pos)):
 #                lemmas[lemma] = formtypes
 
             elif max_depth>0:
                 for redirect in wordlist.get_words(lemma, word.pos):
-                    lemmas.update(self._resolve_lemmas(wordlist, redirect, max_depth-1))
+                    lemmas.update(cls._resolve_lemmas(wordlist, redirect, max_depth-1))
                     break # Only look at the first word
 
             else:
@@ -144,31 +198,10 @@ class AllForms:
                 return {}
 
         return lemmas
+"""
 
-    def _process_word_forms(self, word, wordlist, resolve_lemmas):
-
-        if not len(word.senses):
-            return
-
-        if resolve_lemmas:
-            if self.is_lemma(word):
-                self._add_form(word.word, word.pos, word.word)
-                self._add_word_forms(word, word.word, wordlist)
-
-            for lemma, formtypes in self._resolve_lemmas(wordlist, word).items():
-                self._add_form(word.word, word.pos, lemma)
-                self._add_word_forms(word, lemma, wordlist)
-
-        else:
-#            if not (word.pos == "v" and not word.is_lemma):
-            self._add_form(word.word, word.pos, word.word)
-            self._add_word_forms(word, word.word, wordlist)
-
-            for lemma, formtypes in word.form_of.items():
-                self._add_form(word.word, word.pos, lemma)
-                self._add_word_forms(word, lemma, wordlist)
-
-    opposite_genders = {"m": "f", "f": "m", "m-p": "fpl", "f-p": "mpl"}
+    #opposite_genders = {"m": "f", "f": "m", "m-p": "fpl", "f-p": "mpl"}
+    opposite_genders = {"f": "m", "f-p": "mpl"}
     def _add_word_forms(self, word, lemma, wordlist):
         """ Add all of a word's forms to the given lemma """
 
@@ -206,10 +239,35 @@ class AllForms:
                 self._add_form(form, word.pos, lemma)
 
     def _add_form(self, form, pos, lemma):
+
         if form == "-":
             return
 
         self.dbcon.execute("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [form, pos, lemma])
+
+
+    @property
+    def all_csv(self):
+        lemmas = []
+        prev_pos = None
+        prev_form = None
+        for form, pos, lemma in self.all:
+            if form != prev_form or pos != prev_pos:
+                if lemmas:
+                    yield self.make_csv(prev_form, prev_pos, lemmas)
+                lemmas = []
+            lemmas.append(lemma)
+            prev_form = form
+            prev_pos = pos
+        yield self.make_csv(prev_form, prev_pos, lemmas)
+
+    @staticmethod
+    def make_csv(form, pos, lemmas):
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerow([form,pos]+sorted(lemmas))
+        return si.getvalue().strip()
+
 
 #        value = f"{pos}|{lemma}"
 #        if value not in self.all_forms[form]:

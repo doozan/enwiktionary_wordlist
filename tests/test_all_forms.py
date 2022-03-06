@@ -1,7 +1,195 @@
 from enwiktionary_wordlist.wordlist import Wordlist
 from enwiktionary_wordlist.all_forms import AllForms
 
-def test_forms_complex():
+def test_mf_noun():
+
+    # all feminines should resolve to protector since there are no feminine lemmas
+
+    wordlist_data = """\
+_____
+protector
+pos: n
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  g: m
+  gloss: protector
+"""
+
+    expected = {
+'protector': ['n|protector'],
+'protectora': ['n|protector'],
+'protectoras': ['n|protector'],
+'protectores': ['n|protector'],
+'protectriz': ['n|protector'],
+'protectrices': ['n|protector'],
+}
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+
+
+def test_f_equiv():
+
+    # protectora is a lemma and should be an option for itself and its plurals
+
+    wordlist_data = """\
+_____
+protector
+pos: n
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  g: m
+  gloss: protector
+_____
+protectora
+pos: n
+  meta: {{es-noun|f|+|pl2=protectora_altpl}}
+  g: f
+  gloss: female equivalent of "protector"
+pos: n
+  meta: {{es-noun|f|+|pl2=protectora_altpl2}}
+  g: f
+  gloss: not a form of the masculine
+"""
+
+    expected = {
+'protector': ['n|protector'],
+'protectora': ['n|protector', 'n|protectora'],
+'protectoras': ['n|protector', 'n|protectora'],
+'protectores': ['n|protector'],
+'protectriz': ['n|protector'],
+'protectrices': ['n|protector'],
+'protectora_altpl': ['n|protectora'],
+'protectora_altpl2': ['n|protectora'],
+}
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+
+
+    # The result should be the same if the feminine has a m= in the headword and defs
+    wordlist_data = """\
+_____
+protector
+pos: n
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  g: m
+  gloss: protector
+_____
+protectora
+pos: n
+  meta: {{es-noun|f|+|pl2=protectora_altpl|m=protector}}
+  g: f
+  gloss: protectora
+pos: n
+  meta: {{es-noun|f|+|pl2=protectora_altpl2}}
+  g: f
+  gloss: not a form of the masculine
+"""
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+
+
+def test_alt_lemmas():
+
+    # alt_protectora/alt_protectora_pl should only be forms of alt_protectora
+
+    wordlist_data = """\
+_____
+protector
+pos: n
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  g: m
+  gloss: protector
+_____
+alt_protectora
+pos: n
+  meta: {{es-noun|f|alt_protectora_pl|m=protector}}
+  g: f
+  gloss: female protector
+"""
+
+    expected = {
+'protector': ['n|protector'],
+'protectora': ['n|protector'],
+'protectoras': ['n|protector'],
+'protectores': ['n|protector'],
+'protectriz': ['n|protector'],
+'protectrices': ['n|protector'],
+'alt_protectora': ['n|alt_protectora'],
+'alt_protectora_pl': ['n|alt_protectora'],
+}
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+
+
+
+def test_is_lemma():
+
+    wordlist_data = """\
+_____
+protector
+pos: n
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  g: m
+  gloss: protector
+_____
+protectora
+pos: n
+  meta: {{es-noun|f|m=protector}}
+  g: f
+  gloss: female equivalent of "protector"
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  gloss: animal shelter (an organization that provides temporary homes for stray pet animals)
+pos: n
+  meta: {{head|es|noun}}
+  g: f
+  gloss: using head
+pos: n
+  meta: {{head|es|noun form}}
+  g: f
+  gloss: using head form
+"""
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+
+    words = list(wordlist.get_words("protector", "n"))
+    assert AllForms.is_lemma(words[0]) == True
+
+    words = list(wordlist.get_words("protectora", "n"))
+    assert AllForms.is_lemma(words[0]) == True
+    assert AllForms.is_lemma(words[1]) == True
+    assert AllForms.is_lemma(words[2]) == True
+    assert AllForms.is_lemma(words[3]) == False
+
+
+def test_forms_complex1():
     # protectora should be a form of protector even though it has a secondary
     # declaration as a lemma
 
@@ -58,45 +246,8 @@ pos: n
 'protectora': ['n|protector', 'n|protectora'],
 'protectoras': ['n|protector', 'n|protectora'],
 'protectores': ['n|protector'],
-'protectrices': ['n|protector'],
-'protectriz': ['n|protector'],
-}
-
-    wordlist = Wordlist(wordlist_data.splitlines())
-    for word in wordlist.get_words("protectora"):
-        print("###", [word.word, word.pos, word.forms, word.form_of])
-
-    allforms = AllForms.from_wordlist(wordlist)
-    for k,v in expected.items():
-        print(k,v)
-        assert allforms.get_lemmas(k) == v
-
-
-def test_secondary_lemma_unique_forms():
-    # test2 should be alt of test, but
-    # test2s should only be a form of test2s (since it cannot be an alt of test)
-
-    wordlist_data = """\
-_____
-test
-pos: n
-  meta: {{es-noun|m|-}}
-  gloss: test
-_____
-test2
-pos: n
-  meta: {{es-noun|m|-}}
-  gloss: alternative form of "test"
-pos: n
-  meta: {{es-noun|m|test2s}}
-  g: m
-  gloss: test2
-"""
-
-    expected = {
-'test': ['n|test'],
-'test2': ['n|test', 'n|test2'],
-'test2s': ['n|test2']
+'protectrices': ['n|protector', 'n|protectriz'],
+'protectriz': ['n|protector', 'n|protectriz'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -106,39 +257,7 @@ pos: n
         assert allforms.get_lemmas(k) == v
 
 
-def test_secondary_lemma_no_unique_forms():
-
-    wordlist_data = """\
-_____
-test
-pos: n
-  meta: {{es-noun|m|-}}
-  gloss: test
-_____
-test2
-pos: n
-  meta: {{es-noun|m|test2s}}
-  gloss: alternative form of "test"
-pos: n
-  meta: {{es-noun|m|test2s}}
-  g: m
-  gloss: test2
-"""
-
-    expected = {
-'test': ['n|test'],
-'test2': ['n|test', 'n|test2'],
-'test2s': ['n|test', 'n|test2']
-}
-
-    wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist)
-    for k,v in expected.items():
-        print(k,v)
-        assert allforms.get_lemmas(k) == v
-
-
-def test_forms_text():
+def test_forms_text1():
 
     wordlist_data = """\
 testo {n-meta} :: {{es-noun|m}}
@@ -149,8 +268,8 @@ testa {n-meta} :: {{es-noun|f}}
 testa {f} :: feminine noun of "testo"
 """
     expected = {
-'testa': ['n|testo'],
-'testas': ['n|testo'],
+'testa': ['n|testa'],
+'testas': ['n|testa'],
 'testo': ['n|testo'],
 'testos': ['n|testo'],
 'testoz': ['n|testo'],
@@ -161,8 +280,12 @@ testa {f} :: feminine noun of "testo"
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
-def test_forms_redirection():
+def notest_forms_redirection():
 
     wordlist_data = """\
 test1 {n-meta} :: {{es-noun|m|-}}
@@ -184,6 +307,12 @@ test4 {m} :: alternate form of "test3"
 
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+
+    # this should be different
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -220,12 +349,16 @@ pos: n
     expected = {
 'asca': ['n|asca'],
 'ascas': ['n|asca'],
-'asco': ['n|asca', 'n|asco'],
-'ascos': ['n|asca', 'n|asco']
+'asco': ['n|asco'],
+'ascos': ['n|asco']
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -595,6 +728,10 @@ pos: verb
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_afecto():
@@ -617,6 +754,10 @@ pos: adj
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 def test_nonlemma():
 
@@ -634,6 +775,10 @@ pos: determiner
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
     # but forms can't
     wordlist_data = """\
@@ -646,6 +791,10 @@ pos: determiner
     expected = {}
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -669,6 +818,10 @@ pos: determiner
             'ningún': ['determiner|ninguno']}
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -715,8 +868,43 @@ pos: n
     expected = {
         'actores': ['n|actor'],
         'actriz': ['n|actor', 'n|actriz'],
-        'actrices': ['n|actriz'],
+        'actrices': ['n|actor', 'n|actriz'],
         'actor': ['n|actor']
+    }
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+
+def test_male_lemma():
+
+    # male lemma with feminine equivalent
+
+    wordlist_data="""\
+_____
+coneja
+pos: n
+  meta: {{es-noun|f|m=conejo}}
+  g: f
+  gloss: female equivalent of "conejo"
+_____
+conejo
+pos: n
+  meta: {{es-noun|m|f=coneja}}
+  g: m
+  gloss: rabbit
+"""
+    expected = {
+        'coneja':  ['n|coneja', 'n|conejo'],
+        'conejas': ['n|coneja', 'n|conejo'],
+        'conejo':  ['n|conejo'],
+        'conejos': ['n|conejo'],
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -729,23 +917,38 @@ def test_female_lemma():
 
     # feminine lemma with male forms
 
+    # There's no way to distinguish this from a 'normal' m/f pair where the masculine
+    # in the preferred lemma.
+
     wordlist_data="""\
 _____
 cabra
 pos: n
   meta: {{es-noun|f|m=cabro}}
   g: f
-  gloss: goat
+  gloss: goat, primary lemma
+_____
+cabro
+pos: n
+  meta: {{es-noun|m|f=cabra}}
+  g: m
+  gloss: male goat
 """
+
+    # Ideally this would be reversed, but there's no way of knowing that the female lemma is the 'main' lemma
     expected = {
-        'cabras': ['n|cabra'],
-        'cabro': ['n|cabra'],
-        'cabros': ['n|cabra'],
-        'cabra': ['n|cabra']
+        'cabra': ['n|cabra', 'n|cabro'],
+        'cabras': ['n|cabra', 'n|cabro'],
+        'cabro': ['n|cabro'],
+        'cabros': ['n|cabro'],
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -780,8 +983,8 @@ pos: n
         'latine': ['n|latine'],
         'latines': ['n|latine'],
 
-        'latina': ['n|latino'],
-        'latinas': ['n|latino'],
+        'latina': ['n|latina', 'n|latino'],
+        'latinas': ['n|latina', 'n|latino'],
 
         'latino': ['n|latino'],
         'latinos': ['n|latino'],
@@ -792,11 +995,13 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
 def test_clientes():
-
-    # non binary shouldn't add forms to binary words
 
     wordlist_data="""\
 _____
@@ -820,14 +1025,18 @@ pos: n
 """
 
     expected = {
-        'clienta': ['n|cliente'],
-        'clientas': ['n|cliente'],
+        'clienta': ['n|clienta', 'n|cliente'],
+        'clientas': ['n|clienta', 'n|cliente'],
         'clientes': ['n|cliente'],
         'cliente': ['n|cliente']
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -864,12 +1073,16 @@ pos: pron
 
     expected = {
         'nosotros': ['pron|nosotros'],
-        'nosotras': ['pron|nosotras'],
+        'nosotras': ['pron|nosotras', 'pron|nosotros'],
         'nosotres': ['pron|nosotres']
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -903,21 +1116,10 @@ pos: n
         'bosníacos': ['n|bosníaco'],
         'bosníaca': ['n|bosníaco'],
         'bosníacas': ['n|bosníaco'],
-        'bosniaca': ['n|bosníaco'],
-        'bosniacas': ['n|bosníaco'],
-        'bosniaco': ['n|bosníaco'],
-        'bosniacos': ['n|bosníaco'],
-    }
-
-    expected_unresolved = {
-        'bosníaco': ['n|bosníaco'],
-        'bosníacos': ['n|bosníaco'],
-        'bosníaca': ['n|bosníaco'],
-        'bosníacas': ['n|bosníaco'],
-        'bosniaca': ['n|bosniaca', 'n|bosniaco', 'n|bosníaco'],
+        'bosniaca': ['n|bosniaca', 'n|bosniaco'],
         'bosniacas': ['n|bosniaca', 'n|bosniaco'],
-        'bosniaco': ['n|bosniaco', 'n|bosníaco'],
-        'bosniacos': ['n|bosniaco', 'n|bosníaco']
+        'bosniaco': ['n|bosniaco'],
+        'bosniacos': ['n|bosniaco'],
     }
 
     wordlist = Wordlist(wordlist_data.splitlines())
@@ -925,12 +1127,6 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
-    for k,v in expected_unresolved.items():
-        print(k,v)
-        assert allforms.get_lemmas(k) == v
-
 
 def test_acapulco():
 
@@ -985,9 +1181,13 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
+    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    for k,v in expected.items():
+        print(k,v)
+        assert allforms.get_lemmas(k) == v
 
 
-def test_redirection():
+def notest_redirection():
     data="""\
 _____
 test1
@@ -1086,5 +1286,225 @@ pos: v
     wordlist = Wordlist(wordlist_data.splitlines())
 #    assert "te aborregas" in AllForms.from_wordlist(wordlist).all_forms
     assert "aborregas" in AllForms.from_wordlist(wordlist).all_forms
-    assert AllForms.from_wordlist(wordlist).get_lemmas("aborregas") == ['v|aborregarse']
-    assert AllForms.from_wordlist(wordlist, resolve_lemmas=False).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse', 'v|aborregas']
+    assert AllForms.from_wordlist(wordlist).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse']
+    assert AllForms.from_wordlist(wordlist, resolve_lemmas=False).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse'] #, 'v|aborregas']
+
+
+def test_forms_complex_csv():
+    # protectora should be a form of protector even though it has a secondary
+    # declaration as a lemma
+
+
+
+    wordlist_data = """\
+_____
+protector
+pos: n
+  meta: {{es-noun|m|protectores|f=protectora|f2=protectriz}}
+  g: m
+  gloss: protector
+_____
+protectora
+pos: n
+  meta: {{es-noun|f|m=protector}}
+  g: f
+  gloss: female equivalent of "protector"
+pos: n
+  meta: {{es-noun|f|+|pl2=protectora_altpl2}}
+  g: f
+  gloss: another
+_____
+protectriz
+pos: n
+  meta: {{es-noun|f|m=protector}}
+  g: f
+  gloss: alternative form of "protectora"
+    q: uncommon
+"""
+
+    expected= """\
+protector,n,protector
+protectora,n,protector,protectora
+protectora_altpl2,n,protectora
+protectoras,n,protector,protectora
+protectores,n,protector
+protectrices,n,protector,protectriz
+protectriz,n,protector,protectriz\
+"""
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+    print("\n".join(allforms.all_csv))
+    assert list(allforms.all_csv) == expected.splitlines()
+
+def test_secondary_lemma_unique_forms_csv():
+
+    wordlist_data = """\
+_____
+test
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  gloss: test
+_____
+test2
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  gloss: alternative form of "test"
+_____
+test3
+pos: n
+  meta: {{head|es|noun form}}
+  g: m
+  gloss: alternative form of "test"
+_____
+test4
+pos: n
+  meta: {{head|es|noun form}}
+  g: m
+  gloss: alternative form of "missing_lemma"
+_____
+test5
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  gloss: test5
+_____
+test6
+pos: n
+  meta: {{head|es|noun form}}
+  g: m
+  gross: this has a definition befor the form of
+  gloss: alternative form of "test"
+"""
+
+
+# test2 does not list test as a lemma because
+# test does not declare test2 as a form and
+# test2 is marked as a lemma and not as a form of
+
+    expected = """\
+test,n,test
+test2,n,test2
+test2s,n,test2
+test3,n,test
+test4,n,missing_lemma
+test5,n,test5
+test5s,n,test5
+test6,n,test
+tests,n,test\
+"""
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+    print("\n".join(allforms.all_csv))
+    assert list(allforms.all_csv) == expected.splitlines()
+
+
+def test_aquellos():
+
+    wordlist_data = """\
+_____
+aquél
+pos: pron
+  meta: {{head|es|pronoun|demonstrative||feminine|aquélla|neuter|aquello|masculine plural|aquéllos|feminine plural|aquéllas|g=m}}
+  g: m
+  gloss: that one (far from speaker and listener)
+    q: demonstrative
+  gloss: the former
+    q: demonstrative
+  gloss: anyone/anything
+    q: demonstrative
+_____
+aquéllas
+pos: pron
+  meta: {{head|es|pronoun form|demonstrative|g=f-p}}
+  g: f-p
+  gloss: feminine plural of "aquél"; those ones (far from speaker and listener)
+_____
+aquéllos
+pos: pron
+  meta: {{head|es|pronoun form|demonstrative|g=m-p}}
+  g: m-p
+  gloss: plural of "aquél"; those ones (far from speaker and listener)
+_____
+aquel
+pos: determiner
+  meta: {{head|es|determiner|feminine|aquella|masculine plural|aquellos|g=m-s}}
+  g: m-s
+  etymology: From VL "*accum ille", a compound of Latin "eccum" and ille.
+  gloss: that (over there; implying some distance)
+    q: demonstrative
+pos: pron
+  meta: {{head|es|pronoun form}}
+  usage: The unaccented form can function as a pronoun if it can be unambiguously deduced as such from context.
+  etymology: From VL "*accum ille", a compound of Latin "eccum" and ille.
+  gloss: alternative spelling of "aquél"
+    q: demonstrative
+_____
+aquella
+pos: pron
+  meta: {{head|es|pronoun form|demonstrative|g=f}}
+  g: f
+  usage: The unaccented form can function as a pronoun if it can be unambiguously deduced as such from context.
+  etymology: From VL "*accum ille", from Latin "eccum" ille.
+  gloss: alternative spelling of "aquélla"; that one
+_____
+aquellas
+pos: determiner
+  meta: {{head|es|determiner form|g=f-p}}
+  g: f-p
+  etymology: From Latin "eccu(m)" illās.
+  gloss: feminine plural of "aquel"; those (over there; implying some distance)
+pos: pron
+  meta: {{head|es|pronoun|demonstrative|g=f-p}}
+  g: f-p
+  usage: The unaccented form can function as a pronoun if it can be unambiguously deduced as such from context.
+  etymology: From Latin "eccu(m)" illās.
+  gloss: alternative spelling of "aquéllas"; those ones
+_____
+aquello
+pos: pron
+  meta: {{head|es|pronoun form}}
+  etymology: From VL "*accum illud", neuter singular of *accum ille.
+  gloss: neuter singular of "aquél"; that (over there); it
+_____
+aquellos
+pos: determiner
+  meta: {{head|es|determiner form|demonstrative|g=m-p}}
+  g: m-p
+  etymology: From Latin "eccu(m)" illōs.
+  gloss: masculine plural of "aquel"; those (over there; implying some distance)
+pos: pron
+  meta: {{head|es|pronoun|demonstrative|g=m-p}}
+  g: m-p
+  etymology: From Latin "eccu(m)" illōs.
+  gloss: alternative spelling of "aquéllos"; those ones (over there; implying some distance). The unaccented form can function as a pronoun if it can be unambiguously deduced as su
+pos: pron
+  meta: {{head|es|pronoun|g=n-p}}
+  g: n-p
+  etymology: From Latin "eccu(m)" illōs.
+  gloss: Those ones. (over there; implying some distance)
+"""
+
+    expected = """\
+aquel,determiner,aquel
+aquel,pron,aquél
+aquella,determiner,aquel
+aquella,pron,aquélla
+aquellas,determiner,aquel
+aquellas,pron,aquellas
+aquello,pron,aquél
+aquellos,determiner,aquel
+aquellos,pron,aquellos
+aquél,pron,aquél
+aquélla,pron,aquél
+aquéllas,pron,aquél
+aquéllos,pron,aquél
+"""
+
+    wordlist = Wordlist(wordlist_data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+    print("\n".join(allforms.all_csv))
+    assert list(allforms.all_csv) == expected.splitlines()
