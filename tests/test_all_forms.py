@@ -1187,82 +1187,6 @@ pos: n
         assert allforms.get_lemmas(k) == v
 
 
-def notest_redirection():
-    data="""\
-_____
-test1
-pos: n
-  g: m
-  gloss: test
-_____
-test2
-pos: n
-  gloss: alternate form of "test1"
-_____
-test3
-pos: n
-  gloss: alternate form of "test2"
-_____
-test4
-pos: n
-  gloss: misspelling of "test3"
-_____
-test5
-pos: n
-  gloss: alternative form of "test6"
-_____
-test6
-pos: n
-  gloss: alternative form of "test5"
-_____
-test7
-pos: n
-  gloss: alternative form of "test-none"
-_____
-test8
-pos: n
-  gloss: alternative form of "test4"
-_____
-test9
-pos: n
-  gloss: alternative form of "test8"
-"""
-
-    wlist = Wordlist(data.splitlines())
-    allforms = AllForms.from_wordlist(wlist, resolve_lemmas=True)
-
-    assert wlist.has_word("test1", "n") == True
-    assert wlist.has_word("test2", "n") == True
-
-    test1 = next(wlist.get_words("test1", "n"))
-    test2 = next(wlist.get_words("test2", "n"))
-    test3 = next(wlist.get_words("test3", "n"))
-    test4 = next(wlist.get_words("test4", "n"))
-    test5 = next(wlist.get_words("test5", "n"))
-    test6 = next(wlist.get_words("test6", "n"))
-    test7 = next(wlist.get_words("test7", "n"))
-    test8 = next(wlist.get_words("test8", "n"))
-    test9 = next(wlist.get_words("test9", "n"))
-
-    assert test1.word == "test1"
-    assert test1.pos == "n"
-    assert test1.genders == "m"
-
-    assert allforms._resolve_lemmas(wlist, test1) == {'test1': ['m']}
-    assert allforms._resolve_lemmas(wlist, test2) == {'test1': ['alt']}
-    assert allforms._resolve_lemmas(wlist, test3) == {'test1': ['alt']}
-    assert allforms._resolve_lemmas(wlist, test3, 0) == {}
-    assert allforms._resolve_lemmas(wlist, test4) == {'test1': ['alt']}
-    assert allforms._resolve_lemmas(wlist, test5) == {}
-    assert allforms._resolve_lemmas(wlist, test6) == {}
-    assert allforms._resolve_lemmas(wlist, test7) == {}
-
-    assert allforms._resolve_lemmas(wlist, test8) == {'test1': ['alt']}
-
-    assert allforms._resolve_lemmas(wlist, test9) == {}
-    assert allforms._resolve_lemmas(wlist, test9, 4) == {'test1': ['alt']}
-
-
 def test_condense_verbs_wrong_existing_form():
 
     wordlist_data = """\
@@ -1507,4 +1431,38 @@ aquéllos,pron,aquél
     wordlist = Wordlist(wordlist_data.splitlines())
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join(allforms.all_csv))
+    assert list(allforms.all_csv) == expected.splitlines()
+
+
+def test_alt_of_form():
+
+    # misspellings count as forms
+
+    data="""\
+_____
+país
+pos: n
+  meta: {{es-noun|m|países}}
+  g: m
+  etymology: Borrowed from French "pays", from Old French "païs", from Malayalam "pagensis", from Latin "pāgus" (“country”). Compare Sicilian "pajisi", Italian "paese".
+  gloss: country (the territory of a nation)
+  gloss: country, land (a set region of land having particular human occupation or agreed limits)
+_____
+paises
+pos: n
+  meta: {{head|es|misspelling}}
+  gloss: misspelling of "países"
+"""
+
+    expected = """\
+paises,n,países
+país,n,país
+países,n,país\
+"""
+
+    wordlist = Wordlist(data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+    print("\n".join(allforms.all_csv))
+
+    assert allforms.is_lemma(next(wordlist.get_words("paises", "n"))) == False
     assert list(allforms.all_csv) == expected.splitlines()

@@ -12,6 +12,7 @@ import sys
 from .wordlist import Wordlist
 
 class AllForms:
+    FEM_LEMMAS = ["cabra", "rata"]
 
     def __init__(self, dbfilename=None):
 
@@ -153,52 +154,13 @@ class AllForms:
         if not word.senses:
             return False
 
-        if word.meta and " form" in word.meta and " form" not in word.word:
+        if word.meta and (
+                (" form" in word.meta and " form" not in word.word)
+                or "misspelling" in word.meta):
             return False
-
-#        if word.pos == "n" and word.genders == "f" and "m" in word.forms and word.word not in FEM_LEMMAS:
-#            return False
-
-        # If the first sense is a form-of, it's not a lemma
-#        for sense in word.senses:
-#            if sense.formtype:
-#                return False
-#            break # Only look at the first sense
 
         return True
 
-
-#    @classmethod
-#    def _resolve_lemmas(cls, wordlist, word, max_depth=3):
-        """
-        follows a wordform to its final lemma
-        word is a Word object
-        Returns a dict: { lemma1: [formtypes], .. }
-
-        if cls.is_lemma(word):
-            return {word.word: [word.genders]}
-
-        lemmas = {}
-        for lemma, formtypes in word.form_of.items():
-
-            w = next(wordlist.get_words(lemma, word.pos), None)
-            if cls.is_lemma(w):
-                lemmas[lemma] = formtypes
-
-#            if any(cls.is_lemma(w) for w in wordlist.get_words(lemma, word.pos)):
-#                lemmas[lemma] = formtypes
-
-            elif max_depth>0:
-                for redirect in wordlist.get_words(lemma, word.pos):
-                    lemmas.update(cls._resolve_lemmas(wordlist, redirect, max_depth-1))
-                    break # Only look at the first word
-
-            else:
-                print(f"Lemma recursion exceeded: {word.word} {word.pos} -> {lemma}", file=sys.stderr)
-                return {}
-
-        return lemmas
-"""
 
     #opposite_genders = {"m": "f", "f": "m", "m-p": "fpl", "f-p": "mpl"}
     opposite_genders = {"f": "m", "f-p": "mpl"}
@@ -229,7 +191,7 @@ class AllForms:
                    and any(x for x in opposite_words if form == x.word or any(y for y in x.forms.values() if form in y)):
                     continue
 
-                if word.genders == "f" and word.form_of and formtype in ["m", "mpl"]:
+                if word.genders == "f" and word.form_of and formtype in ["m", "mpl"] and word.word not in self.FEM_LEMMAS:
                     continue
 
                 if non_binary and formtype in ["m", "f", "mpl", "fpl"]:
