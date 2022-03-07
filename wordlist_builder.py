@@ -19,6 +19,7 @@
 Convert a wiktionary entries into wordlist entries
 """
 
+from collections import defaultdict
 import os
 import re
 import sys
@@ -259,20 +260,13 @@ class WordlistBuilder:
         return synonyms
 
     @classmethod
-    def word_to_text(cls, word, exclude_verb_forms):
+    def word_to_text(cls, word):
 
         senses = []
         non_verbform_sense = False
         for sense in word.senses:
             if not sense.gloss:
                 continue
-
-            if exclude_verb_forms:
-                if sense.nonform or not sense.formtype:
-                    non_verbform_sense = True
-
-                elif "_" not in sense.formtype and sense.formtype not in ["gerund", "infinitive", "reflexive"]:
-                    non_verbform_sense = True
 
             s = {}
             s["gloss"] = sense.gloss
@@ -281,7 +275,7 @@ class WordlistBuilder:
             s["regional"] = "; ".join(sense.regions) if sense.regions else None
             senses.append(s)
 
-        if not senses or exclude_verb_forms and not non_verbform_sense:
+        if not senses:
             return
 
         word_lines = WordlistBuilder.make_word_entry(
@@ -320,3 +314,33 @@ class WordlistBuilder:
                 return False
 
         return True
+
+
+    @staticmethod
+    def from_wordlist(wordlist, exclude_generated):
+        for word in sorted(wordlist.all_entries.keys()):
+            skipped = defaultdict(list)
+            header = False
+            for word_obj in wordlist.get_words(word):
+
+                # Words with forms before lemmas are forms
+                # eg, piernas is usually a form of pierna, not the less-frequenly used piernas
+                # because its words are listed in the order (piernas, form of pierna), (piernas, lemma)
+                # For these rare cases, it's important to preserve the "form of", even if it's a
+                # generated form of
+
+                if exclude_generated and WordlistBuilder.is_generated(word_obj, wordlist):
+                    skipped[word_obj.pos].append(word_obj)
+                    continue
+
+                queue = skipped[word_obj.pos] + [word_obj]
+                skipped[word_obj.pos] = []
+                for word_obj in queue:
+                    word_lines = WordlistBuilder.word_to_text(word_obj)
+                    if not word_lines:
+                        continue
+                    if not header:
+                        header = True
+                        yield("_____")
+                        yield(word)
+                    yield from word_lines

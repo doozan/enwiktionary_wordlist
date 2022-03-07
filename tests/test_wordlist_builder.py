@@ -16,6 +16,7 @@
 
 import pytest
 from enwiktionary_wordlist.wordlist_builder import WordlistBuilder
+from enwiktionary_wordlist.wordlist import Wordlist
 import mwparserfromhell
 
 builder = WordlistBuilder("Spanish", "es")
@@ -1362,4 +1363,95 @@ pos: n
   gloss: female equivalent of "chivo"; young female goat, kid\
 """
 
+def test_is_generated():
 
+    wordlist_data="""\
+_____
+morena
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  etymology: See moreno. Ultimately related to English "Moor".
+  gloss: female equivalent of "moreno"
+pos: adj
+  meta: {{head|es|adjective form}}
+  etymology: See moreno. Ultimately related to English "Moor".
+  gloss: feminine singular of "moreno"
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  etymology: from Latin "muraena" (“sea eel, lamprey”), from Ancient Greek "σμυραινα", from σμυρος (“sea eel”).
+  gloss: moray
+    q: zoology
+_____
+morenas
+pos: adj
+  meta: {{head|es|adjective form}}
+  gloss: feminine plural of "moreno"
+pos: n
+  meta: {{head|es|noun form|g=f-p}}
+  g: f-p
+  gloss: plural of "morena"
+_____
+moreno
+pos: adj
+  meta: {{es-adj|sup=morenísimo}}
+  etymology: From moro + -eno.
+  gloss: dark colored
+  gloss: dark-skinned, tan
+  gloss: dark-haired
+pos: n
+  meta: {{es-noun|m|f=morena}}
+  g: m
+  etymology: From moro + -eno.
+  gloss: a dark-skinned or tan person
+  gloss: a person with dark-hair
+_____
+morenos
+pos: adj
+  meta: {{head|es|adjective form}}
+  gloss: masculine plural of "moreno"
+pos: n
+  meta: {{head|es|noun form|g=m-p}}
+  g: m-p
+  gloss: plural of "moreno"\
+"""
+
+    expected = """\
+_____
+morena
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  etymology: See moreno. Ultimately related to English "Moor".
+  gloss: female equivalent of "moreno"
+pos: n
+  meta: {{es-noun|f}}
+  g: f
+  etymology: from Latin "muraena" (“sea eel, lamprey”), from Ancient Greek "σμυραινα", from σμυρος (“sea eel”).
+  gloss: moray
+    q: zoology
+_____
+moreno
+pos: adj
+  meta: {{es-adj|sup=morenísimo}}
+  etymology: From moro + -eno.
+  gloss: dark colored
+  gloss: dark-skinned, tan
+  gloss: dark-haired
+pos: n
+  meta: {{es-noun|m|f=morena}}
+  g: m
+  etymology: From moro + -eno.
+  gloss: a dark-skinned or tan person
+  gloss: a person with dark-hair\
+"""
+
+    wordlist_full = Wordlist(wordlist_data.splitlines())
+
+    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False))
+    assert res == wordlist_data
+
+    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=True))
+    print(res)
+    assert res == expected
