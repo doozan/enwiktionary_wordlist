@@ -190,6 +190,11 @@ class Word():
         self._parse_meta()
         return self._forms
 
+    def has_form(self, form, formtype=None):
+        if formtype:
+            return form in self.forms.get(formtype,[])
+        return any(form in f for f in self.forms.values())
+
     def add_forms_from_meta(self):
         for template in templates.iter_templates(self.meta):
             if template.name == "head":

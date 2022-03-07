@@ -23,8 +23,15 @@ def test_word():
     assert word.forms == {}
     assert word.form_of == { "testz": ["alt"] }
 
+
+    assert word.has_form("tests") == False
+
     word.add_form("pl", "tests")
     assert word.forms == { "pl": ["tests"] }
+
+    assert word.has_form("tests") == True
+    assert word.has_form("tests", "xx") == False
+    assert word.has_form("tests", "pl") == True
 
     word.add_form("pl", "test2s")
     assert word.forms == { "pl": ["tests", "test2s"] }
