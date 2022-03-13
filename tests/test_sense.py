@@ -32,5 +32,5 @@ def test_sense():
     run_test_sense_form("obsolete form of se (as a dative pronoun)", "old", "se", "as a dative pronoun)")
     run_test_sense_form('compound form of "ir"+"se"', "form", "ir", "")
     run_test_sense_form('inflection of "-acho"', "form", "-acho", "")
-    run_test_sense_form('only used in "autogestionarse"', "alt", "autogestionarse", "")
+    run_test_sense_form('only used in "autogestionarse"', "onlyin", "autogestionarse", "")
 
