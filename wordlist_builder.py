@@ -34,9 +34,6 @@ class WordlistBuilder:
     def __init__(self, lang_name, lang_id):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
-        self._problems = {}
-        self._stats = {}
-        self.fixes = set()
 
         start = fr"(^|\n)==\s*{self.LANG_SECTION}\s*==\s*\n"
         re_endings = [ r"\[\[\s*Category\s*:", r"==[^=]+==", r"----" ]
@@ -47,13 +44,6 @@ class WordlistBuilder:
         newlines = r"(\n\s*){1,2}"
         pattern = fr"{start}.*?(?={newlines}({endings})|$)"
         self._re_pattern = re.compile(pattern, re.DOTALL)
-
-    def flag_problem(self, problem, *data, from_child=False):
-        """
-        Add *problem* to the internal list of problems
-        """
-        self._problems[problem] = self._problems.get(problem, []) + [data]
-        # TODO: do something with the errors raised
 
     def get_language_entry(self, text):
         """
@@ -169,9 +159,6 @@ class WordlistBuilder:
                 if sense_data not in senses:
                     senses.append(sense_data)
 
-            if not senses:
-                continue
-
             usages = []
             for usage in self.get_usage(word):
                 usage_text = self.usage_to_text(usage, title)
@@ -275,9 +262,6 @@ class WordlistBuilder:
             s["regional"] = "; ".join(sense.regions) if sense.regions else None
             senses.append(s)
 
-        if not senses:
-            return
-
         word_lines = WordlistBuilder.make_word_entry(
             pos = word.pos,
             meta = word.meta,
@@ -309,19 +293,33 @@ class WordlistBuilder:
             formtype = "pl" if word.pos == "adj" and sense.formtype == "mpl" else sense.formtype
             lemmas = wordlist.get_words(sense.lemma, word.pos)
             if formtype == "reflexive" and any(has_reflexive(lemma) for lemma in lemmas):
-                return True
+                continue
+
+            # -r verbs are infinitive of -rse verbs, but -rse verbs list themselves at their infinitive formtype
+            if formtype == "infinitive" and sense.lemma.endswith("rse") and any(wordlist.get_words(sense.lemma[:-2])):
+                continue
+
             if not any(word.word in l.forms.get(formtype, []) for l in lemmas):
+                # infinitive_comb will refer to the -r form of -rse verbs, so manually check the -rse lemma
+                if (formtype.startswith("infinitive_comb_") or formtype.startswith("gerund_comb_")) \
+                    and sense.lemma.endswith("r") \
+                    and any(word.word in l.forms.get(formtype, []) for l in wordlist.get_words(sense.lemma + "se", "v")):
+                    continue
                 return False
 
         return True
 
 
     @staticmethod
-    def from_wordlist(wordlist, exclude_generated):
+    def from_wordlist(wordlist, exclude_generated, exclude_empty):
+        entry = []
         for word in sorted(wordlist.all_entries.keys()):
             skipped = defaultdict(list)
             header = False
             for word_obj in wordlist.get_words(word):
+
+                if exclude_empty and not word_obj.senses:
+                    continue
 
                 # Words with forms before lemmas are forms
                 # eg, piernas is usually a form of pierna, not the less-frequenly used piernas
@@ -340,7 +338,12 @@ class WordlistBuilder:
                     if not word_lines:
                         continue
                     if not header:
+                        if entry:
+                            yield "\n".join(entry)
+                            entry = []
                         header = True
-                        yield("_____")
-                        yield(word)
-                    yield from word_lines
+                        entry = ["_____", word]
+                    entry += word_lines
+
+        if entry:
+            yield "\n".join(entry)

@@ -124,7 +124,7 @@ def test_completada():
 ===Adjective===
 {{head|es|adjective form}}
 
-# {{es-adj form of|completado|f|sg}}
+# {{adj form of|es|completado||f|s}}
 
 ===Verb===
 {{head|es|past participle form}}
@@ -143,6 +143,9 @@ def test_completada():
     entry = builder.entry_to_text(lang_entry, "completada")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
+pos: adj
+  meta: {{head|es|adjective form}}
+  gloss: feminine singular of "completado"
 pos: v
   meta: {{head|es|past participle form}}
   gloss: pp_fs of "completar"
@@ -1449,9 +1452,47 @@ pos: n
 
     wordlist_full = Wordlist(wordlist_data.splitlines())
 
-    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False))
+    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False, exclude_empty=False))
     assert res == wordlist_data
 
-    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=True))
+    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=True, exclude_empty=True))
     print(res)
     assert res == expected
+
+
+def test_empty_verb():
+
+    # Empty verbs should generate text, but that text may be ignored if
+    # --exclude-empty is used
+
+    orig_text="""\
+==Spanish==
+
+===Etymology===
+{{af|es|a-|mojama|-ar}}
+
+===Pronunciation===
+{{es-IPA}}
+
+===Verb===
+{{es-verb}}
+
+# {{rfdef|es}}
+
+====Conjugation====
+{{es-conj|nocomb=1}}
+
+===Further reading===
+* {{R:DRAE}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "bolivariano")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+pos: v
+  meta: {{es-verb}} {{es-conj|nocomb=1}}
+  etymology: a- + mojama + -ar\
+"""
