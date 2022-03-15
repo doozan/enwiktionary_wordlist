@@ -164,11 +164,11 @@ diosa {f} [biochemistry] :: diose
 """
     wlist = Wordlist(data.splitlines())
 
-    dios =  next(wlist.get_words("dios", "n"))
+    dios =  next(wlist.get_iwords("dios", "n"))
     assert dios.forms == {'f': ['diosa'], 'fpl': ['diosas'], 'pl': ['dioses']}
 
     assert list(wlist.get_formtypes("dios", "n", "diosa")) == ["f"]
-    diosa =  next(wlist.get_words("diosa", "n"))
+    diosa =  next(wlist.get_iwords("diosa", "n"))
     assert diosa.forms == {'m': ['dios'], 'mpl': ['dioses'], 'pl': ['diosas']}
     assert diosa.form_of == {}
 
@@ -191,10 +191,10 @@ aquellos {pron} :: Those ones. (over there; implying some distance)
 
     wlist = Wordlist(data.splitlines())
 
-    word =  next(wlist.get_words("aquel", "pron"))
+    word =  next(wlist.get_iwords("aquel", "pron"))
     assert word.forms == {'f': ['aquella'], 'fpl': ['aquellas'], 'mpl': ['aquellos'], 'neutrum': ['aquello'], 'neutrum_plural': ['aquellos']}
 
-    word =  next(wlist.get_words("aquellos", "pron"))
+    word =  next(wlist.get_iwords("aquellos", "pron"))
 #    for sense in word.senses:
 #        print(sense.gloss)
     assert word.form_of == {'aquéllos': ['alt']}

@@ -179,10 +179,10 @@ pos: n
 
     wordlist = Wordlist(wordlist_data.splitlines())
 
-    words = list(wordlist.get_words("protector", "n"))
+    words = wordlist.get_words("protector", "n")
     assert AllForms.is_lemma(words[0]) == True
 
-    words = list(wordlist.get_words("protectora", "n"))
+    words = wordlist.get_words("protectora", "n")
     assert AllForms.is_lemma(words[0]) == True
     assert AllForms.is_lemma(words[1]) == True
     assert AllForms.is_lemma(words[2]) == True
@@ -1464,5 +1464,5 @@ países,n,país\
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join(allforms.all_csv))
 
-    assert allforms.is_lemma(next(wordlist.get_words("paises", "n"))) == False
+    assert allforms.is_lemma(next(wordlist.get_iwords("paises", "n"))) == False
     assert list(allforms.all_csv) == expected.splitlines()

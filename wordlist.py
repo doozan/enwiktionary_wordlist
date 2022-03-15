@@ -166,26 +166,25 @@ class Wordlist():
                 yield word_obj
 
     def iter_all_words(self):
-#        count = 0
         for word, entry in self.all_entries.items():
-#            count += 1
-#            if count > 10000:
-#                break
-            yield from self.get_words(word)
+            yield from self.get_iwords(word)
 
     def has_entry(self, word):
         return word in self.all_entries
 
     def has_word(self, word, pos=None):
-        return any(self.get_words(word, pos))
+        return any(self.get_iwords(word, pos))
 
     def get_words(self, title, pos=None):
+        return list(self.get_iwords(title, pos))
+
+    def get_iwords(self, title, pos=None):
         if title not in self.all_entries:
             return []
 
         if self.cache_words:
             if title not in self._cached:
-                self._cached[title] = list(self._get_words(title))
+                self._cached[title] = list(self._get_iwords(title))
 
                 # Delete the source lines from all_entries
                 if title in self.all_entries:
@@ -196,14 +195,14 @@ class Wordlist():
                     yield word
 
         else:
-            yield from self._get_words(title, pos)
+            yield from self._get_iwords(title, pos)
 
-    def _get_words(self, word, pos=None):
+    def _get_iwords(self, word, pos=None):
         yield from self.get_entry_words(word, self.all_entries.get(word,[]), pos)
 
     def get_formtypes(self, lemma, pos, form):
         """ Returns the possible formtypes of a given form in lemma,pos """
-        for word in self.get_words(lemma, pos):
+        for word in self.get_iwords(lemma, pos):
             yield from word.get_formtypes(form)
 
     @staticmethod
