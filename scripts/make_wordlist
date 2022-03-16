@@ -22,6 +22,7 @@ This will build a dictionary from an english wiktionary dump
 import os
 import re
 import sys
+from multiprocessing import Pool
 
 os.environ["PYWIKIBOT_NO_USER_CONFIG"]="2"
 from pywikibot import xmlreader
@@ -61,18 +62,30 @@ def iter_xml(datafile, lang_section):
 
         yield entry.title, lang_entry
 
+
+_builder = None
+def make_entry(item):
+    title, entry = item
+    entry = _builder.entry_to_text(entry, title)
+    if entry:
+        return title, entry
+
 def main():
     import argparse
+    global _builder
 
     parser = argparse.ArgumentParser(description="Convert *nym sections to tags.")
     parser.add_argument("--xml", help="Read entries from specified wiktionary XML dump")
     parser.add_argument("--langdata", help="Read articles from specified language data file")
     parser.add_argument("--wordlist", help="Read articles from existing wordlist")
     parser.add_argument("--lang-id", help="Language id")
+    parser.add_argument("-j", help="use N processes", type=int, default=1)
     parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--exclude-verb-forms', action='store_true', help="Exclude all verb forms")
     parser.add_argument('--exclude-generated-forms', action='store_true', help="Exclude forms entries that can be generate automatically")
+    parser.add_argument('--exclude-empty', action='store_true', help="Exclude words with no senses")
+
     args = parser.parse_args()
 
     count = 0
@@ -86,43 +99,46 @@ def main():
             raise ValueError(f"Unknown language id: {args.lang_id}")
 
         lang_section = lang_ids[args.lang_id]
-        builder = WordlistBuilder(lang_section, args.lang_id)
+        _builder = WordlistBuilder(lang_section, args.lang_id)
 
         if args.langdata:
             iter_entry = iter_langdata(args.langdata)
         else:
             iter_entry = iter_xml(args.xml, lang_section)
 
-        def _iter_entries():
-            for title, entry in iter_entry:
-                entry = builder.entry_to_text(entry, title)
-                if not entry:
+        wordlist = Wordlist()
+        count = 0
+        with Pool(args.j) as pool:
+            for item in pool.imap_unordered(make_entry, iter_entry, 10):
+#        for wiki_item in iter_entry:
+#                item = make_entry(wiki_item)
+                if not item:
                     continue
-                yield title, entry
+                title, entry = item
 
-        iter_entries = _iter_entries()
+                count += 1
+                if count % 1000 == 0 and args.verbose:
+                    print(count, file=sys.stderr, end="\r")
+                if args.limit and count >= args.limit:
+                    break
+                wordlist.all_entries[title] = map(str.lstrip, entry)
 
     elif args.wordlist:
-        infile = open(args.wordlist)
-        iter_entries = Wordlist._iter_entries(infile)
+        wordlist = Wordlist()
+        with open(args.wordlist) as infile:
+            for title, entry in Wordlist._iter_entries(infile):
+                count += 1
+                if count % 1000 == 0 and args.verbose:
+                    print(count, file=sys.stderr, end="\r")
+                if args.limit and count >= args.limit:
+                    break
+                wordlist.all_entries[title] = map(str.lstrip, entry)
 
     else:
         raise ValueError("No input file specified, use --xml or --lang-data or --wordlist")
 
-    # Build a Wordlist manually so later it can be used to validate entries
-    wordlist = Wordlist()
-    count = 0
-    for title, entry in iter_entries:
-        count += 1
-        if count % 1000 == 0 and args.verbose:
-            print(count, file=sys.stderr, end="\r")
-        if args.limit and count >= args.limit:
-            break
-        wordlist.all_entries[title] = map(str.lstrip, entry)
-
-
-    for line in WordlistBuilder.from_wordlist(wordlist, exclude_generated=args.exclude_generated_forms):
-        print(line)
+    for entry in WordlistBuilder.from_wordlist(wordlist, exclude_generated=args.exclude_generated_forms, exclude_empty=args.exclude_empty):
+        print(entry)
 
     print(count, "entries processed", file=sys.stderr)
 
