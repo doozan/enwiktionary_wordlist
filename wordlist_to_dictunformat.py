@@ -373,15 +373,8 @@ class WordlistToDictunformat():
                     if self.wordlist.has_word(lemma, pos):
                         form_targets.append(target)
                     else:
-                        print(form,lemma,pos,"not found in db", file=sys.stderr)
-                        if not self.wordlist.has_word(lemma):
-                            print("XXX", form,lemma,pos,"not found in db", file=sys.stderr)
-                        else:
-                            print("XXX", lemma, "is found in db", file=sys.stderr)
-                            for word in self.wordlist.get_words(lemma):
-                                print(word.word, word.pos, file=sys.stderr)
-
-                        raise ValueError("entry not found")
+                        # missing entries are usually generated forms that have been removed
+                        continue
 
             prev_form = form
 
