@@ -48,29 +48,34 @@ def main():
 
     args = argparser.parse_args()
 
-    lang_sections = []
-    for lang_id in args.lang:
-        if lang_id not in lang_ids:
-            raise ValueError(f"Unknown language id: {args.lang_id}")
-        lang_sections.append(lang_ids[lang_id])
-
     if not os.path.isfile(args.xml):
         raise FileNotFoundError(f"Cannot open: {args.xml}")
+
+
+    lang_count = {}
+
+    file_handles = {}
+    pattern = {}
+
+    lang_sections = []
+    for lang_id in args.lang:
+        lang_name = lang_ids.get(lang_id)
+        if not lang_name:
+            raise ValueError(f"Unknown language id: {lang_id}")
+
+        filename = lang_id + ".txt.bz2"
+        outfile = os.path.join(args.outdir, filename)
+        file_handles[lang_name] = bz2.open(outfile, "wt")
+        lang_count[lang_name] = 0
+
+        lang_sections.append(lang_name)
+
+    match_pattern = make_pattern(lang_sections)
 
     dump = xmlreader.XmlDump(args.xml)
     parser = dump.parse()
 
     count = 0
-    lang_count = {}
-
-    file_handles = {}
-    pattern = {}
-    for lang_name in lang_sections:
-        filename = lang_name + ".txt.bz2"
-        outfile = os.path.join(args.outdir, filename)
-        file_handles[lang_name] = bz2.open(outfile, "wt")
-        lang_count[lang_name] = 0
-    match_pattern = make_pattern(lang_sections)
 
     for entry in parser:
         if not count % 1000 and args.verbose:
