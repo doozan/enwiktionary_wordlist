@@ -184,11 +184,12 @@ class Wordlist():
 
         if self.cache_words:
             if title not in self._cached:
-                self._cached[title] = list(self._get_iwords(title))
+                self._cached[title] = tuple(self._get_iwords(title))
 
                 # Delete the source lines from all_entries
                 if title in self.all_entries:
                     self.all_entries[title] = None
+                    # don't delete the entry, it breaks iteration in allforms
 
             for word in self._cached[title]:
                 if not pos or pos == word.pos:
@@ -198,7 +199,7 @@ class Wordlist():
             yield from self._get_iwords(title, pos)
 
     def _get_iwords(self, word, pos=None):
-        yield from self.get_entry_words(word, self.all_entries.get(word,[]), pos)
+        return self.get_entry_words(word, self.all_entries.get(word,[]), pos)
 
     def get_formtypes(self, lemma, pos, form):
         """ Returns the possible formtypes of a given form in lemma,pos """
