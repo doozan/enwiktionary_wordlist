@@ -63,7 +63,7 @@ def main():
         if not lang_name:
             raise ValueError(f"Unknown language id: {lang_id}")
 
-        filename = lang_id + ".txt.bz2"
+        filename = f"{lang_id}-en.enwikt.txt.bz2"
         outfile = os.path.join(args.outdir, filename)
         file_handles[lang_name] = bz2.open(outfile, "wt")
         lang_count[lang_name] = 0
