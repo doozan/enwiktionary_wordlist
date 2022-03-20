@@ -19,8 +19,6 @@ def main():
     parser.add_argument("wordlist", help="wordlist")
     parser.add_argument("allforms", help="all_forms csv file")
     parser.add_argument("--name", help="dictionary name", required=True)
-    parser.add_argument("--from-lang-id", help="from language id", required=True)
-    parser.add_argument("--to-lang-id", help="to language id", required=True)
     parser.add_argument("--description", help="description", default="", required=True)
     parser.add_argument("--url", help="source url")
     args = parser.parse_args()
@@ -30,7 +28,7 @@ def main():
 
     converter = WordlistToDictunformat(wordlist, allforms)
 
-    name = f"{args.name} ({args.from_lang_id}-{args.to_lang_id})"
+    name = args.name
 
     print("_____")
     print("00-database-info")
