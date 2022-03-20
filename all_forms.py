@@ -26,6 +26,8 @@ class AllForms:
             self.dbcon = sqlite3.connect(":memory:")
             self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
 
+        self.add_counter = 0
+
     def get_lemmas(self, word, filter_pos=None):
         if filter_pos:
             res = self.dbcon.execute("SELECT pos || '|' || lemma FROM forms WHERE form=? AND pos=? ORDER BY pos, lemma", (word, filter_pos))
@@ -98,49 +100,6 @@ class AllForms:
                     self._add_form(word.word, word.pos, lemma)
                     self._add_word_forms(word, lemma, wordlist)
 
-
-            old = """
-
-            secondary = bool(word.word == prev_word and word.pos == prev_pos)
-            prev_word = word.word
-            prev_pos = word.pos
-            if not secondary:
-                primary_lemma = True
-            is_lemma = self.is_lemma(word)
-            print(word.word, "is_lemma:", is_lemma)
-            primary_lemma = primary_lemma and is_lemma
-
-            if not len(word.senses):
-                continue
-
-            if False: #resolve_lemmas:
-                # Only add forms for primary lemmas (lemmas that occur before a nonlemma)
-                if primary_lemma:
-                    print("primary lemma", word.word, word.pos, word.genders)
-                    self._add_form(word.word, word.pos, word.word)
-                    self._add_word_forms(word, word.word, wordlist)
-                else:
-                    print("non-primary lemma", word.word)
-
-                    # Don't try to resolve secondary lemmas
-#                    if is_lemma:
-#                        continue
-
-                    for lemma, formtypes in self._resolve_lemmas(wordlist, word).items():
-                        print("  adding", lemma, formtypes)
-                        self._add_form(word.word, word.pos, lemma)
-                        self._add_word_forms(word, lemma, wordlist)
-
-            else:
-#                if not (word.pos == "v" and not word.is_lemma):
-                self._add_form(word.word, word.pos, word.word)
-                self._add_word_forms(word, word.word, wordlist)
-
-                for lemma, formtypes in word.form_of.items():
-                    self._add_form(word.word, word.pos, lemma)
-                    self._add_word_forms(word, lemma, wordlist)
-"""
-
     @staticmethod
     def is_lemma(word):
 
@@ -207,6 +166,10 @@ class AllForms:
 
         self.dbcon.execute("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [form, pos, lemma])
 
+        # commit intermittently to avoid excessive memory use
+        self.add_counter += 1
+        if self.add_counter % 100000 == 0:
+            self.dbcon.execute("COMMIT;")
 
     @property
     def all_csv(self):
