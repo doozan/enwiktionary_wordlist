@@ -3,7 +3,7 @@ from enwiktionary_wordlist.all_forms import AllForms
 
 def test_mf_noun():
 
-    # all feminines should resolve to protector since there are no feminine lemmas
+    # generate implied feminine lemmas
 
     wordlist_data = """\
 _____
@@ -16,23 +16,18 @@ pos: n
 
     expected = {
 'protector': ['n|protector'],
-'protectora': ['n|protector'],
-'protectoras': ['n|protector'],
+'protectora': ['n|protector', 'n|protectora'],
+'protectoras': ['n|protector', 'n|protectora'],
 'protectores': ['n|protector'],
-'protectriz': ['n|protector'],
-'protectrices': ['n|protector'],
+'protectriz': ['n|protector', 'n|protectriz'],
+'protectrices': ['n|protector', 'n|protectriz'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
-    for k,v in expected.items():
-        print(k,v)
-        assert allforms.get_lemmas(k) == v
-
 
 def test_f_equiv():
 
@@ -62,14 +57,14 @@ pos: n
 'protectora': ['n|protector', 'n|protectora'],
 'protectoras': ['n|protector', 'n|protectora'],
 'protectores': ['n|protector'],
-'protectriz': ['n|protector'],
-'protectrices': ['n|protector'],
+'protectriz': ['n|protector', 'n|protectriz'],
+'protectrices': ['n|protector', 'n|protectriz'],
 'protectora_altpl': ['n|protectora'],
 'protectora_altpl2': ['n|protectora'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -96,11 +91,11 @@ pos: n
 """
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -127,21 +122,21 @@ pos: n
 
     expected = {
 'protector': ['n|protector'],
-'protectora': ['n|protector'],
-'protectoras': ['n|protector'],
+'protectora': ['n|protector', 'n|protectora'],
+'protectoras': ['n|protector', 'n|protectora'],
 'protectores': ['n|protector'],
-'protectriz': ['n|protector'],
-'protectrices': ['n|protector'],
+'protectriz': ['n|protector', 'n|protectriz'],
+'protectrices': ['n|protector', 'n|protectriz'],
 'alt_protectora': ['n|alt_protectora'],
 'alt_protectora_pl': ['n|alt_protectora'],
 }
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -280,7 +275,7 @@ testa {f} :: feminine noun of "testo"
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -312,7 +307,7 @@ test4 {m} :: alternate form of "test3"
         assert allforms.get_lemmas(k) == v
 
     # this should be different
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -358,7 +353,7 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -728,7 +723,7 @@ pos: verb
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -754,7 +749,7 @@ pos: adj
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -775,7 +770,7 @@ pos: determiner
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -794,7 +789,7 @@ pos: determiner
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -821,7 +816,7 @@ pos: determiner
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -877,7 +872,7 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -948,7 +943,7 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -995,7 +990,7 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -1036,7 +1031,7 @@ pos: n
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -1082,7 +1077,7 @@ pos: pron
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -1114,8 +1109,8 @@ pos: n
     expected = {
         'bosníaco': ['n|bosníaco'],
         'bosníacos': ['n|bosníaco'],
-        'bosníaca': ['n|bosníaco'],
-        'bosníacas': ['n|bosníaco'],
+        'bosníaca': ['n|bosníaca', 'n|bosníaco'],
+        'bosníacas': ['n|bosníaca', 'n|bosníaco'],
         'bosniaca': ['n|bosniaca', 'n|bosniaco'],
         'bosniacas': ['n|bosniaca', 'n|bosniaco'],
         'bosniaco': ['n|bosniaco'],
@@ -1143,12 +1138,12 @@ pos: prop
     expected = {'Acapulco': ['prop|Acapulco']}
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=True)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
 
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -1177,11 +1172,11 @@ pos: n
               'fulanos': ['n|fulana']}
 
     wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist, resolve_lemmas=False)
+    allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
         assert allforms.get_lemmas(k) == v
@@ -1211,7 +1206,7 @@ pos: v
 #    assert "te aborregas" in AllForms.from_wordlist(wordlist).all_forms
     assert "aborregas" in AllForms.from_wordlist(wordlist).all_forms
     assert AllForms.from_wordlist(wordlist).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse']
-    assert AllForms.from_wordlist(wordlist, resolve_lemmas=False).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse'] #, 'v|aborregas']
+    assert AllForms.from_wordlist(wordlist).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse'] #, 'v|aborregas']
 
 
 def test_forms_complex_csv():

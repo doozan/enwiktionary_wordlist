@@ -19,7 +19,8 @@ class AllForms:
         if dbfilename:
             existing = os.path.exists(dbfilename)
             self.dbcon = sqlite3.connect(dbfilename)
-            self.dbcon.execute('PRAGMA synchronous = OFF')
+            self.dbcon.execute('PRAGMA synchronous=OFF;')
+
             if not existing:
                 self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
         else:
@@ -75,17 +76,17 @@ class AllForms:
             return cls.from_data(infile, cached)
 
     @classmethod
-    def from_wordlist(cls, wordlist, resolve_lemmas=True):
+    def from_wordlist(cls, wordlist):
         self = cls()
 
         self.dbcon.execute("BEGIN TRANSACTION;")
-        self._load_wordlist_forms(wordlist, resolve_lemmas)
+        self._load_wordlist_forms(wordlist)
         self.dbcon.execute('''CREATE INDEX idx_form_pos ON forms (form, pos)''')
         self.dbcon.execute("COMMIT;")
 
         return self
 
-    def _load_wordlist_forms(self, wordlist, resolve_lemmas):
+    def _load_wordlist_forms(self, wordlist):
 
         prev_pos = None
         prev_word = None
@@ -95,6 +96,8 @@ class AllForms:
             if self.is_lemma(word):
                 self._add_form(word.word, word.pos, word.word)
                 self._add_word_forms(word, word.word, wordlist)
+                self._add_female_equivalent(word, wordlist)
+                self._add_reflexive_infinitive(word, wordlist)
             else:
                 for lemma, formtypes in word.form_of.items():
                     self._add_form(word.word, word.pos, lemma)
@@ -115,10 +118,49 @@ class AllForms:
 
         if word.meta and (
                 (" form" in word.meta and " form" not in word.word)
-                or "misspelling" in word.meta):
+                or "misspelling" in word.meta
+                or "es-past participle" in word.meta
+                ):
             return False
 
         return True
+
+
+    def _add_reflexive_infinitive(self, word, wordlist):
+        if word.pos != "v":
+            return
+
+        if word.word.endswith("rse"):
+            self._add_form(word.word[:-2], word.pos, word.word)
+
+    def _add_female_equivalent(self, word, wordlist):
+        if word.genders != "m":
+            return
+
+        if word.pos not in ["n", "prop", "suffix"]:
+            return
+
+        fems = word.forms.get("f", [])
+        fpl = word.forms.get("fpl", [])
+
+        for i,form in enumerate(fems):
+            if not form:
+                continue
+
+            if not wordlist.has_word(form, word.pos):
+                self._add_form(form, word.pos, form)
+
+            if len(fems) == len(fpl):
+                self._add_form(fpl[i], word.pos, form)
+            else:
+                # If there are multiple female lemmas and nota a 1-to-1 mapping of lemmas to plurals,
+                # it will be impossible to guess which plural(s) match to which lemmas
+                # Luckily, there's nothing like that in the dataset. Yet.
+                if len(fems) > 1:
+                    raise ValueError("multiple female lemmas with multiple plurals",
+                            word.word, word.pos, fems, fpl, file=sys.stderr)
+                for pl in fpl:
+                    self._add_form(pl, word.pos, form)
 
 
     #opposite_genders = {"m": "f", "f": "m", "m-p": "fpl", "f-p": "mpl"}
@@ -160,16 +202,10 @@ class AllForms:
                 self._add_form(form, word.pos, lemma)
 
     def _add_form(self, form, pos, lemma):
-
         if form == "-":
             return
 
         self.dbcon.execute("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [form, pos, lemma])
-
-        # commit intermittently to avoid excessive memory use
-        self.add_counter += 1
-        if self.add_counter % 100000 == 0:
-            self.dbcon.execute("COMMIT;")
 
     @property
     def all_csv(self):
