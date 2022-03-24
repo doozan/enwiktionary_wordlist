@@ -17,7 +17,6 @@ verb_types = [
     "transitivo",
 ]
 
-
 def is_lemma(word):
 
     """
@@ -29,9 +28,6 @@ def is_lemma(word):
        + any gloss is not a "form of"
 
     Mainly this means that we consider "feminine equivalent" nouns to be forms and not lemmas unless they have definitions
-
-    Note, there's a similar implementation in all_forms,
-    any major improvements should be ported there
     """
 
     if not word.senses:
@@ -73,12 +69,13 @@ if __name__ == "__main__":
 #        print(word.word, word.pos, word.is_lemma, len(word.senses), word.form_of)
 #    exit()
 
-
     items = defaultdict(list)
 
     lemmas = set()
     values = []
     for word in wordlist.iter_all_words():
+        if word.word in lemmas:
+            continue
 
         if args.only_unqualified:
             sense = word.senses[0]
@@ -93,10 +90,8 @@ if __name__ == "__main__":
         # TODO: Since we want to use wiktionary's definition of a lemma, we should implement it here
         # or do we? - isn't it better to have "niña" as a form and not a lemma, especially for finding DRAE differences
         # either way, better to build our own definition of is_lemma and keep it here
+
         if is_lemma(word) or any(x for x in ["alt", "old", "rare", "spell"] for f in word.form_of.values() if x in f):
-            if word.word not in lemmas:
-                lemmas.add(word.word)
-                print(word.word)
-#
-#    for lemma in sorted(lemmas):
-#        print(lemma)
+
+            lemmas.add(word.word)
+            print(word.word)

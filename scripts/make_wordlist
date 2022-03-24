@@ -22,7 +22,7 @@ This will build a dictionary from an english wiktionary dump
 import os
 import re
 import sys
-from multiprocessing import Pool
+import multiprocessing
 
 os.environ["PYWIKIBOT_NO_USER_CONFIG"]="2"
 from pywikibot import xmlreader
@@ -79,7 +79,7 @@ def main():
     parser.add_argument("--langdata", help="Read articles from specified language data file")
     parser.add_argument("--wordlist", help="Read articles from existing wordlist")
     parser.add_argument("--lang-id", help="Language id")
-    parser.add_argument("-j", help="use N processes", type=int, default=1)
+    parser.add_argument("-j", help="run N jobs in parallel (default = # CPUs - 1", type=int)
     parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
     parser.add_argument('--progress', action='store_true')
     parser.add_argument('--exclude-verb-forms', action='store_true', help="Exclude all verb forms")
@@ -87,6 +87,9 @@ def main():
     parser.add_argument('--exclude-empty', action='store_true', help="Exclude words with no senses")
 
     args = parser.parse_args()
+
+    if not args.j:
+        args.j = multiprocessing.cpu_count()-1
 
     count = 0
     entries = {}
@@ -110,7 +113,7 @@ def main():
         count = 0
 
         if args.j > 1:
-            pool = Pool(args.j)
+            pool = multiprocessing.Pool(args.j)
             iter_items =  pool.imap_unordered(make_entry, iter_entry, 10)
         else:
             iter_items = map(make_entry, iter_entry)
