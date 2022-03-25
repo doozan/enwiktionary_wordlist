@@ -60,12 +60,12 @@ def iter_xml(datafile, lang_section):
         if not lang_entry:
             continue
 
-        yield entry.title, lang_entry
+        yield entry.title, lang_entry, entry.revisionid
 
 
 _builder = None
 def make_entry(item):
-    title, entry = item
+    title, entry, revision = item
     entry = _builder.entry_to_text(entry, title)
     if entry:
         return title, entry

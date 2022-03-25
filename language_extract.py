@@ -17,29 +17,34 @@
 
 import bz2
 import re
+from collections import namedtuple
+
+WiktionaryPage = namedtuple('WiktionaryPage', 'title text revision')
 
 class LanguageFile:
     @staticmethod
     def iter_articles(filename):
-        """ Yields (article_title, article_text) for each article in filename """
+        """ Yields (title, text, revision) for each article in filename """
         with bz2.open(filename, "rt") as infile:
-            pattern = r'^_____([^_].*)_____$'
+            pattern = r'^_____([^:]*)(:@)?(.*?)_____$'
             entry = []
-            entry_title = None
+            title = None
             for line in infile:
                 match = re.match(pattern, line)
                 if match:
                     if entry:
-                        yield (entry_title, "".join(entry))
-                    entry_title = match.group(1)
+                        entry[-1] = entry[-1].strip()
+                        yield WiktionaryPage(title, "".join(entry), revision)
+                    title = match.group(1)
+                    revision = match.group(3)
                     entry = []
                 else:
-                    if entry_title is None:
+                    if title is None:
                         raise ValueError("File is not a recognized format")
                     entry.append(line)
             if entry:
-                yield (entry_title, "".join(entry))
-
+                entry[-1] = entry[-1].strip()
+                yield WiktionaryPage(title, "".join(entry), revision)
 
     def __init__(self, lang_name):
 
