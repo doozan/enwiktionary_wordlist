@@ -25,15 +25,7 @@ from pywikibot import xmlreader
 import re
 import sys
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
-
-
-def make_pattern(lang_sections):
-    section_titles = "|".join(map(re.escape, lang_sections))
-    start = fr"(^|\n)==\s*(?P<section_title>{section_titles})\s*==\s*\n"
-    endings = r"==[^=]+==|----"
-    newlines = r"(\n\s*)+"
-    pattern = fr"{start}.*?(?={newlines}({endings})|$)"
-    return re.compile(pattern, re.DOTALL)
+from enwiktionary_wordlist.utils import make_language_pattern
 
 def main():
 
@@ -70,7 +62,7 @@ def main():
 
         lang_sections.append(lang_name)
 
-    match_pattern = make_pattern(lang_sections)
+    match_pattern = make_language_pattern(lang_sections)
 
     dump = xmlreader.XmlDump(args.xml)
     parser = dump.parse()

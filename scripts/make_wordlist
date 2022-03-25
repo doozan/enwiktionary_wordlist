@@ -29,7 +29,8 @@ from pywikibot import xmlreader
 
 from enwiktionary_parser.languages.all_ids import languages as lang_ids
 
-from enwiktionary_wordlist.language_extract import LanguageFile
+from enwiktionary_wordlist.wikiextract import WikiExtractWithRev
+from enwiktionary_wordlist.utils import make_language_pattern
 from enwiktionary_wordlist.wordlist import Wordlist
 from enwiktionary_wordlist.wordlist_builder import WordlistBuilder
 
@@ -38,7 +39,7 @@ def iter_langdata(datafile):
     if not os.path.isfile(datafile):
         raise FileNotFoundError(f"Cannot open: {datafile}")
 
-    yield from LanguageFile.iter_articles(datafile)
+    return WikiExtractWithRev.iter_articles_from_bz2(datafile)
 
 def iter_xml(datafile, lang_section):
 
@@ -48,17 +49,18 @@ def iter_xml(datafile, lang_section):
     dump = xmlreader.XmlDump(datafile)
     parser = dump.parse()
 
-    langparser = LanguageFile(lang_section)
+    pattern = make_language_pattern(lang_section)
 
     for entry in parser:
 
         if ":" in entry.title or "/" in entry.title:
             continue
 
-        lang_entry = langparser.get_language_entry(entry.text)
-
-        if not lang_entry:
+        match = re.match(pattern, entry.text)
+        if not match:
             continue
+
+        lang_entry = match.group(0)
 
         yield entry.title, lang_entry, entry.revisionid
 

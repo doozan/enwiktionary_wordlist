@@ -14,8 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ..utils import wiki_to_text
+from ..utils import wiki_to_text, make_language_pattern
 import mwparserfromhell
+import re
 
 def test_wiki_to_text():
 
@@ -36,3 +37,62 @@ def test_wiki_to_text():
     assert text == "(also figuratively, transitive with en)"
 
 
+def test_language_match():
+    lang1 = """\
+==Sabir==
+
+===Verb===
+{{head|pml|verb}}
+
+# to [[speak]]
+
+===References===
+* Feissat et Demonchy, ''Dictionnaire de la Langue Franque, ou Petit Mauresque''\
+"""
+
+    lang2 = """\
+==Spanish==
+
+===Verb===
+{{es-verb}}
+
+# {{lb|es|intransitive}} to [[talk]]; to [[speak]]; to [[communicate]] using [[word]]s
+
+===Further reading===
+* {{R:DRAE}}
+
+{{C|es|Talking}}\
+"""
+
+    lang3 = """\
+==Tagalong==
+
+===Verb===
+{{head|pml|verb}}
+
+# to [[speak]]\
+"""
+
+    page_text = "\n\n----\n\n".join([lang1, lang2, lang3])
+
+    pattern = make_language_pattern("Sabir")
+    print(pattern)
+    assert re.search(pattern, page_text).group(0).strip() == lang1
+
+    pattern = make_language_pattern("Spanish")
+    assert re.search(pattern, page_text).group(0).strip() == lang2
+
+    pattern = make_language_pattern("Tagalong")
+    assert re.search(pattern, page_text).group(0).strip() == lang3
+
+    # Also matches if the ---- is missing
+    page_text = "\n".join([lang1, lang2, lang3])
+
+    pattern = make_language_pattern("Sabir")
+    assert re.search(pattern, page_text).group(0).strip() == lang1
+
+    pattern = make_language_pattern("Spanish")
+    assert re.search(pattern, page_text).group(0).strip() == lang2
+
+    pattern = make_language_pattern("Tagalong")
+    assert re.search(pattern, page_text).group(0).strip() == lang3

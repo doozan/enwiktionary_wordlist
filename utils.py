@@ -90,3 +90,14 @@ def wiki_to_text( wikitext, title):
     res = re.sub(r"&ndash;", "-", res)
     return res
 
+
+def make_language_pattern(lang_sections):
+    """ Returns a regex pattern for matching given L2 sections
+    lang_sections may be a list of section titles or a single string to match just one section
+    """
+    section_titles = lang_sections if isinstance(lang_sections, str) else "|".join(map(re.escape, lang_sections))
+    start = fr"(^|\n)==\s*(?P<section_title>{section_titles})\s*==\s*\n"
+    endings = r"==[^=]+==|----"
+    newlines = r"(\n\s*)+"
+    pattern = fr"{start}.*?(?={newlines}({endings})|$)"
+    return re.compile(pattern, re.DOTALL)
