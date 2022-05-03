@@ -31,11 +31,20 @@ class AllForms:
 
     def get_lemmas(self, word, filter_pos=None):
         if filter_pos:
-            res = self.dbcon.execute("SELECT pos || '|' || lemma FROM forms WHERE form=? AND pos=? ORDER BY pos, lemma", (word, filter_pos))
+            if isinstance(filter_pos, list):
+                in_clause = ",".join(["?"]*len(filter_pos))
+                res = self.dbcon.execute(f"SELECT pos || '|' || lemma FROM forms WHERE form=? AND pos IN ({in_clause}) ORDER BY pos, lemma", (word, *filter_pos))
+            else:
+                res = self.dbcon.execute("SELECT pos || '|' || lemma FROM forms WHERE form=? AND pos=? ORDER BY pos, lemma", (word, filter_pos))
         else:
             res = self.dbcon.execute("SELECT pos || '|' || lemma FROM forms WHERE form=? ORDER BY pos, lemma", (word,))
 
         return [x[0] for x in res]
+
+    @property
+    def all_lemmas(self):
+        for x in self.dbcon.execute("SELECT DISTINCT lemma FROM forms ORDER BY lemma"):
+            yield x[0]
 
     @property
     def all_forms(self):

@@ -838,8 +838,12 @@ test,noun,n1,n2,n3
 #    assert allforms.all_forms == {'test': 0, 'test1,test2': 37}
 
     assert allforms.get_lemmas('test') == ['adj|a1', 'adj|a2', 'adj|a3', 'noun|n1', 'noun|n2', 'noun|n3']
+    assert allforms.get_lemmas('test', 'adj') == ['adj|a1', 'adj|a2', 'adj|a3']
+    assert allforms.get_lemmas('test', ['adj']) == ['adj|a1', 'adj|a2', 'adj|a3']
+    assert allforms.get_lemmas('test', ['adj','noun']) == ['adj|a1', 'adj|a2', 'adj|a3', 'noun|n1', 'noun|n2', 'noun|n3']
     assert allforms.get_lemmas('test1,test2') == ['noun|test1', 'noun|test2', 'noun|test3']
 
+    assert list(allforms.all_lemmas) == ['a1', 'a2', 'a3', 'n1', 'n2', 'n3', 'test1', 'test2', 'test3']
 
 def test_actor():
 
