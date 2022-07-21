@@ -128,6 +128,7 @@ class Sense():
         "feminine plural past participle": "pp_fp",
         "gerund": "gerund",
         "infinitive": "infinitive",
+        "smart inflection": "smart_inflection",
         r"(?:gerund|pp|cond|fut|infinitive|imp|impf|neg_imp|pres|pret)_\w+": "1", # patern matches will always be themselves
     }
 

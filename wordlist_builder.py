@@ -291,6 +291,10 @@ class WordlistBuilder:
                 return False
 
             formtype = "pl" if word.pos == "adj" and sense.formtype == "mpl" else sense.formtype
+
+            if formtype == "smart_inflection":
+                continue
+
             lemmas = wordlist.get_words(sense.lemma, word.pos)
             if formtype == "reflexive" and any(has_reflexive(lemma) for lemma in lemmas):
                 continue
