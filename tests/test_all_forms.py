@@ -1465,3 +1465,22 @@ países,n,país\
 
     assert allforms.is_lemma(next(wordlist.get_iwords("paises", "n"))) == False
     assert list(allforms.all_csv) == expected.splitlines()
+
+
+def test_part():
+
+    # misspellings count as forms
+
+    data="""\
+_____
+brincar
+pos: v
+  meta: {{es-verb}} {{es-conj}}
+  gloss: to jump around
+"""
+
+    wordlist = Wordlist(data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+    print("\n".join([x for x in allforms.all_csv if x.startswith("brincada,")]))
+
+    assert "brincada,part,brincar" in allforms.all_csv
