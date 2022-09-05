@@ -197,7 +197,7 @@ class Word():
 
     def add_forms_from_meta(self):
         for template in templates.iter_templates(self.meta):
-            if template.name == "head":
+            if template.name in ["head", "head-lite"]:
                 data = self.get_head_forms(template)
             else:
                 data = templates.expand_template(template, self.word)
