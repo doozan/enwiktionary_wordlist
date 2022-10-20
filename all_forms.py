@@ -5,7 +5,6 @@ import collections
 import csv
 import io
 import os
-import pickle
 import sqlite3
 import sys
 
@@ -45,8 +44,18 @@ class AllForms:
         res = self.dbcon.execute(f"SELECT DISTINCT form FROM forms WHERE lemma=? AND pos=?", (lemma, pos,))
         return [x[0] for x in res]
 
-    def has_form(self, form, pos):
-        res = self.dbcon.execute(f"SELECT form FROM forms WHERE form=? AND pos=?", (form, pos,))
+    def has_form(self, form, pos=None):
+        if pos:
+            res = self.dbcon.execute(f"SELECT form FROM forms WHERE form=? AND pos=? LIMIT 1", (form, pos,))
+        else:
+            res = self.dbcon.execute(f"SELECT form FROM forms WHERE form=? LIMIT 1", (form,))
+        return bool(list(res))
+
+    def has_lemma(self, lemma, pos=None):
+        if pos:
+            res = self.dbcon.execute(f"SELECT form FROM forms WHERE form=? and lemma=? AND pos=? LIMIT 1", (lemma, lemma, pos,))
+        else:
+            res = self.dbcon.execute(f"SELECT form FROM forms WHERE form=? and lemma=? LIMIT 1", (lemma,lemma))
         return bool(list(res))
 
     def get_form_pos(self, form):
