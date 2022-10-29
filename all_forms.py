@@ -157,7 +157,7 @@ class AllForms:
             return False
 
         if word.meta and (
-                (" form" in word.meta and " form" not in word.word)
+                (" form" in word.meta and "apocopate" not in word.meta and " form" not in word.word)
                 or "misspelling" in word.meta
                 or "es-past participle" in word.meta
                 ):
