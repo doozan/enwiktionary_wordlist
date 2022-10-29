@@ -40,8 +40,12 @@ class AllForms:
 
         return [x[0] for x in res]
 
-    def get_lemma_forms(self, lemma, pos):
-        res = self.dbcon.execute(f"SELECT DISTINCT form FROM forms WHERE lemma=? AND pos=?", (lemma, pos,))
+    def get_lemma_forms(self, lemma, filter_pos=None):
+        if filter_pos:
+            res = self.dbcon.execute(f"SELECT DISTINCT form FROM forms WHERE lemma=? AND pos=?", (lemma, filter_pos,))
+        else:
+            res = self.dbcon.execute(f"SELECT DISTINCT form FROM forms WHERE lemma=?", (lemma,))
+
         return [x[0] for x in res]
 
     def has_form(self, form, pos=None):
