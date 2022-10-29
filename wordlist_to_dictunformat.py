@@ -326,7 +326,7 @@ class WordlistToDictunformat():
 
         # Important to sort tagets so we can identify duplicates
         # Sort by pos, then lemma so the page is ordered nicely
-        target_key = "|".join([f"{pos}:{lemma}" for lemma,pos in sorted(targets, key=lambda x: (x[1], x[0]))])
+        target_key = "|".join([f"{pos}‡{lemma}" for lemma,pos in sorted(targets, key=lambda x: (x[1], x[0]))])
 
         all_pages[target_key].append(key)
 
@@ -389,7 +389,7 @@ class WordlistToDictunformat():
                 print(count, file=sys.stderr, end="\r")
 
             primary = self.get_primary_word(keys)
-            entry = self.build_entry(primary, [t.split(":") for t in targets.split("|")])
+            entry = self.build_entry(primary, [t.split("‡") for t in targets.split("|")])
 
             yield "_____"
             keys.remove(primary)
