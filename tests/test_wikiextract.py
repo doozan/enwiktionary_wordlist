@@ -60,8 +60,8 @@ def test_iter_articles_with_revision_from_bz2(tmp_path):
     assert items[0] == ("page1:test", "page1 text", "12345")
     assert items[0].title == "page1:test"
     assert items[0].text == "page1 text"
-    assert items[0].revision == "12345"
+    assert items[0].revisionid == "12345"
 
     assert items[1].title == "page2"
     assert items[1].text == "page2 text\npage2 text\npage2 text"
-    assert items[1].revision == ""
+    assert items[1].revisionid == ""

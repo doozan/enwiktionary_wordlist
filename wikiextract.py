@@ -63,12 +63,12 @@ class WikiExtract:
             yield from cls.iter_articles(infile)
 
 
-ArticleWithRev = namedtuple("ArticleWithRev", "title text revision")
+ArticleWithRev = namedtuple("ArticleWithRev", "title text revisionid")
 class WikiExtractWithRev(WikiExtract):
 
     @classmethod
     def iter_articles(cls, iterable):
-        """ Yields (title, text, revision) for each article in iterable """
+        """ Yields (title, text, revisionid) for each article in iterable """
         for fulltitle, text in super().iter_articles(iterable):
-            title, _, revision = fulltitle.partition(":@")
-            yield ArticleWithRev(title, text, revision)
+            title, _, revisionid = fulltitle.partition(":@")
+            yield ArticleWithRev(title, text, revisionid)
