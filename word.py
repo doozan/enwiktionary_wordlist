@@ -80,9 +80,9 @@ class Word():
         if formtype == "mpl" and self.genders == "fp":
             self.add_lemma(form, "fpl")
 
-    def get_formtypes(self, word):
+    def get_formtypes(self, form):
        for formtype, forms in self.forms.items():
-           if word in forms:
+           if form in forms:
                yield formtype
 
     def add_lemma(self, lemma, formtype):
@@ -193,7 +193,7 @@ class Word():
     def has_form(self, form, formtype=None):
         if formtype:
             return form in self.forms.get(formtype,[])
-        return any(form in f for f in self.forms.values())
+        return any(self.get_formtypes(form))
 
     def add_forms_from_meta(self):
         for template in templates.iter_templates(self.meta):

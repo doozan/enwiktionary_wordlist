@@ -26,8 +26,6 @@ class AllForms:
             self.dbcon = sqlite3.connect(":memory:")
             self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
 
-        self.add_counter = 0
-
     def get_lemmas(self, word, filter_pos=None):
         if filter_pos:
             if isinstance(filter_pos, list):
