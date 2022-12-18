@@ -240,12 +240,7 @@ class AllForms:
                 if non_binary and formtype in ["m", "f", "mpl", "fpl"]:
                     continue
 
-                if word.pos == "v" and formtype in ["pp_ms", "pp_mp", "pp_fs", "pp_fp"]:
-                    pos = "part"
-                else:
-                    pos = word.pos
-
-                self._add_form(form, pos, lemma)
+                self._add_form(form, word.pos, lemma)
 
     def _add_form(self, form, pos, lemma):
         if form == "-":

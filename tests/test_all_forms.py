@@ -1469,7 +1469,8 @@ países,n,país\
 
 def test_part():
 
-    # misspellings count as forms
+    # Verbs should only generate verb forms
+    # "part" identification, etc is handled elsewhere
 
     data="""\
 _____
@@ -1483,4 +1484,6 @@ pos: v
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join([x for x in allforms.all_csv if x.startswith("brincada,")]))
 
-    assert "brincada,part,brincar" in allforms.all_csv
+    for line in allforms.all_csv:
+        assert ",part," not in line
+        assert ",v," in line

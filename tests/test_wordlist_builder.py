@@ -1460,6 +1460,118 @@ pos: n
     assert res == expected
 
 
+def test_participles():
+
+    # participles should be considered verb forms and should pass is_generated()
+
+    hablado_wiki = """\
+==Spanish==
+===Participle===
+{{es-past participle}}
+
+# {{past participle of|es|hablar}}
+"""
+    hablado_data = """\
+pos: part
+  meta: {{es-past participle}}
+  gloss: past participle of "hablar"\
+"""
+    entry = builder.entry_to_text(hablado_wiki, "hablado")
+    print("\n".join(entry))
+    assert "\n".join(entry) == hablado_data
+
+
+    hablados_wiki = """\
+==Spanish==
+===Participle===
+{{es-past participle}}
+
+# {{masculine plural of|es|hablado}}
+"""
+    hablados_data = """\
+pos: part
+  meta: {{es-past participle}}
+  gloss: masculine plural of "hablado"\
+"""
+    entry = builder.entry_to_text(hablados_wiki, "hablados")
+    print("\n".join(entry))
+    assert "\n".join(entry) == hablados_data
+
+
+    hablada_wiki = """\
+==Spanish==
+===Participle===
+{{es-past participle}}
+
+# {{feminine singular of|es|hablado}}
+"""
+    hablada_data = """\
+pos: part
+  meta: {{es-past participle}}
+  gloss: feminine singular of "hablado"\
+"""
+    entry = builder.entry_to_text(hablada_wiki, "hablada")
+    print("\n".join(entry))
+    assert "\n".join(entry) == hablada_data
+
+
+    habladas_wiki = """\
+==Spanish==
+===Participle===
+{{es-past participle}}
+
+# {{feminine plural of|es|hablado}}
+"""
+    habladas_data = """\
+pos: part
+  meta: {{es-past participle}}
+  gloss: feminine plural of "hablado"\
+"""
+    entry = builder.entry_to_text(habladas_wiki, "habladas")
+    print("\n".join(entry))
+    assert "\n".join(entry) == habladas_data
+
+
+    hablar_data = """\
+pos: v
+  meta: {{es-verb}} {{es-conj}}
+  gloss: to talk\
+"""
+
+    wordlist_data=f"""\
+_____
+hablada
+{hablada_data}
+_____
+habladas
+{habladas_data}
+_____
+hablado
+{hablado_data}
+_____
+hablados
+{hablados_data}
+_____
+hablar
+{hablar_data}\
+"""
+
+    expected = f"""\
+_____
+hablar
+{hablar_data}\
+"""
+    wordlist_full = Wordlist(wordlist_data.splitlines())
+
+    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False, exclude_empty=False))
+    print(wordlist_data)
+    assert res == wordlist_data
+
+    res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=True, exclude_empty=True))
+    print(res)
+    assert res == expected
+
+
 def test_empty_verb():
 
     # Empty verbs should generate text, but that text may be ignored if
