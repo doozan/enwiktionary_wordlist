@@ -320,7 +320,7 @@ class WordlistBuilder:
             # only pp_ms will list the verb, the others will list the pp_ms form and will need
             # to do a lookup to find the verb
             if word.pos == "part":
-                formtype = get_part_formtype(formtype)
+                formtype = cls.get_part_formtype(formtype)
                 lemma = sense.lemma if formtype == "pp_ms" else cls.get_part_lemma(sense.lemma, wordlist)
                 if not lemma or not any(word.word in l.forms.get(formtype, []) for l in wordlist.get_words(lemma, "v")):
                     return False
