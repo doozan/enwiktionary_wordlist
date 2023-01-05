@@ -24,7 +24,7 @@ import os
 from pywikibot import xmlreader
 import re
 import sys
-from enwiktionary_parser.languages.all_ids import languages as lang_ids
+from enwiktionary_parser.languages.all_ids import ALL_LANG_IDS
 from enwiktionary_wordlist.utils import make_language_pattern
 
 def main():
@@ -51,7 +51,7 @@ def main():
 
     lang_sections = []
     for lang_id in args.lang:
-        lang_name = lang_ids.get(lang_id)
+        lang_name = ALL_LANG_IDS.get(lang_id)
         if not lang_name:
             raise ValueError(f"Unknown language id: {lang_id}")
 
