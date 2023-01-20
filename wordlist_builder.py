@@ -241,6 +241,11 @@ class WordlistBuilder:
             if not synonym:
                 synonym = wiki_to_text(item["target"], title).strip()
             if synonym:
+                if "q" in item:
+                    synonym = f'({item["q"]}) {synonym}'
+                if "qq" in item:
+                    synonym = f'{synonym} ({item["qq"]})'
+
                 synonyms.append(synonym)
 #           [ { "target": "word", "q": "qual" }, { "target": "word2", "tr": "tr" } ]
 
