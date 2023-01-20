@@ -21,11 +21,13 @@ Extract all articles with the specified language
 
 import bz2
 import os
-from pywikibot import xmlreader
 import re
 import sys
+
+from collections import defaultdict
 from enwiktionary_parser.languages.all_ids import ALL_LANG_IDS
 from enwiktionary_wordlist.utils import make_language_pattern
+from pywikibot import xmlreader
 
 def main():
 
@@ -36,6 +38,7 @@ def main():
     argparser.add_argument("--lang", action="append", help="Language to dump, can be specified multiple times", required=True)
     argparser.add_argument("--outdir", help="Path to save extracted languages", default=".")
     argparser.add_argument("--limit", type=int, help="Limit processing to first N articles")
+    argparser.add_argument("--all", action="store_true", help="Dump complete pages with all languages")
     argparser.add_argument('--verbose', action='store_true')
 
     args = argparser.parse_args()
@@ -43,26 +46,26 @@ def main():
     if not os.path.isfile(args.xml):
         raise FileNotFoundError(f"Cannot open: {args.xml}")
 
-
-    lang_count = {}
+    lang_count = defaultdict(int)
 
     file_handles = {}
     pattern = {}
 
     lang_sections = []
     for lang_id in args.lang:
-        lang_name = ALL_LANG_IDS.get(lang_id)
-        if not lang_name:
-            raise ValueError(f"Unknown language id: {lang_id}")
+        if lang_id == "all":
+            lang_name = "all"
+        else:
+            lang_name = ALL_LANG_IDS.get(lang_id)
+            if not lang_name:
+                raise ValueError(f"Unknown language id: {lang_id}")
+            lang_sections.append(lang_name)
 
         filename = f"{lang_id}-en.enwikt.txt.bz2"
         outfile = os.path.join(args.outdir, filename)
         file_handles[lang_name] = bz2.open(outfile, "wt")
-        lang_count[lang_name] = 0
 
-        lang_sections.append(lang_name)
-
-    match_pattern = make_language_pattern(lang_sections)
+    match_pattern = make_language_pattern(lang_sections) if lang_sections else None
 
     dump = xmlreader.XmlDump(args.xml)
     parser = dump.parse()
@@ -77,7 +80,15 @@ def main():
             break
         count += 1
 
-        if ":" in entry.title:
+        if ":" in entry.title or "/" in entry.title or entry.isredirect:
+            continue
+
+        if "all" in args.lang:
+            lang_name = "all"
+            lang_count[lang_name] += 1
+            file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+
+        if not match_pattern:
             continue
 
         for res in re.finditer(match_pattern, entry.text):
@@ -88,7 +99,7 @@ def main():
             file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{lang_entry}\n")
 
     print(f"Total articles: {count}")
-    for lang_name in lang_sections:
+    for lang_name in file_handles:
         file_handles[lang_name].close
         print(f"Total in {lang_name}: {lang_count[lang_name]}")
 
