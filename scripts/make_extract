@@ -38,7 +38,6 @@ def main():
     argparser.add_argument("--lang", action="append", help="Language to dump, can be specified multiple times", required=True)
     argparser.add_argument("--outdir", help="Path to save extracted languages", default=".")
     argparser.add_argument("--limit", type=int, help="Limit processing to first N articles")
-    argparser.add_argument("--all", action="store_true", help="Dump complete pages with all languages")
     argparser.add_argument('--verbose', action='store_true')
 
     args = argparser.parse_args()

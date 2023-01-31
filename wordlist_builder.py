@@ -143,6 +143,8 @@ class WordlistBuilder:
 
                 sense_data = {}
                 sense_data["gloss"] = gloss_text
+                if sense.sense_ids:
+                    sense_data["id"] = "; ".join(sense.sense_ids)
 
                 if sense.gloss.qualifiers:
                     qualifiers = make_qualification(self.LANG_ID, title, sense.gloss.qualifiers)
@@ -262,6 +264,7 @@ class WordlistBuilder:
 
             s = {}
             s["gloss"] = sense.gloss
+            s["id"] = sense.id
             s["q"] = sense.qualifier.rstrip(", ") if sense.qualifier else None
             s["syn"] = "; ".join(sense.synonyms) if sense.synonyms else None
             s["regional"] = "; ".join(sense.regions) if sense.regions else None

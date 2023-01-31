@@ -6,6 +6,7 @@ class Sense():
 
         self.gloss = None
         self.qualifier = None
+        self.id = None
         self._regiondata = None
         self._regions = None
         self._syndata = None
@@ -14,6 +15,8 @@ class Sense():
         for key, value in data:
             if key == "gloss":
                 self.gloss = value
+            elif key == "id":
+                self.id = value
             elif key == "q":
                 self.qualifier = value
             elif key == "syn":

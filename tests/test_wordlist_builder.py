@@ -1609,35 +1609,25 @@ pos: v
   etymology: a- + mojama + -ar\
 """
 
-
-def test_polish():
-
-    # Declension shouldn't show up as a POS
-
+def test_senseid():
     orig_text="""\
-==Polish==
-
-===Pronunciation===
-{{pl-p}}
+==Spanish==
 
 ===Noun===
-{{pl-noun|n}}
+{{es-noun}}
 
-# {{verbal noun of|pl|ablaktować}}
-
-====Declension====
-{{pl-decl-noun-n|tantum=s}}
+# {{senseid|es|taxonomy}} {{lb|es|countable|biology|taxonomy}} A [[category]] in the [[classification]] of [[organism]]s, ranking below [[order]] and above [[genus]]; a [[taxon]] at that rank.
 """
 
-    pl_builder = WordlistBuilder("Polish", "pl")
-
-    lang_entry = pl_builder.get_language_entry(orig_text)
+    lang_entry = builder.get_language_entry(orig_text)
     assert lang_entry != ""
 
-    entry = pl_builder.entry_to_text(lang_entry, "ablaktowanie")
+    entry = builder.entry_to_text(lang_entry, "family")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
-  meta: {{pl-noun|n}}
-  gloss: verbal noun of "ablaktować"\
+  meta: {{es-noun}}
+  gloss: A category in the classification of organisms, ranking below order and above genus; a taxon at that rank
+    id: taxonomy
+    q: countable, biology, taxonomy\
 """
