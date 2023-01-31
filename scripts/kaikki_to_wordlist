@@ -1,0 +1,20 @@
+#!/usr/bin/python3
+
+from enwiktionary_wordlist.kaikki_to_wordlist import KaikkiToWordlist
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Convert json to wordlist")
+    parser.add_argument("file", help="Kaikki JSON file")
+    parser.add_argument("--allforms", help="write allforms data to specified file")
+    args = parser.parse_args()
+
+    converter = KaikkiToWordlist(args.file, bool(args.allforms))
+
+    if args.allforms:
+        converter.dump_allforms(args.allforms)
+
+    converter.dump_wordlist()
+
+if __name__ == "__main__":
+    main()
