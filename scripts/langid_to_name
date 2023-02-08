@@ -1,0 +1,15 @@
+#!/usr/bin/python3
+
+from enwiktionary_parser.languages.all_ids import ALL_LANG_IDS
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Convert language id to language name")
+    parser.add_argument("langid", help="language id")
+    args = parser.parse_args()
+
+    print(ALL_LANG_IDS[args.langid])
+
+if __name__ == "__main__":
+    main()
+
