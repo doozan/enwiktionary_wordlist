@@ -1,6 +1,8 @@
 import re
 import sys
 
+from .example import Example
+
 class Sense():
     def __init__(self, data): # pos, qualifier, gloss, syndata):
 
@@ -11,8 +13,13 @@ class Sense():
         self._regions = None
         self._syndata = None
         self._synonyms = None
+        self.examples = []
 
-        for key, value in data:
+        for i, item in enumerate(data):
+            key, value = item
+            if key == "ex":
+                self.parse_examples(data[i:])
+                break
             if key == "gloss":
                 self.gloss = value
             elif key == "id":
@@ -29,6 +36,23 @@ class Sense():
         self.formtype, self.lemma, self.nonform = self.parse_form_of(self.gloss)
         if self.lemma:
             self.lemma = self.lemma.strip()
+
+    def parse_examples(self, data):
+        ex_data = []
+        for kv in data:
+            key, value = kv
+            if key == "ex":
+                if ex_data:
+                    self.add_example(ex_data)
+                ex_data = [kv]
+            else:
+                ex_data.append(kv)
+        if ex_data:
+            self.add_example(ex_data)
+
+    def add_example(self, ex_data):
+        self.examples.append(Example(ex_data))
+
 
     @property
     def synonyms(self):
