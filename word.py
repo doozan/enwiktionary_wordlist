@@ -36,6 +36,7 @@ class Word():
         self.qualifier = None
         self.etymology = None
         self.use_notes = None
+        self.headline = None
 
         for i, item in enumerate(data):
             key, value = item
@@ -57,6 +58,10 @@ class Word():
             # Term labels
             elif key == "q":
                 self.qualifier = value
+            elif key == "headline":
+                self.headline = value
+            else:
+                raise ValueError("Unknown key/value pair", key, value)
 
     def add_form(self, formtype, form):
 
