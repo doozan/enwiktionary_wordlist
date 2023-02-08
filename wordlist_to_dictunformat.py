@@ -88,7 +88,9 @@ class WordlistToDictunformat():
 
         line.append(" <i>")
         line.append(self.display_pos.get(word_obj.pos, word_obj.pos))
-        if word_obj.genders:
+        if word_obj.headline:
+            line.append(f", {word_obj.headline}")
+        elif word_obj.genders:
             if word_obj.genders not in self.display_gender:
                 print(f"Unknown gender {word_obj.word}: '{word_obj.genders}'", file=sys.stderr)
             line.append(f", {self.display_gender.get(word_obj.genders, word_obj.genders)}")
@@ -121,6 +123,25 @@ class WordlistToDictunformat():
             line.append(f"[<i>{sense.qualifier}</i>] ")
 
         line.append(html.escape(sense.gloss))
+
+        if sense.examples:
+
+            # Only use inline formatting if it can apply to all examples
+            use_inline = all((not ex.english or len(ex.english) < 40) and len(ex.text) < 40 for ex in sense.examples)
+            for example in sense.examples:
+                line.append('<div style="font-size: 80%">')
+                if example.source:
+                    line.append(example.source)
+                if use_inline:
+                    if example.english:
+                        line.append(f"<i>{example.text}</i> ― {example.english}")
+                    else:
+                        line.append(f"<i>{example.text}</i>")
+                else:
+                    line.append(f"<i>{example.text}</i>")
+                    if example.english:
+                        line.append(f" &nbsp; {example.english}")
+                line.append('</div>')
 
         if sense.synonyms:
             line.append('<div style="font-size: 80%">')
