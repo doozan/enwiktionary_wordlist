@@ -6,7 +6,9 @@ import re
 import sys
 from smart_open import open
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
+
+Example = namedtuple("Example", [ "type", "source", "text", "english" ])
 
 class KaikkiToWordlist():
 
@@ -191,7 +193,20 @@ class KaikkiToWordlist():
 
         senseid = "; ".join(sense_data.get("senseid", []))
         if senseid:
-            res["senseid"] = senseid
+            res["id"] = senseid
+
+        examples = []
+        for example in sense_data.get("examples", []):
+            _text = example.get("text")
+            _trans = example.get("english")
+            _type = example.get("type")
+            _ref = example.get("ref")
+            if _text:
+                examples.append(Example(_type, _ref, _text, _trans))
+
+        if examples:
+            res["examples"] = examples
+
 
         # TODO: get examples and other data
 
@@ -209,6 +224,20 @@ class KaikkiToWordlist():
         pos = lemma_data.get("pos")
 
         item = {}
+
+        headlines = []
+        for x in lemma_data.get("head_templates", []):
+            headline = x["expansion"].removeprefix(lemma).lstrip()
+            if headline and headline not in headlines:
+                headlines.append(headline)
+
+#        if len(headlines) > 1:
+#            print("multi headlines", lemma, pos, file=sys.stderr)
+#            print(headlines, file=sys.stderr)
+
+        if headlines:
+            item["headline"] = "; ".join(headlines)
+
         ety = lemma_data.get("etymology_text")
         if ety:
             item["etymology"] = ety
@@ -238,8 +267,16 @@ class KaikkiToWordlist():
                     for sense in item["senses"]:
                         self.print_value(1, "gloss", sense["gloss"])
                         for k,v in sorted(sense.items()):
-                            if k != "gloss":
+                            if k in ["gloss", "examples"]:
+                                continue
+                            else:
                                 self.print_value(2, k, v)
+                        for example in sense.get("examples", []):
+                            self.print_value(2, "ex", example.text)
+                            if example.english:
+                                self.print_value(3, "eng", example.english)
+                            if example.source:
+                                self.print_value(3, "src", example.source)
 
     def dump_allforms(self, filename):
 
