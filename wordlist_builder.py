@@ -31,9 +31,16 @@ from enwiktionary_parser.sections.etymology import EtymologySection
 from enwiktionary_wordlist.utils import wiki_to_text, make_qualification, make_pos_tag
 
 class WordlistBuilder:
-    def __init__(self, lang_name, lang_id):
+    def __init__(self, lang_name, lang_id, transcludes_filename=None):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
+
+        self._transclude_senses = {}
+        if transcludes_filename:
+            with open(transcludes_filename) as infile:
+                for l in infile:
+                    word, senseid, _, sense = l.split(":", 3)
+                    self._transclude_senses[(word,senseid)] = sense.strip()
 
         start = fr"(^|\n)==\s*{self.LANG_SECTION}\s*==\s*\n"
         re_endings = [ r"\[\[\s*Category\s*:", r"==[^=]+==", r"----" ]
@@ -220,7 +227,7 @@ class WordlistBuilder:
         return word_entry
 
     def gloss_to_text(self, gloss, title):
-        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title).strip())
+        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title, transclude_senses=self._transclude_senses).strip())
 
     def usage_to_text(self, usage, title):
         text = wiki_to_text(usage, title).strip()

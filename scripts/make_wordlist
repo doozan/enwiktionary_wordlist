@@ -81,6 +81,7 @@ def main():
     parser.add_argument("--langdata", help="Read articles from specified language data file")
     parser.add_argument("--wordlist", help="Read articles from existing wordlist")
     parser.add_argument("--lang-id", help="Language id")
+    parser.add_argument("--transcludes", help="Senses that can be transcluded by {{transclude sense}}")
     parser.add_argument("-j", help="run N jobs in parallel (default = # CPUs - 1", type=int)
     parser.add_argument("--limit", help="Limit to n entries", type=int, default=0)
     parser.add_argument('--progress', action='store_true')
@@ -104,7 +105,7 @@ def main():
             raise ValueError(f"Unknown language id: {args.lang_id}")
 
         lang_section = ALL_LANG_IDS[args.lang_id]
-        _builder = WordlistBuilder(lang_section, args.lang_id)
+        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes)
 
         if args.langdata:
             iter_entry = iter_langdata(args.langdata)

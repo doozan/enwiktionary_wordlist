@@ -61,7 +61,7 @@ class Word():
             elif key == "headline":
                 self.headline = value
             else:
-                raise ValueError("Unknown key/value pair", key, value)
+                raise ValueError("Unknown key/value pair", key, value, data)
 
     def add_form(self, formtype, form):
 

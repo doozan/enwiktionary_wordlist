@@ -62,10 +62,10 @@ def make_pos_tag(word, qualifiers):
 
     return "{" + pos + "}"
 
-def wiki_to_text( wikitext, title):
+def wiki_to_text( wikitext, title, transclude_senses={}):
     wikt = wtparser.parse(wikitext)
 
-    expand_templates(wikt, title)
+    expand_templates(wikt, title, transclude_senses)
 
     # Reparse and expand links
     wikt = wtparser.parse(str(wikt))
