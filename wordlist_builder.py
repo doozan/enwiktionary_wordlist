@@ -31,9 +31,10 @@ from enwiktionary_parser.sections.etymology import EtymologySection
 from enwiktionary_wordlist.utils import wiki_to_text, make_qualification, make_pos_tag
 
 class WordlistBuilder:
-    def __init__(self, lang_name, lang_id, transcludes_filename=None):
+    def __init__(self, lang_name, lang_id, transcludes_filename=None, expand_templates=False):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
+        self._expand_templates = expand_templates
 
         self._transclude_senses = {}
         if transcludes_filename:
@@ -69,7 +70,7 @@ class WordlistBuilder:
         for k,values in sorted(forms.items()):
             for v in sorted(values):
                 if re.search(r"[\<\{\[]", v):
-                    v = wiki_to_text(v, title)
+                    v = self.expand_templates(v, title)
 
                 if ";" in v:
                     raise ValueError(f"ERROR: ; found in value ({v})")
@@ -154,10 +155,10 @@ class WordlistBuilder:
                     sense_data["id"] = "; ".join(sense.sense_ids)
 
                 if sense.gloss.qualifiers:
-                    qualifiers = make_qualification(self.LANG_ID, title, sense.gloss.qualifiers)
-                    if qualifiers:
-                        qualifiers = qualifiers.rstrip(", ")
-                        sense_data["q"] = qualifiers
+                    qualifier = self.get_qualifier(title, sense.gloss.qualifiers)
+                    if qualifier:
+                        qualifier = qualifier.rstrip(", ")
+                        sense_data["q"] = qualifier
 
                 synonyms = []
                 for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
@@ -182,17 +183,25 @@ class WordlistBuilder:
                         etys.append(ety_text)
                 word.ifilter_wordsenses()
 
+            qualifier = self.get_qualifier(title, word.qualifiers)
             entry += self.make_word_entry(
                 pos = word.shortpos,
                 meta = " ".join(map(str,word.form_sources)).replace("\n", ""),
                 genders = "; ".join(word.genders) if word.genders else None,
-                qualifier = make_qualification(self.LANG_ID, title, word.qualifiers),
+                qualifier = qualifier,
                 usages = usages,
                 etys =  etys,
                 senses = senses,
             )
 
         return entry
+
+    def get_qualifier(self, title, qualifiers):
+        if not qualifiers:
+            return ""
+        if not self._expand_templates:
+            return ", ".join(qualifiers)
+        return make_qualification(self.LANG_ID, title, qualifiers)
 
     @staticmethod
     def make_word_entry(pos, meta, qualifier, genders, usages, etys, senses):
@@ -226,11 +235,16 @@ class WordlistBuilder:
 
         return word_entry
 
+    def expand_templates(self, text, title):
+        if not self._expand_templates:
+            return text.strip()
+        return wiki_to_text(text, title, transclude_senses=self._transclude_senses).strip()
+
     def gloss_to_text(self, gloss, title):
-        return re.sub(r"\s\s+", " ", wiki_to_text(gloss.data.rstrip("\r\n\t ."), title, transclude_senses=self._transclude_senses).strip())
+        return re.sub(r"\s\s+", " ", self.expand_templates(gloss.data.rstrip("\r\n\t ."), title))
 
     def usage_to_text(self, usage, title):
-        text = wiki_to_text(usage, title).strip()
+        text = self.expand_templates(usage, title)
         # Strip leading * if there are no newlines
         if "\n" not in text:
             text = re.sub("^[ *#]+", "", text)
@@ -239,16 +253,17 @@ class WordlistBuilder:
         return text
 
     def etymology_to_text(self, etymology, title):
-        return re.sub("\n", r"\\n", wiki_to_text(etymology, title).strip())
+        text = self.expand_templates(etymology, title)
+        return re.sub("\n", r"\\n", text)
 
     def items_to_synonyms(self, items, title):
         synonyms = []
         for item in items:
             synonym = None
             if "alt" in item:
-                synonym = wiki_to_text(item["alt"], title).strip()
+                synonym = self.expand_templates(item["alt"], title).strip()
             if not synonym:
-                synonym = wiki_to_text(item["target"], title).strip()
+                synonym = self.expand_templates(item["target"], title).strip()
             if synonym:
                 if "q" in item:
                     synonym = f'({item["q"]}) {synonym}'

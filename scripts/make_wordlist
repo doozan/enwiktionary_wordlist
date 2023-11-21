@@ -68,6 +68,7 @@ def iter_xml(datafile, lang_section):
 _builder = None
 def make_entry(item):
     title, entry, revision = item
+
     entry = _builder.entry_to_text(entry, title)
     if entry:
         return title, entry
@@ -88,6 +89,7 @@ def main():
     parser.add_argument('--exclude-verb-forms', action='store_true', help="Exclude all verb forms")
     parser.add_argument('--exclude-generated-forms', action='store_true', help="Exclude forms entries that can be generate automatically")
     parser.add_argument('--exclude-empty', action='store_true', help="Exclude words with no senses")
+    parser.add_argument('--expand-templates', action='store_true', help="Convert templates to text")
 
     args = parser.parse_args()
 
@@ -105,7 +107,7 @@ def main():
             raise ValueError(f"Unknown language id: {args.lang_id}")
 
         lang_section = ALL_LANG_IDS[args.lang_id]
-        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes)
+        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes, args.expand_templates)
 
         if args.langdata:
             iter_entry = iter_langdata(args.langdata)
@@ -117,7 +119,7 @@ def main():
 
         if args.j > 1:
             pool = multiprocessing.Pool(args.j)
-            iter_items =  pool.imap_unordered(make_entry, iter_entry, 10)
+            iter_items =  pool.imap_unordered(make_entry, iter_entry, 100)
         else:
             iter_items = map(make_entry, iter_entry)
 
