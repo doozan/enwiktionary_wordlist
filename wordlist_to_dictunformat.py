@@ -143,9 +143,13 @@ class WordlistToDictunformat():
                         line.append(f" &nbsp; {example.english}")
                 line.append('</div>')
 
-        if sense.synonyms:
+        for nymtype, qualifier, nyms in sense.nyms:
             line.append('<div style="font-size: 80%">')
-            line.append("Synonyms: " + "; ".join(sense.synonyms))
+
+            nym = {"syn": "Synonyms", "ant": "Antonyms"}[nymtype]
+            qualifier = "" if not qualifier else f" [{qualifier}]"
+
+            line.append(f"{nym}:{qualifier} " + "; ".join(nyms))
             line.append('</div>')
         line.append('</li>\n')
 
@@ -222,8 +226,12 @@ class WordlistToDictunformat():
         line.append(sense.gloss)
         lines.append(" ".join(line))
 
-        if sense.synonyms:
-            lines.append("      Synonyms: " + "; ".join(sense.synonyms))
+
+        for nymtype, qualifier, nyms in sense.nyms:
+            nym = {"syn": "Synonyms", "ant": "Antonyms"}[nymtype]
+            qualifier = "" if not qualifier else f" [{qualifier}]"
+
+            lines.append(f"{nym}:{qualifier} " + "; ".join(nyms))
 
         return "\n".join(lines)
 

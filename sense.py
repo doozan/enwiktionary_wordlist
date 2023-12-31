@@ -11,8 +11,8 @@ class Sense():
         self.id = None
         self._regiondata = None
         self._regions = None
-        self._syndata = None
-        self._synonyms = None
+        self._nymdata = []
+        self._nyms = []
         self.examples = []
 
         for i, item in enumerate(data):
@@ -24,10 +24,15 @@ class Sense():
                 self.gloss = value
             elif key == "id":
                 self.id = value
+            elif key in ["syn", "ant"]:
+                self._nymdata.append((key, value))
             elif key == "q":
-                self.qualifier = value
-            elif key == "syn":
-                self._syndata = value
+                # "q" before nymdata applies to the gloss
+                # "q" after nymdata applies to the nyms
+                if self._nymdata:
+                    self._nymdata.append((key, value))
+                else:
+                    self.qualifier = value
             elif key == "regional":
                 self._regiondata = value
             else:
@@ -55,11 +60,29 @@ class Sense():
 
 
     @property
-    def synonyms(self):
-        if self._syndata:
-            self._synonyms = self.parse_list(self._syndata)
-            self._syndata = None
-        return self._synonyms
+    def nyms(self):
+        if self._nymdata:
+            nymtype = None
+            qualifier = None
+            nyms = []
+
+            for k, v in self._nymdata:
+                if k in ["syn", "ant"]:
+                    if nyms:
+                        self._nyms.append((nymtype, qualifier, nyms))
+                    nymtype = k
+                    qualifier = None
+                    nyms = self.parse_list(v)
+                elif k == "q":
+                    qualifier = v
+                else:
+                    raise ValueError("Unhandled nymdata", (k,v), self._nymdata)
+
+            if nyms:
+                self._nyms.append((nymtype, qualifier, nyms))
+
+            self._nymdata = None
+        return self._nyms
 
     @property
     def regions(self):

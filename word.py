@@ -42,7 +42,7 @@ class Word():
             key, value = item
             if key == "gloss":
                 self._sense_data = data[i:]
-                # Everything after the first gloss will be lazy-loaded as .senses
+                # Everything starting from the first gloss will be lazy-loaded as .senses
                 break
             elif key == "meta":
                 self.meta = value
