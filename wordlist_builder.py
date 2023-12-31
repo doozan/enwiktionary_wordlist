@@ -288,7 +288,13 @@ class WordlistBuilder:
             s["gloss"] = sense.gloss
             s["id"] = sense.id
             s["q"] = sense.qualifier.rstrip(", ") if sense.qualifier else None
-            s["syn"] = "; ".join(sense.synonyms) if sense.synonyms else None
+            for nym in ["ant", "syn"]:
+                nyms = []
+                for n in sense.nyms:
+                    if n[0] == nym:
+                        nyms += n[2]
+                # TODO: add qualifier, or just skip this if not used by make_word_entry?
+                s[nym] = "; ".join(nyms) if nyms else None
             s["regional"] = "; ".join(sense.regions) if sense.regions else None
             senses.append(s)
 
