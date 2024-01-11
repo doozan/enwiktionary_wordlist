@@ -6,7 +6,6 @@ _____
 amiga
 pos: n
   meta: {{es-noun|f|m=amigo}}
-  forms: m=amigo; mpl=amigos; pl=amigas
   g: f
   gloss: female equivalent of "amigo", friend
   gloss: friend
@@ -14,7 +13,6 @@ _____
 amigo
 pos: n
   meta: {{es-noun|m|f=amiga}}
-  forms: f=amiga; fpl=amigas; pl=amigos
   g: m
   gloss: friend
 """
@@ -29,11 +27,9 @@ pos: n
 def test_mbformat():
     data="""\
 amiga {n-meta} :: {{es-noun|f}}
-amiga {n-forms} :: m=amigo; mpl=amigos; pl=amigas
 amiga {f} :: female equivalent of "amigo", friend
 amiga {f} :: friend2
 amigo {n-meta} :: {{es-noun|m}}
-amigo {n-forms} :: f=amiga; fpl=amigas; pl=amigos
 amigo {m} :: friend
 amigo {m} :: friend2
 """
@@ -44,14 +40,12 @@ amigo {m} :: friend2
 'amiga': [
     'pos: n',
     'meta: {{es-noun|f}}',
-    'forms: m=amigo; mpl=amigos; pl=amigas',
     'g: f',
     'gloss: female equivalent of "amigo", friend',
     'gloss: friend2'],
 'amigo': [
     'pos: n',
     'meta: {{es-noun|m}}',
-    'forms: f=amiga; fpl=amigas; pl=amigos',
     'g: m',
     'gloss: friend',
     'gloss: friend2']}
@@ -63,10 +57,8 @@ amigo {m} :: friend2
 
     data = """\
 test {n-meta} :: x
-test {n-forms} :: pl=tests
 test {m} :: masculine
 test {n-meta} :: x
-test {n-forms} :: pl=tests
 test {f} :: feminine
 """
     wordlist = Wordlist(data.splitlines())
@@ -75,12 +67,10 @@ test {f} :: feminine
 'test': [
     'pos: n',
     'meta: x',
-    'forms: pl=tests',
     'g: m',
     'gloss: masculine',
     'pos: n',
     'meta: x',
-    'forms: pl=tests',
     'g: f',
     'gloss: feminine']
 }
@@ -91,14 +81,12 @@ _____
 amiga
 pos: n
   meta: {{es-noun|f|m=amigo}}
-  forms: m=amigo; mpl=amigos; pl=amigas
   g: f
   gloss: female equivalent of "amigo", friend
 _____
 amigo
 pos: n
   meta: {{es-noun|m|f=amiga}}
-  forms: f=amiga; fpl=amigas; pl=amigos
   g: m
   gloss: friend
 """
@@ -123,14 +111,12 @@ _____
 amiga
 pos: n
   meta: {{es-noun|f|m=amigo}}
-  forms: m=amigo; mpl=amigos; pl=amigas
   g: f
   gloss: female equivalent of "amigo", friend
 _____
 amigo
 pos: n
   meta: {{es-noun|m|f=amiga}}
-  forms: f=amiga; fpl=amigas; pl=amigos
   g: m
   gloss: friend
 """
@@ -153,13 +139,10 @@ def test_dios():
 
     data = """\
 dios {n-meta} :: {{es-noun|m|dioses|f=diosa}}
-dios {n-forms} :: f=diosa; fpl=diosas; pl=dioses
 dios {m} :: god
 diosa {n-meta} :: {{es-noun|f|m=dios}}
-diosa {n-forms} :: m=dios; mpl=dios; pl=diosas
 diosa {f} :: goddess
 diosa {n-meta} :: {{es-noun|f}}
-diosa {n-forms} :: pl=diosas
 diosa {f} [biochemistry] :: diose
 """
     wlist = Wordlist(data.splitlines())
@@ -176,12 +159,10 @@ def test_aquellos():
 
     data = """\
 aquél {pron-meta} :: {{head|es|pronoun|demonstrative, feminine|aquélla|neuter|aquello|masculine plural|aquéllos|feminine plural|aquéllas|g=m}}
-aquél {pron-forms} :: demonstrative_feminine=aquélla; feminine_plural=aquéllas; masculine_plural=aquéllos; neuter=aquello
 aquél {pron} [demonstrative] :: that one (far from speaker and listener)
 aquéllos {pron-meta} :: {{head|es|pronoun|demonstrative|g=m-p}}
 aquéllos {pron} :: plural of "aquél"; those ones (far from speaker and listener)
 aquel {pron-meta} :: {{head|es|pronoun|g=m|feminine|aquella|neutrum|aquello|masculine plural|aquellos|neutrum plural|aquellos|feminine plural|aquellas}}
-aquel {pron-forms} :: feminine=aquella; feminine_plural=aquellas; masculine_plural=aquellos; neutrum=aquello; neutrum_plural=aquellos
 aquel {pron} [demonstrative] :: alternative spelling of "aquél"
 aquellos {pron-meta} :: {{head|es|pronoun|demonstrative|g=m-p}}
 aquellos {pron} :: alternative spelling of "aquéllos"; those ones (over there; implying some distance). The unaccented form can function as a pronoun if it can be unambiguously deduced as such from context.

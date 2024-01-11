@@ -10,13 +10,13 @@ def run_test_sense_form(gloss, formtype, lemma, nonform):
 def test_sense():
     data = [
 ("gloss", "(mostly) obsolete form of fuego"),
+("q", "rare"),
 ("syn", "syn1; syn2"),
-("q", "rare")
 ]
 
     sense = Sense(data)
     assert sense.qualifier == "rare"
-    assert sense.synonyms == ["syn1", "syn2"]
+    assert sense.nyms == [('syn', None, ['syn1', 'syn2'])]
     assert sense.formtype == "old"
     assert sense.lemma == "fuego"
     assert sense.nonform == "(mostly"

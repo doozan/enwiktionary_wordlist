@@ -19,7 +19,7 @@ from enwiktionary_wordlist.wordlist_builder import WordlistBuilder
 from enwiktionary_wordlist.wordlist import Wordlist
 import mwparserfromhell
 
-builder = WordlistBuilder("Spanish", "es")
+builder = WordlistBuilder("Spanish", "es", expand_templates=True)
 
 def test_chapo():
 
@@ -418,7 +418,7 @@ pos: v
     q: transitive
 pos: v
   meta: {{es-verb|aterr|ar}} {{es-conj-ar|aterr|combined=1}}
-  etymology: From a- + Latin terreō.
+  etymology: From a- + Latin "terreō".
   gloss: to scare
     q: transitive\
 """
@@ -996,7 +996,7 @@ pos: adv
   meta: {{es-adv}}
   etymology: a ("to") + bajo ("down"). Cognate to French "à bas", which is also used in sense “down with”. Compare English "abase" and VL "ad bassum".
   gloss: down
-    syn: ayuso; yuso
+    syn: (obsolete) ayuso; (obsolete) yuso
   gloss: downstairs
   gloss: below
 pos: interj
@@ -1630,4 +1630,30 @@ pos: n
   gloss: A category in the classification of organisms, ranking below order and above genus; a taxon at that rank
     id: taxonomy
     q: countable, biology, taxonomy\
+"""
+
+
+
+def test_multi_past_participle():
+    orig_text="""\
+==Spanish==
+
+===Verb===
+{{es-verb}}
+
+# to [[refry]]
+
+====Conjugation====
+{{es-conj|nocomb=1}}
+"""
+
+    lang_entry = builder.get_language_entry(orig_text)
+    assert lang_entry != ""
+
+    entry = builder.entry_to_text(lang_entry, "refreír")
+    print("\n".join(entry))
+    assert "\n".join(entry) == """\
+pos: v
+  meta: {{es-verb}} {{es-conj|nocomb=1}}
+  gloss: to refry\
 """

@@ -320,7 +320,6 @@ _____
 asca
 pos: n
   meta: {{es-noun|m}}
-  forms: pl=ascas
   g: m
   gloss: ascus
     q: mycology
@@ -329,14 +328,12 @@ _____
 asco
 pos: n
   meta: {{es-noun|m}}
-  forms: pl=ascos
   g: m
   gloss: disgust
   gloss: nausea
   gloss: disgusting person
 pos: n
   meta: {{es-noun|m}}
-  forms: pl=ascos
   g: m
   gloss: alternative form of "asca"
 """
@@ -359,383 +356,12 @@ pos: n
         assert allforms.get_lemmas(k) == v
 
 
-def test_verb_forms():
-    wordlist_data = """\
-_____
-bifurcar
-pos: verb
-  meta: {{es-verb}} {{es-conj}}
-  gloss: to bifurcate, to cause to fork off
-    q: transitive
-  gloss: To diverge, fork off
-    q: reflexive
-_____
-bifurcarse
-pos: verb
-  meta: {{es-verb}} {{es-conj}}
-  gloss: to split, divide, fork, branch off
-"""
-
-    expected = {
-'bifurcar': ['verb|bifurcar'],
-'bifurcaríamos': ['verb|bifurcar'],
-'bifurcaría': ['verb|bifurcar'],
-'bifurcaríais': ['verb|bifurcar'],
-'bifurcarían': ['verb|bifurcar'],
-'bifurcarías': ['verb|bifurcar'],
-'bifurcaremos': ['verb|bifurcar'],
-'bifurcaré': ['verb|bifurcar'],
-'bifurcaréis': ['verb|bifurcar'],
-'bifurcarán': ['verb|bifurcar'],
-'bifurcarás': ['verb|bifurcar'],
-'bifurcará': ['verb|bifurcar'],
-'bifurcáremos': ['verb|bifurcar'],
-'bifurcare': ['verb|bifurcar'],
-'bifurcareis': ['verb|bifurcar'],
-'bifurcaren': ['verb|bifurcar'],
-'bifurcares': ['verb|bifurcar'],
-'bifurcando': ['verb|bifurcar'],
-'bifurcándola': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándolas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándole': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándolo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándolos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándome': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándomela': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándomelas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándomele': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándomeles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándomelo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándomelos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonosla': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonoslas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonosle': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonosles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonoslo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándonoslos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoosla': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándooslas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoosle': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoosles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándooslo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándooslos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándose': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándosela': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoselas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándosele': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoseles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoselo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoselos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándote': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándotela': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándotelas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándotele': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándoteles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándotelo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcándotelos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurquemos': ['verb|bifurcar'],
-'bifurquémosla': ['verb|bifurcar'],
-'bifurquémoslas': ['verb|bifurcar'],
-'bifurquémosle': ['verb|bifurcar'],
-'bifurquémosles': ['verb|bifurcar'],
-'bifurquémoslo': ['verb|bifurcar'],
-'bifurquémoslos': ['verb|bifurcar'],
-'bifurquémonos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurquémosnosla': ['verb|bifurcar'],
-'bifurquémosnoslas': ['verb|bifurcar'],
-'bifurquémosnosle': ['verb|bifurcar'],
-'bifurquémosnosles': ['verb|bifurcar'],
-'bifurquémosnoslo': ['verb|bifurcar'],
-'bifurquémosnoslos': ['verb|bifurcar'],
-'bifurquémoos': ['verb|bifurcar'],
-'bifurquémososla': ['verb|bifurcar'],
-'bifurquémososlas': ['verb|bifurcar'],
-'bifurquémososle': ['verb|bifurcar'],
-'bifurquémososles': ['verb|bifurcar'],
-'bifurquémososlo': ['verb|bifurcar'],
-'bifurquémososlos': ['verb|bifurcar'],
-'bifurquémoste': ['verb|bifurcar'],
-'bifurquémostela': ['verb|bifurcar'],
-'bifurquémostelas': ['verb|bifurcar'],
-'bifurquémostele': ['verb|bifurcar'],
-'bifurquémosteles': ['verb|bifurcar'],
-'bifurquémostelo': ['verb|bifurcar'],
-'bifurquémostelos': ['verb|bifurcar'],
-'bifurcad': ['verb|bifurcar'],
-'bifurcadla': ['verb|bifurcar'],
-'bifurcadlas': ['verb|bifurcar'],
-'bifurcadle': ['verb|bifurcar'],
-'bifurcadles': ['verb|bifurcar'],
-'bifurcadlo': ['verb|bifurcar'],
-'bifurcadlos': ['verb|bifurcar'],
-'bifurcadme': ['verb|bifurcar'],
-'bifurcádmela': ['verb|bifurcar'],
-'bifurcádmelas': ['verb|bifurcar'],
-'bifurcádmele': ['verb|bifurcar'],
-'bifurcádmeles': ['verb|bifurcar'],
-'bifurcádmelo': ['verb|bifurcar'],
-'bifurcádmelos': ['verb|bifurcar'],
-'bifurcadnos': ['verb|bifurcar'],
-'bifurcádnosla': ['verb|bifurcar'],
-'bifurcádnoslas': ['verb|bifurcar'],
-'bifurcádnosle': ['verb|bifurcar'],
-'bifurcádnosles': ['verb|bifurcar'],
-'bifurcádnoslo': ['verb|bifurcar'],
-'bifurcádnoslos': ['verb|bifurcar'],
-'bifurcaos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcádosla': ['verb|bifurcar'],
-'bifurcádoslas': ['verb|bifurcar'],
-'bifurcádosle': ['verb|bifurcar'],
-'bifurcádosles': ['verb|bifurcar'],
-'bifurcádoslo': ['verb|bifurcar'],
-'bifurcádoslos': ['verb|bifurcar'],
-'bifurquen': ['verb|bifurcar'],
-'bifúrquenla': ['verb|bifurcar'],
-'bifúrquenlas': ['verb|bifurcar'],
-'bifúrquenle': ['verb|bifurcar'],
-'bifúrquenles': ['verb|bifurcar'],
-'bifúrquenlo': ['verb|bifurcar'],
-'bifúrquenlos': ['verb|bifurcar'],
-'bifúrquenme': ['verb|bifurcar'],
-'bifúrquenmela': ['verb|bifurcar'],
-'bifúrquenmelas': ['verb|bifurcar'],
-'bifúrquenmele': ['verb|bifurcar'],
-'bifúrquenmeles': ['verb|bifurcar'],
-'bifúrquenmelo': ['verb|bifurcar'],
-'bifúrquenmelos': ['verb|bifurcar'],
-'bifúrquennos': ['verb|bifurcar'],
-'bifúrquennosla': ['verb|bifurcar'],
-'bifúrquennoslas': ['verb|bifurcar'],
-'bifúrquennosle': ['verb|bifurcar'],
-'bifúrquennosles': ['verb|bifurcar'],
-'bifúrquennoslo': ['verb|bifurcar'],
-'bifúrquennoslos': ['verb|bifurcar'],
-'bifúrquense': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifúrquensela': ['verb|bifurcar'],
-'bifúrquenselas': ['verb|bifurcar'],
-'bifúrquensele': ['verb|bifurcar'],
-'bifúrquenseles': ['verb|bifurcar'],
-'bifúrquenselo': ['verb|bifurcar'],
-'bifúrquenselos': ['verb|bifurcar'],
-'bifurca': ['verb|bifurcar'],
-'bifúrcala': ['verb|bifurcar'],
-'bifúrcalas': ['verb|bifurcar'],
-'bifúrcale': ['verb|bifurcar'],
-'bifúrcales': ['verb|bifurcar'],
-'bifúrcalo': ['verb|bifurcar'],
-'bifúrcalos': ['verb|bifurcar'],
-'bifúrcame': ['verb|bifurcar'],
-'bifúrcamela': ['verb|bifurcar'],
-'bifúrcamelas': ['verb|bifurcar'],
-'bifúrcamele': ['verb|bifurcar'],
-'bifúrcameles': ['verb|bifurcar'],
-'bifúrcamelo': ['verb|bifurcar'],
-'bifúrcamelos': ['verb|bifurcar'],
-'bifúrcanos': ['verb|bifurcar'],
-'bifúrcanosla': ['verb|bifurcar'],
-'bifúrcanoslas': ['verb|bifurcar'],
-'bifúrcanosle': ['verb|bifurcar'],
-'bifúrcanosles': ['verb|bifurcar'],
-'bifúrcanoslo': ['verb|bifurcar'],
-'bifúrcanoslos': ['verb|bifurcar'],
-'bifúrcate': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifúrcatela': ['verb|bifurcar'],
-'bifúrcatelas': ['verb|bifurcar'],
-'bifúrcatele': ['verb|bifurcar'],
-'bifúrcateles': ['verb|bifurcar'],
-'bifúrcatelo': ['verb|bifurcar'],
-'bifúrcatelos': ['verb|bifurcar'],
-'bifurque': ['verb|bifurcar'],
-'bifúrquela': ['verb|bifurcar'],
-'bifúrquelas': ['verb|bifurcar'],
-'bifúrquele': ['verb|bifurcar'],
-'bifúrqueles': ['verb|bifurcar'],
-'bifúrquelo': ['verb|bifurcar'],
-'bifúrquelos': ['verb|bifurcar'],
-'bifúrqueme': ['verb|bifurcar'],
-'bifúrquemela': ['verb|bifurcar'],
-'bifúrquemelas': ['verb|bifurcar'],
-'bifúrquemele': ['verb|bifurcar'],
-'bifúrquemeles': ['verb|bifurcar'],
-'bifúrquemelo': ['verb|bifurcar'],
-'bifúrquemelos': ['verb|bifurcar'],
-'bifúrquenos': ['verb|bifurcar'],
-'bifúrquenosla': ['verb|bifurcar'],
-'bifúrquenoslas': ['verb|bifurcar'],
-'bifúrquenosle': ['verb|bifurcar'],
-'bifúrquenosles': ['verb|bifurcar'],
-'bifúrquenoslo': ['verb|bifurcar'],
-'bifúrquenoslos': ['verb|bifurcar'],
-'bifúrquese': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifúrquesela': ['verb|bifurcar'],
-'bifúrqueselas': ['verb|bifurcar'],
-'bifúrquesele': ['verb|bifurcar'],
-'bifúrqueseles': ['verb|bifurcar'],
-'bifúrqueselo': ['verb|bifurcar'],
-'bifúrqueselos': ['verb|bifurcar'],
-'bifurcá': ['verb|bifurcar'],
-'bifurcábamos': ['verb|bifurcar'],
-'bifurcaba': ['verb|bifurcar'],
-'bifurcabais': ['verb|bifurcar'],
-'bifurcaban': ['verb|bifurcar'],
-'bifurcabas': ['verb|bifurcar'],
-'bifurcáramos': ['verb|bifurcar'],
-'bifurcara': ['verb|bifurcar'],
-'bifurcarais': ['verb|bifurcar'],
-'bifurcaran': ['verb|bifurcar'],
-'bifurcaras': ['verb|bifurcar'],
-'bifurcásemos': ['verb|bifurcar'],
-'bifurcase': ['verb|bifurcar'],
-'bifurcaseis': ['verb|bifurcar'],
-'bifurcasen': ['verb|bifurcar'],
-'bifurcases': ['verb|bifurcar'],
-'bifurcarla': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarlas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarle': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarlo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarlos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarme': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcármela': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcármelas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcármele': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcármeles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcármelo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcármelos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarnos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárnosla': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárnoslas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárnosle': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárnosles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárnoslo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárnoslos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcaros': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárosla': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcároslas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárosle': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárosles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcároslo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcároslos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarse': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcársela': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárselas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcársele': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárseles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárselo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárselos': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcarte': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcártela': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcártelas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcártele': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcárteles': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcártelo': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcártelos': ['verb|bifurcar', 'verb|bifurcarse'],
-'no bifurquemos': ['verb|bifurcar'],
-'no bifurquéis': ['verb|bifurcar'],
-'no bifurquen': ['verb|bifurcar'],
-'no bifurques': ['verb|bifurcar'],
-'no bifurque': ['verb|bifurcar'],
-'bifurcadas': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcada': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcados': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcado': ['verb|bifurcar', 'verb|bifurcarse'],
-'bifurcamos': ['verb|bifurcar'],
-'bifurco': ['verb|bifurcar'],
-'bifurcáis': ['verb|bifurcar'],
-'bifurcan': ['verb|bifurcar'],
-'bifurcas': ['verb|bifurcar'],
-'bifurcás': ['verb|bifurcar'],
-'bifurquéis': ['verb|bifurcar'],
-'bifurques': ['verb|bifurcar'],
-'bifurqués': ['verb|bifurcar'],
-'bifurqué': ['verb|bifurcar'],
-'bifurcasteis': ['verb|bifurcar'],
-'bifurcaron': ['verb|bifurcar'],
-'bifurcaste': ['verb|bifurcar'],
-'bifurcó': ['verb|bifurcar'],
-'nos bifurcaríamos': ['verb|bifurcarse'],
-'me bifurcaría': ['verb|bifurcarse'],
-'os bifurcaríais': ['verb|bifurcarse'],
-'se bifurcarían': ['verb|bifurcarse'],
-'te bifurcarías': ['verb|bifurcarse'],
-'se bifurcaría': ['verb|bifurcarse'],
-'nos bifurcaremos': ['verb|bifurcarse'],
-'me bifurcaré': ['verb|bifurcarse'],
-'os bifurcaréis': ['verb|bifurcarse'],
-'se bifurcarán': ['verb|bifurcarse'],
-'te bifurcarás': ['verb|bifurcarse'],
-'se bifurcará': ['verb|bifurcarse'],
-'nos bifurcáremos': ['verb|bifurcarse'],
-'me bifurcare': ['verb|bifurcarse'],
-'os bifurcareis': ['verb|bifurcarse'],
-'se bifurcaren': ['verb|bifurcarse'],
-'te bifurcares': ['verb|bifurcarse'],
-'se bifurcare': ['verb|bifurcarse'],
-'bifurcate': ['verb|bifurcarse'],
-'nos bifurcábamos': ['verb|bifurcarse'],
-'me bifurcaba': ['verb|bifurcarse'],
-'os bifurcabais': ['verb|bifurcarse'],
-'se bifurcaban': ['verb|bifurcarse'],
-'te bifurcabas': ['verb|bifurcarse'],
-'se bifurcaba': ['verb|bifurcarse'],
-'nos bifurcáramos': ['verb|bifurcarse'],
-'me bifurcara': ['verb|bifurcarse'],
-'os bifurcarais': ['verb|bifurcarse'],
-'se bifurcaran': ['verb|bifurcarse'],
-'te bifurcaras': ['verb|bifurcarse'],
-'se bifurcara': ['verb|bifurcarse'],
-'nos bifurcásemos': ['verb|bifurcarse'],
-'me bifurcase': ['verb|bifurcarse'],
-'os bifurcaseis': ['verb|bifurcarse'],
-'se bifurcasen': ['verb|bifurcarse'],
-'te bifurcases': ['verb|bifurcarse'],
-'se bifurcase': ['verb|bifurcarse'],
-'no nos bifurquemos': ['verb|bifurcarse'],
-'no os bifurquéis': ['verb|bifurcarse'],
-'no se bifurquen': ['verb|bifurcarse'],
-'no te bifurques': ['verb|bifurcarse'],
-'no se bifurque': ['verb|bifurcarse'],
-'nos bifurcamos': ['verb|bifurcarse'],
-'me bifurco': ['verb|bifurcarse'],
-'os bifurcáis': ['verb|bifurcarse'],
-'se bifurcan': ['verb|bifurcarse'],
-'te bifurcas': ['verb|bifurcarse'],
-'se bifurca': ['verb|bifurcarse'],
-'te bifurcás': ['verb|bifurcarse'],
-'nos bifurquemos': ['verb|bifurcarse'],
-'me bifurque': ['verb|bifurcarse'],
-'os bifurquéis': ['verb|bifurcarse'],
-'se bifurquen': ['verb|bifurcarse'],
-'te bifurques': ['verb|bifurcarse'],
-'se bifurque': ['verb|bifurcarse'],
-'te bifurqués': ['verb|bifurcarse'],
-'me bifurqué': ['verb|bifurcarse'],
-'os bifurcasteis': ['verb|bifurcarse'],
-'se bifurcaron': ['verb|bifurcarse'],
-'te bifurcaste': ['verb|bifurcarse'],
-'se bifurcó': ['verb|bifurcarse']
-}
-    wordlist = Wordlist(wordlist_data.splitlines())
-    allforms = AllForms.from_wordlist(wordlist)
-    for k,v in expected.items():
-        print(k,v)
-        assert allforms.get_lemmas(k) == v
-    allforms = AllForms.from_wordlist(wordlist)
-    for k,v in expected.items():
-        print(k,v)
-        assert allforms.get_lemmas(k) == v
-
-
 def test_afecto():
     wordlist_data = """\
 _____
 afecto
 pos: adj
   meta: {{es-adj|f=afecta}}
-  forms: f=afecta; fpl=afectas; pl=afectos
   gloss: test
 """
     expected = {
@@ -1298,7 +924,6 @@ test6
 pos: n
   meta: {{head|es|noun form}}
   g: m
-  gross: this has a definition befor the form of
   gloss: alternative form of "test"
 """
 
@@ -1487,3 +1112,340 @@ pos: v
     for line in allforms.all_csv:
         assert ",part," not in line
         assert ",v," in line
+
+
+def test_proscribir():
+
+    # Verbs should only generate verb forms
+    # "part" identification, etc is handled elsewhere
+
+    data="""\
+_____
+proscribir
+pos: v
+  meta: {{es-verb}} {{es-conj}}
+  gloss: to have
+"""
+
+    wordlist = Wordlist(data.splitlines())
+    allforms = AllForms.from_wordlist(wordlist)
+
+    csv = "\n".join(allforms.all_csv)
+
+    assert csv == """\
+proscriba,v,proscribir
+proscribamos,v,proscribir
+proscriban,v,proscribir
+proscribas,v,proscribir
+proscribe,v,proscribir
+proscriben,v,proscribir
+proscribes,v,proscribir
+proscribid,v,proscribir
+proscribidla,v,proscribir
+proscribidlas,v,proscribir
+proscribidle,v,proscribir
+proscribidles,v,proscribir
+proscribidlo,v,proscribir
+proscribidlos,v,proscribir
+proscribidme,v,proscribir
+proscribidnos,v,proscribir
+proscribiendo,v,proscribir
+proscribiera,v,proscribir
+proscribierais,v,proscribir
+proscribieran,v,proscribir
+proscribieras,v,proscribir
+proscribiere,v,proscribir
+proscribiereis,v,proscribir
+proscribieren,v,proscribir
+proscribieres,v,proscribir
+proscribieron,v,proscribir
+proscribiese,v,proscribir
+proscribieseis,v,proscribir
+proscribiesen,v,proscribir
+proscribieses,v,proscribir
+proscribila,v,proscribir
+proscribilas,v,proscribir
+proscribile,v,proscribir
+proscribiles,v,proscribir
+proscribilo,v,proscribir
+proscribilos,v,proscribir
+proscribime,v,proscribir
+proscribimos,v,proscribir
+proscribinos,v,proscribir
+proscribir,v,proscribir
+proscribiremos,v,proscribir
+proscribirla,v,proscribir
+proscribirlas,v,proscribir
+proscribirle,v,proscribir
+proscribirles,v,proscribir
+proscribirlo,v,proscribir
+proscribirlos,v,proscribir
+proscribirme,v,proscribir
+proscribirnos,v,proscribir
+proscribiros,v,proscribir
+proscribirse,v,proscribir
+proscribirte,v,proscribir
+proscribirá,v,proscribir
+proscribirán,v,proscribir
+proscribirás,v,proscribir
+proscribiré,v,proscribir
+proscribiréis,v,proscribir
+proscribiría,v,proscribir
+proscribiríais,v,proscribir
+proscribiríamos,v,proscribir
+proscribirían,v,proscribir
+proscribirías,v,proscribir
+proscribiste,v,proscribir
+proscribisteis,v,proscribir
+proscribite,v,proscribir
+proscribiéndola,v,proscribir
+proscribiéndolas,v,proscribir
+proscribiéndole,v,proscribir
+proscribiéndoles,v,proscribir
+proscribiéndolo,v,proscribir
+proscribiéndolos,v,proscribir
+proscribiéndome,v,proscribir
+proscribiéndomela,v,proscribir
+proscribiéndomelas,v,proscribir
+proscribiéndomele,v,proscribir
+proscribiéndomeles,v,proscribir
+proscribiéndomelo,v,proscribir
+proscribiéndomelos,v,proscribir
+proscribiéndonos,v,proscribir
+proscribiéndonosla,v,proscribir
+proscribiéndonoslas,v,proscribir
+proscribiéndonosle,v,proscribir
+proscribiéndonosles,v,proscribir
+proscribiéndonoslo,v,proscribir
+proscribiéndonoslos,v,proscribir
+proscribiéndoos,v,proscribir
+proscribiéndoosla,v,proscribir
+proscribiéndooslas,v,proscribir
+proscribiéndoosle,v,proscribir
+proscribiéndoosles,v,proscribir
+proscribiéndooslo,v,proscribir
+proscribiéndooslos,v,proscribir
+proscribiéndose,v,proscribir
+proscribiéndosela,v,proscribir
+proscribiéndoselas,v,proscribir
+proscribiéndosele,v,proscribir
+proscribiéndoseles,v,proscribir
+proscribiéndoselo,v,proscribir
+proscribiéndoselos,v,proscribir
+proscribiéndote,v,proscribir
+proscribiéndotela,v,proscribir
+proscribiéndotelas,v,proscribir
+proscribiéndotele,v,proscribir
+proscribiéndoteles,v,proscribir
+proscribiéndotelo,v,proscribir
+proscribiéndotelos,v,proscribir
+proscribiéramos,v,proscribir
+proscribiéremos,v,proscribir
+proscribiésemos,v,proscribir
+proscribió,v,proscribir
+proscribo,v,proscribir
+proscribáis,v,proscribir
+proscribámonos,v,proscribir
+proscribámonosla,v,proscribir
+proscribámonoslas,v,proscribir
+proscribámonosle,v,proscribir
+proscribámonosles,v,proscribir
+proscribámonoslo,v,proscribir
+proscribámonoslos,v,proscribir
+proscribámoos,v,proscribir
+proscribámoosla,v,proscribir
+proscribámooslas,v,proscribir
+proscribámoosle,v,proscribir
+proscribámoosles,v,proscribir
+proscribámooslo,v,proscribir
+proscribámooslos,v,proscribir
+proscribámosla,v,proscribir
+proscribámoslas,v,proscribir
+proscribámosle,v,proscribir
+proscribámosles,v,proscribir
+proscribámoslo,v,proscribir
+proscribámoslos,v,proscribir
+proscribámoste,v,proscribir
+proscribámostela,v,proscribir
+proscribámostelas,v,proscribir
+proscribámostele,v,proscribir
+proscribámosteles,v,proscribir
+proscribámostelo,v,proscribir
+proscribámostelos,v,proscribir
+proscribás,v,proscribir
+proscribí,v,proscribir
+proscribía,v,proscribir
+proscribíais,v,proscribir
+proscribíamos,v,proscribir
+proscribían,v,proscribir
+proscribías,v,proscribir
+proscribídmela,v,proscribir
+proscribídmelas,v,proscribir
+proscribídmele,v,proscribir
+proscribídmeles,v,proscribir
+proscribídmelo,v,proscribir
+proscribídmelos,v,proscribir
+proscribídnosla,v,proscribir
+proscribídnoslas,v,proscribir
+proscribídnosle,v,proscribir
+proscribídnosles,v,proscribir
+proscribídnoslo,v,proscribir
+proscribídnoslos,v,proscribir
+proscribímela,v,proscribir
+proscribímelas,v,proscribir
+proscribímele,v,proscribir
+proscribímeles,v,proscribir
+proscribímelo,v,proscribir
+proscribímelos,v,proscribir
+proscribínosla,v,proscribir
+proscribínoslas,v,proscribir
+proscribínosle,v,proscribir
+proscribínosles,v,proscribir
+proscribínoslo,v,proscribir
+proscribínoslos,v,proscribir
+proscribíos,v,proscribir
+proscribíosla,v,proscribir
+proscribíoslas,v,proscribir
+proscribíosle,v,proscribir
+proscribíosles,v,proscribir
+proscribíoslo,v,proscribir
+proscribíoslos,v,proscribir
+proscribírmela,v,proscribir
+proscribírmelas,v,proscribir
+proscribírmele,v,proscribir
+proscribírmeles,v,proscribir
+proscribírmelo,v,proscribir
+proscribírmelos,v,proscribir
+proscribírnosla,v,proscribir
+proscribírnoslas,v,proscribir
+proscribírnosle,v,proscribir
+proscribírnosles,v,proscribir
+proscribírnoslo,v,proscribir
+proscribírnoslos,v,proscribir
+proscribírosla,v,proscribir
+proscribíroslas,v,proscribir
+proscribírosle,v,proscribir
+proscribírosles,v,proscribir
+proscribíroslo,v,proscribir
+proscribíroslos,v,proscribir
+proscribírsela,v,proscribir
+proscribírselas,v,proscribir
+proscribírsele,v,proscribir
+proscribírseles,v,proscribir
+proscribírselo,v,proscribir
+proscribírselos,v,proscribir
+proscribírtela,v,proscribir
+proscribírtelas,v,proscribir
+proscribírtele,v,proscribir
+proscribírteles,v,proscribir
+proscribírtelo,v,proscribir
+proscribírtelos,v,proscribir
+proscribís,v,proscribir
+proscribítela,v,proscribir
+proscribítelas,v,proscribir
+proscribítele,v,proscribir
+proscribíteles,v,proscribir
+proscribítelo,v,proscribir
+proscribítelos,v,proscribir
+proscripta,v,proscribir
+proscriptas,v,proscribir
+proscripto,v,proscribir
+proscriptos,v,proscribir
+proscrita,v,proscribir
+proscritas,v,proscribir
+proscrito,v,proscribir
+proscritos,v,proscribir
+proscríbala,v,proscribir
+proscríbalas,v,proscribir
+proscríbale,v,proscribir
+proscríbales,v,proscribir
+proscríbalo,v,proscribir
+proscríbalos,v,proscribir
+proscríbame,v,proscribir
+proscríbamela,v,proscribir
+proscríbamelas,v,proscribir
+proscríbamele,v,proscribir
+proscríbameles,v,proscribir
+proscríbamelo,v,proscribir
+proscríbamelos,v,proscribir
+proscríbanla,v,proscribir
+proscríbanlas,v,proscribir
+proscríbanle,v,proscribir
+proscríbanles,v,proscribir
+proscríbanlo,v,proscribir
+proscríbanlos,v,proscribir
+proscríbanme,v,proscribir
+proscríbanmela,v,proscribir
+proscríbanmelas,v,proscribir
+proscríbanmele,v,proscribir
+proscríbanmeles,v,proscribir
+proscríbanmelo,v,proscribir
+proscríbanmelos,v,proscribir
+proscríbannos,v,proscribir
+proscríbannosla,v,proscribir
+proscríbannoslas,v,proscribir
+proscríbannosle,v,proscribir
+proscríbannosles,v,proscribir
+proscríbannoslo,v,proscribir
+proscríbannoslos,v,proscribir
+proscríbanos,v,proscribir
+proscríbanosla,v,proscribir
+proscríbanoslas,v,proscribir
+proscríbanosle,v,proscribir
+proscríbanosles,v,proscribir
+proscríbanoslo,v,proscribir
+proscríbanoslos,v,proscribir
+proscríbanse,v,proscribir
+proscríbansela,v,proscribir
+proscríbanselas,v,proscribir
+proscríbansele,v,proscribir
+proscríbanseles,v,proscribir
+proscríbanselo,v,proscribir
+proscríbanselos,v,proscribir
+proscríbase,v,proscribir
+proscríbasela,v,proscribir
+proscríbaselas,v,proscribir
+proscríbasele,v,proscribir
+proscríbaseles,v,proscribir
+proscríbaselo,v,proscribir
+proscríbaselos,v,proscribir
+proscríbela,v,proscribir
+proscríbelas,v,proscribir
+proscríbele,v,proscribir
+proscríbeles,v,proscribir
+proscríbelo,v,proscribir
+proscríbelos,v,proscribir
+proscríbeme,v,proscribir
+proscríbemela,v,proscribir
+proscríbemelas,v,proscribir
+proscríbemele,v,proscribir
+proscríbemeles,v,proscribir
+proscríbemelo,v,proscribir
+proscríbemelos,v,proscribir
+proscríbenos,v,proscribir
+proscríbenosla,v,proscribir
+proscríbenoslas,v,proscribir
+proscríbenosle,v,proscribir
+proscríbenosles,v,proscribir
+proscríbenoslo,v,proscribir
+proscríbenoslos,v,proscribir
+proscríbete,v,proscribir
+proscríbetela,v,proscribir
+proscríbetelas,v,proscribir
+proscríbetele,v,proscribir
+proscríbeteles,v,proscribir
+proscríbetelo,v,proscribir
+proscríbetelos,v,proscribir"""
+
+#    wordlist = Wordlist(wordlist_data.splitlines())
+#    allforms = AllForms.from_wordlist(wordlist)
+#    for k,v in expected.items():
+#        print(k,v)
+#        assert allforms.get_lemmas(k) == v
+#    allforms = AllForms.from_wordlist(wordlist)
+#    for k,v in expected.items():
+#        print(k,v)
+#        assert allforms.get_lemmas(k) == v
+
+
+
