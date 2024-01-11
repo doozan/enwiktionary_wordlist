@@ -74,7 +74,7 @@ class Word():
         # strip "no" and direct objects that preceed the verb conjugation
         # "no te metes" -> "metes"
         if self.pos == "v" and " " in form:
-            form = re.sub(f"^(?:no )?(?:(?:me|te|se|nos|os) )?(.*)", r'\1', form)
+            form = re.sub(f"(^|[|])(?:no )?(?:(?:me|te|se|nos|os) )?", r'\1', form)
 
         if form not in self._forms[formtype]:
             self._forms[formtype].append(form)
@@ -96,11 +96,11 @@ class Word():
 
     @staticmethod
     def parse_list(line):
-        items = {}
         for match in re.finditer(r"\s*(.*?)=(.*?)(; |$)", line):
             k = match.group(1)
-            v = match.group(2)
-            yield k,v
+            vs = match.group(2)
+            for v in vs.split("|"):
+                yield k,v
 
     @property
     def pos(self):

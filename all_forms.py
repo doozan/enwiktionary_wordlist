@@ -246,7 +246,9 @@ class AllForms:
         if form == "-":
             return
 
-        self.dbcon.execute("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [form, pos, lemma])
+        for f in form.split("|"):
+            self.dbcon.execute("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [f, pos, lemma])
+
 
     @property
     def all_csv(self):
