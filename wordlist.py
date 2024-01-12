@@ -6,6 +6,8 @@ import sys
 
 from .word import Word
 
+from enwiktionary_wordlist.utils import wiki_to_text
+
 verb_types = {
         "t": "transitive",
         "r": "reflexive",
@@ -15,7 +17,11 @@ verb_types = {
 }
 
 class Wordlist():
-    def __init__(self, wordlist_data=None, cache_words=True):
+    def __init__(self, wordlist_data=None, cache_words=True, template_cachedb=None):
+        # cache here refers to the database used to cache mediawiki queries used to expand templates
+        self.template_cachedb = template_cachedb
+
+        # cache here refers to caching word objects in memory to speed up repeat access
         self.cache_words = cache_words
         self._cached = {}
         if not wordlist_data:
@@ -130,8 +136,7 @@ class Wordlist():
             notes.append(note)
         return "; ".join(notes)
 
-    @staticmethod
-    def get_entry_words(title, lines, pos=None):
+    def get_entry_words(self, title, lines, pos=None):
 
         common = []
         word_items = []
@@ -149,7 +154,7 @@ class Wordlist():
 
             elif key == "pos":
                 if word_items:
-                    word_obj = Word(title, word_items)
+                    word_obj = Word(self, title, word_items)
                     if (not pos or word_obj.pos == pos):
                         yield word_obj
 
@@ -161,7 +166,7 @@ class Wordlist():
                 word_items.append((key,value))
 
         if word_items:
-            word_obj = Word(title, word_items)
+            word_obj = Word(self, title, word_items)
             if (not pos or word_obj.pos == pos):
                 yield word_obj
 
@@ -205,6 +210,9 @@ class Wordlist():
         """ Returns the possible formtypes of a given form in lemma,pos """
         for word in self.get_iwords(lemma, pos):
             yield from word.get_formtypes(form)
+
+    def expand_templates(self, text, title):
+        return wiki_to_text(text, title, template_cachedb=self.template_cachedb).strip()
 
     @staticmethod
     def parse_line(line):

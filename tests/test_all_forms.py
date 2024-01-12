@@ -1,6 +1,9 @@
 from enwiktionary_wordlist.wordlist import Wordlist
 from enwiktionary_wordlist.all_forms import AllForms
 
+import enwiktionary_templates
+cachedb = enwiktionary_templates.cache.get_default_cachedb()
+
 def test_mf_noun():
 
     # generate implied feminine lemmas
@@ -23,7 +26,7 @@ pos: n
 'protectrices': ['n|protector', 'n|protectriz'],
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -63,7 +66,7 @@ pos: n
 'protectora_altpl2': ['n|protectora'],
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -90,7 +93,7 @@ pos: n
   gloss: not a form of the masculine
 """
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -131,7 +134,7 @@ pos: n
 'alt_protectora_pl': ['n|alt_protectora'],
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -172,7 +175,7 @@ pos: n
   gloss: using head form
 """
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
 
     words = wordlist.get_words("protector", "n")
     assert AllForms.is_lemma(words[0]) == True
@@ -245,7 +248,7 @@ pos: n
 'protectriz': ['n|protector', 'n|protectriz'],
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -270,7 +273,7 @@ testa {f} :: feminine noun of "testo"
 'testoz': ['n|testo'],
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -300,7 +303,7 @@ test4 {m} :: alternate form of "test3"
 'test4': ['n|test1']
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -345,7 +348,7 @@ pos: n
 'ascos': ['n|asco']
 }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -370,7 +373,7 @@ pos: adj
 'afectos': ['adj|afecto'],
 'afecto': ['adj|afecto']}
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -391,7 +394,7 @@ pos: determiner
   gloss: test
 """
     expected = {'ningún': ['determiner|ningún']}
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -410,7 +413,7 @@ pos: determiner
   gloss: test
 """
     expected = {}
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -437,7 +440,7 @@ pos: determiner
             'ninguno': ['determiner|ninguno'],
             'ninguna': ['determiner|ninguno'],
             'ningún': ['determiner|ninguno']}
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -497,7 +500,7 @@ pos: n
         'actor': ['n|actor']
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -532,7 +535,7 @@ pos: n
         'conejos': ['n|conejo'],
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -568,7 +571,7 @@ pos: n
         'cabros': ['n|cabro'],
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -615,7 +618,7 @@ pos: n
         'latinos': ['n|latino'],
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -656,7 +659,7 @@ pos: n
         'cliente': ['n|cliente']
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -702,7 +705,7 @@ pos: pron
         'nosotres': ['pron|nosotres']
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -747,7 +750,7 @@ pos: n
         'bosniacos': ['n|bosniaco'],
     }
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -767,7 +770,7 @@ pos: prop
 
     expected = {'Acapulco': ['prop|Acapulco']}
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -801,7 +804,7 @@ pos: n
               'fulano': ['n|fulana'],
               'fulanos': ['n|fulana']}
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     for k,v in expected.items():
         print(k,v)
@@ -832,7 +835,7 @@ pos: v
   gloss: verb
 """
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
 #    assert "te aborregas" in AllForms.from_wordlist(wordlist).all_forms
     assert "aborregas" in AllForms.from_wordlist(wordlist).all_forms
     assert AllForms.from_wordlist(wordlist).get_lemmas("aborregas") == ['v|aborregar', 'v|aborregarse']
@@ -881,7 +884,7 @@ protectrices,n,protector,protectriz
 protectriz,n,protector,protectriz\
 """
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join(allforms.all_csv))
     assert list(allforms.all_csv) == expected.splitlines()
@@ -944,7 +947,7 @@ test6,n,test
 tests,n,test\
 """
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join(allforms.all_csv))
     assert list(allforms.all_csv) == expected.splitlines()
@@ -1052,7 +1055,7 @@ aquéllas,pron,aquél
 aquéllos,pron,aquél
 """
 
-    wordlist = Wordlist(wordlist_data.splitlines())
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join(allforms.all_csv))
     assert list(allforms.all_csv) == expected.splitlines()
@@ -1084,7 +1087,7 @@ país,n,país
 países,n,país\
 """
 
-    wordlist = Wordlist(data.splitlines())
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join(allforms.all_csv))
 
@@ -1105,7 +1108,7 @@ pos: v
   gloss: to jump around
 """
 
-    wordlist = Wordlist(data.splitlines())
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
     print("\n".join([x for x in allforms.all_csv if x.startswith("brincada,")]))
 
@@ -1127,7 +1130,7 @@ pos: v
   gloss: to have
 """
 
-    wordlist = Wordlist(data.splitlines())
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
     allforms = AllForms.from_wordlist(wordlist)
 
     csv = "\n".join(allforms.all_csv)
@@ -1437,7 +1440,7 @@ proscríbeteles,v,proscribir
 proscríbetelo,v,proscribir
 proscríbetelos,v,proscribir"""
 
-#    wordlist = Wordlist(wordlist_data.splitlines())
+#    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
 #    allforms = AllForms.from_wordlist(wordlist)
 #    for k,v in expected.items():
 #        print(k,v)

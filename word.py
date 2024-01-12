@@ -2,7 +2,6 @@ from collections import defaultdict
 import enwiktionary_templates as templates
 import re
 from .sense import Sense
-from .utils import wiki_to_text
 
 shorten_formtype = {
     "feminine": "f",
@@ -20,8 +19,9 @@ shorten_formtype = {
 
 class Word():
 
-    def __init__(self, word, data):
+    def __init__(self, parent, word, data):
 
+        self.parent = parent
         self.word = word
         self._pos = None
         # accessed as .forms
@@ -69,7 +69,7 @@ class Word():
             return
 
         if "[[" in form or "</" in form:
-            form = wiki_to_text(form, self.word)
+            form = self.parent.expand_templates(form, self.word)
 
         # strip "no" and direct objects that preceed the verb conjugation
         # "no te metes" -> "metes"
@@ -205,7 +205,7 @@ class Word():
             if template.name in ["head", "head-lite"]:
                 data = self.get_head_forms(template)
             else:
-                data = templates.expand_template(template, self.word)
+                data = self.parent.expand_templates(template, self.word)
 
             for formtype, form in self.parse_list(data):
                 self.add_form(formtype, form)

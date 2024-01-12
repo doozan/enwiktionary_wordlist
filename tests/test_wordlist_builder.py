@@ -19,6 +19,9 @@ from enwiktionary_wordlist.wordlist_builder import WordlistBuilder
 from enwiktionary_wordlist.wordlist import Wordlist
 import mwparserfromhell
 
+import enwiktionary_templates
+cachedb = enwiktionary_templates.cache.get_default_cachedb()
+
 builder = WordlistBuilder("Spanish", "es", expand_templates=True)
 
 def test_chapo():
@@ -1450,7 +1453,7 @@ pos: n
   gloss: a person with dark-hair\
 """
 
-    wordlist_full = Wordlist(wordlist_data.splitlines())
+    wordlist_full = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
 
     res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False, exclude_empty=False))
     assert res == wordlist_data
@@ -1561,7 +1564,7 @@ _____
 hablar
 {hablar_data}\
 """
-    wordlist_full = Wordlist(wordlist_data.splitlines())
+    wordlist_full = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
 
     res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False, exclude_empty=False))
     print(wordlist_data)

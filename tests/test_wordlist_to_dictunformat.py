@@ -1,6 +1,8 @@
 from enwiktionary_wordlist.wordlist import Wordlist
 from enwiktionary_wordlist.wordlist_to_dictunformat import WordlistToDictunformat
 
+import enwiktionary_templates
+cachedb = enwiktionary_templates.cache.get_default_cachedb()
 
 def test_forms_text():
     data = """\
@@ -53,7 +55,7 @@ asco;   ascos
 </ol>\
 """
 
-    wordlist = Wordlist(data.splitlines())
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
     exporter = WordlistToDictunformat(wordlist)
     res = "\n".join(exporter.export())
     assert res == expected
@@ -85,7 +87,7 @@ bifurcar;   bifurca;   bifurcaba;   bifurcabais;   bifurcaban;   bifurcabas;   b
 <li>[<i>reflexive</i>] to diverge, fork off</li>
 </ol>"""
 
-    wordlist = Wordlist(data.splitlines())
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
     exporter = WordlistToDictunformat(wordlist)
     res = "\n".join(exporter.export())
     print(res)
@@ -140,7 +142,7 @@ lentes
 <p style="margin-top: 1em"><i>Etymology:</i> Borrowed from Latin &quot;lēns, lentem&quot; (“lentil”), in Medieval Latin later taking on the sense of &quot;lens&quot;. Cognate with English &quot;lens&quot;.</p>\
 """
 
-    wordlist = Wordlist(data.splitlines())
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
     exporter = WordlistToDictunformat(wordlist)
     res = "\n".join(exporter.export())
     assert res == expected
