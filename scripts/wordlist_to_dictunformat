@@ -11,6 +11,9 @@ from enwiktionary_wordlist.wordlist_to_dictunformat import WordlistToDictunforma
 from enwiktionary_wordlist.wordlist import Wordlist
 from enwiktionary_wordlist.all_forms import AllForms
 
+import enwiktionary_templates
+cachedb = enwiktionary_templates.cache.get_default_cachedb()
+
 def main():
 
     import argparse
@@ -23,7 +26,7 @@ def main():
     parser.add_argument("--url", help="source url")
     args = parser.parse_args()
 
-    wordlist = Wordlist.from_file(args.wordlist)
+    wordlist = Wordlist.from_file(args.wordlist, cachedb, template_cachedb=cachedb)
     allforms = AllForms.from_file(args.allforms)
 
     converter = WordlistToDictunformat(wordlist, allforms)

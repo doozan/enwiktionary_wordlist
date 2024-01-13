@@ -39,7 +39,7 @@ class Wordlist():
             self.all_entries = {title: entry for title, entry in self._iter_entries(iter_data)}
 
     @classmethod
-    def from_file(cls, filename, cache_words=True):
+    def from_file(cls, filename, cache_words=True, template_cachedb=None):
         # check for cached version
         cached = filename + ".~db"
         if os.path.exists(cached) and os.path.getctime(cached) > os.path.getctime(filename):
@@ -48,7 +48,7 @@ class Wordlist():
             return res
 
         with open(filename) as infile:
-            res = cls(infile, cache_words)
+            res = cls(infile, cache_words, template_cachedb=template_cachedb)
             with open(cached, "wb") as outfile:
                 pickle.dump(res, outfile)
             return res
