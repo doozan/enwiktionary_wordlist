@@ -36,6 +36,7 @@ def main():
     argparser = argparse.ArgumentParser(description="Extract language sections from enwiktionary dump")
     argparser.add_argument("--xml", help="XML file to load", required=True)
     argparser.add_argument("--lang", action="append", help="Language to dump, can be specified multiple times", required=True)
+    argparser.add_argument("--templates", help="Dump the entire Templates: namespace", action='store_true')
     argparser.add_argument("--outdir", help="Path to save extracted languages", default=".")
     argparser.add_argument("--limit", type=int, help="Limit processing to first N articles")
     argparser.add_argument('--verbose', action='store_true')
@@ -64,6 +65,11 @@ def main():
         outfile = os.path.join(args.outdir, filename)
         file_handles[lang_name] = bz2.open(outfile, "wt")
 
+    if args.templates:
+        filename = f"templates.enwikt.txt.bz2"
+        outfile = os.path.join(args.outdir, filename)
+        file_handles["templates"] = bz2.open(outfile, "wt")
+
     match_pattern = make_language_pattern(lang_sections) if lang_sections else None
 
     dump = xmlreader.XmlDump(args.xml)
@@ -78,6 +84,12 @@ def main():
         if args.limit and count >= args.limit:
             break
         count += 1
+
+        if args.templates and entry.title.startswith("Template:"):
+            lang_name = "templates"
+            lang_count[lang_name] += 1
+            file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+            continue
 
         if ":" in entry.title or "/" in entry.title or entry.isredirect:
             continue
