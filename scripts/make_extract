@@ -37,6 +37,8 @@ def main():
     argparser.add_argument("--xml", help="XML file to load", required=True)
     argparser.add_argument("--lang", action="append", help="Language to dump, can be specified multiple times", required=True)
     argparser.add_argument("--templates", help="Dump the entire Templates: namespace", action='store_true')
+    argparser.add_argument("--modules", help="Dump the entire Modules: namespace", action='store_true')
+    argparser.add_argument("--redirects", help="Dump all redirects", action='store_true')
     argparser.add_argument("--outdir", help="Path to save extracted languages", default=".")
     argparser.add_argument("--limit", type=int, help="Limit processing to first N articles")
     argparser.add_argument('--verbose', action='store_true')
@@ -70,6 +72,16 @@ def main():
         outfile = os.path.join(args.outdir, filename)
         file_handles["templates"] = bz2.open(outfile, "wt")
 
+    if args.modules:
+        filename = f"modules.enwikt.txt.bz2"
+        outfile = os.path.join(args.outdir, filename)
+        file_handles["modules"] = bz2.open(outfile, "wt")
+
+    if args.redirects:
+        filename = f"redirects.enwikt.txt.bz2"
+        outfile = os.path.join(args.outdir, filename)
+        file_handles["redirects"] = bz2.open(outfile, "wt")
+
     match_pattern = make_language_pattern(lang_sections) if lang_sections else None
 
     dump = xmlreader.XmlDump(args.xml)
@@ -89,9 +101,21 @@ def main():
             lang_name = "templates"
             lang_count[lang_name] += 1
             file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+
+        elif args.templates and entry.title.startswith("Module:"):
+            lang_name = "modules"
+            lang_count[lang_name] += 1
+            file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+
+        if entry.isredirect:
+            if args.redirects:
+                lang_name = "redirects"
+                lang_count[lang_name] += 1
+                file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
             continue
 
-        if ":" in entry.title or "/" in entry.title or entry.isredirect:
+        # TODO: split ":" and validate namespace
+        if ":" in entry.title or "/" in entry.title:
             continue
 
         if "all" in args.lang:
