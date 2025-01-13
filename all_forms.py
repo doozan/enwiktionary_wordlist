@@ -100,6 +100,7 @@ class AllForms:
                 self._add_form(form, pos, lemma)
 
         self.dbcon.execute('''CREATE INDEX idx_form_pos ON forms (form, pos)''')
+        self.dbcon.execute('''CREATE INDEX idx_lemma ON forms (lemma)''')
         self.dbcon.execute("COMMIT;")
         return self
 
