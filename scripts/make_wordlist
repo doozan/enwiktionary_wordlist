@@ -37,14 +37,32 @@ from enwiktionary_wordlist.wordlist_builder import WordlistBuilder
 import enwiktionary_templates
 cachedb = enwiktionary_templates.cache.get_default_cachedb()
 
-def iter_langdata(datafile):
+def iter_langdata(datafile, debug=None):
 
     if not os.path.isfile(datafile):
         raise FileNotFoundError(f"Cannot open: {datafile}")
 
-    return WikiExtractWithRev.iter_articles_from_bz2(datafile)
+    debug_matched = False
+    continue_after_match = debug and debug.startswith("+")
+    if continue_after_match:
+        debug = debug[1:]
 
-def iter_xml(datafile, lang_section):
+    for title, text, revision in WikiExtractWithRev.iter_articles_from_bz2(datafile):
+
+        if debug:
+            if not debug_matched:
+                if title == debug:
+                    debug_matched = True
+                else:
+                    continue
+
+        yield title, text, revision
+
+        if debug and not continue_after_match:
+            break
+
+
+def iter_xml(datafile, lang_section, debug=None):
 
     if not os.path.isfile(datafile):
         raise FileNotFoundError(f"Cannot open: {datafile}")
@@ -55,6 +73,9 @@ def iter_xml(datafile, lang_section):
     pattern = make_language_pattern(lang_section)
 
     for entry in parser:
+
+        if debug and entry.title != debug:
+            continue
 
         if ":" in entry.title or "/" in entry.title:
             continue
@@ -72,9 +93,19 @@ _builder = None
 def make_entry(item):
     title, entry, revision = item
 
-    entry = _builder.entry_to_text(entry, title)
+    try:
+        entry = _builder.entry_to_text(entry, title)
+    except Exception as e:
+        print("--"*40)
+        print("Failed on:", title, file=sys.stderr)
+        print(e)
+        raise e
     if entry:
         return title, entry
+
+    print("unparsable", title, file=sys.stderr)
+    return
+
 
 def main():
     import argparse
@@ -94,6 +125,7 @@ def main():
     parser.add_argument('--exclude-empty', action='store_true', help="Exclude words with no senses")
     parser.add_argument('--expand-templates', action='store_true', help="Convert templates to text")
     parser.add_argument('--low-mem', action='store_true', help="Use less memory (slower)")
+    parser.add_argument('--debug', help="Debug a specific entry")
 
     args = parser.parse_args()
     use_cache = not args.low_mem
@@ -115,9 +147,9 @@ def main():
         _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes, args.expand_templates)
 
         if args.langdata:
-            iter_entry = iter_langdata(args.langdata)
+            iter_entry = iter_langdata(args.langdata, debug=args.debug)
         else:
-            iter_entry = iter_xml(args.xml, lang_section)
+            iter_entry = iter_xml(args.xml, lang_section, debug=args.debug)
 
         wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache)
         count = 0
