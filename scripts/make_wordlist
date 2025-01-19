@@ -93,8 +93,10 @@ def main():
     parser.add_argument('--exclude-generated-forms', action='store_true', help="Exclude forms entries that can be generate automatically")
     parser.add_argument('--exclude-empty', action='store_true', help="Exclude words with no senses")
     parser.add_argument('--expand-templates', action='store_true', help="Convert templates to text")
+    parser.add_argument('--low-mem', action='store_true', help="Use less memory (slower)")
 
     args = parser.parse_args()
+    use_cache = not args.low_mem
 
     if not args.j:
         args.j = multiprocessing.cpu_count()-1
@@ -117,7 +119,7 @@ def main():
         else:
             iter_entry = iter_xml(args.xml, lang_section)
 
-        wordlist = Wordlist(template_cachedb=cachedb)
+        wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache)
         count = 0
 
         if args.j > 1:
@@ -140,7 +142,7 @@ def main():
             wordlist.all_entries[title] = map(str.lstrip, entry)
 
     elif args.wordlist:
-        wordlist = Wordlist(template_cachedb=cachedb)
+        wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache)
         with open(args.wordlist) as infile:
             for title, entry in Wordlist._iter_entries(infile):
                 count += 1
