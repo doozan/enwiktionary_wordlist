@@ -133,13 +133,13 @@ def main():
                 continue
             title, entry = item
 
-            count += 1
+            wordlist.all_entries[title] = map(str.lstrip, entry)
 
+            count += 1
             if count % 10 == 0 and args.progress:
                 print(count, file=sys.stderr, end="\r")
             if args.limit and count >= args.limit:
                 break
-            wordlist.all_entries[title] = map(str.lstrip, entry)
 
     elif args.wordlist:
         wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache)
