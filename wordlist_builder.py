@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020 Jeff Doozan
+# Copyright (c) 2020-2025 Jeff Doozan
 #
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,13 +20,15 @@ Convert a wiktionary entries into wordlist entries
 """
 
 from collections import defaultdict
+import copy
 import os
 import re
 import sys
 
-import enwiktionary_parser as wtparser
-from enwiktionary_parser.sections.usage import UsageSection
-from enwiktionary_parser.sections.etymology import EtymologySection
+import enwiktionary_sectionparser as sectionparser
+from autodooz.sections import ALL_POS, COUNTABLE_SECTIONS, ALL_LANGS
+
+import mwparserfromhell as mwparser
 
 from enwiktionary_wordlist.utils import wiki_to_text, make_qualification, make_pos_tag
 
@@ -53,142 +55,215 @@ class WordlistBuilder:
         pattern = fr"{start}.*?(?={newlines}({endings})|$)"
         self._re_pattern = re.compile(pattern, re.DOTALL)
 
-    def get_language_entry(self, text):
-        """
-        Return the body text of the language entry
-        """
+    @staticmethod
+    def get_child_or_later_peer(section, title):
+        child = next(section.ifilter_sections(matches=lambda x: x.title == title), None)
+        if child:
+            return child
 
-        res = re.search(self._re_pattern, text)
-        if res:
-            return res.group(0)
-
-    def forms_to_string(self, forms, title):
-        if not forms:
-            return None
-
-        res = []
-        for k,values in sorted(forms.items()):
-            for v in sorted(values):
-                if re.search(r"[\<\{\[]", v):
-                    v = self.expand_templates(v, title)
-
-                if ";" in v:
-                    raise ValueError(f"ERROR: ; found in value ({v})")
-
-                k = re.sub("[.,/:;]+", "", k)
-                k = re.sub(" +", "_", k)
-                res.append(f"{k}={v}")
-
-        return "; ".join(res)
-
-
-    def get_meta(self, title, word):
-        """ Returns a formatted form line with the template(s) defining the forms """
-
-        pos = word.shortpos
-        return title + " {" + pos + "-meta} :: " + " ".join(map(str,word.form_sources)).replace("\n","")
-
-
-    def get_etymology(self, word):
-        # Ideally, the word is inside an Etymology section
-        res = word.get_ancestor(EtymologySection)
-        if res:
-            return [res]
-
-        # But sometimes etymology is L3 and POS is also L3, find the nearest preceeding etymology section
-        for sibling in word._parent._parent.ifilter(recursive=False):
-            if isinstance(sibling,  EtymologySection):
-                res = sibling
-            if sibling == word._parent:
-                break
-        if res:
-            return [res]
-        return []
-
-    def get_usage(self, word):
-        """ Returns a list of Usage sections that match the given word """
-
-        res = None
-        # First, look for Usage as a child of the word
         after = False
-        res = word._parent.filter_usagenotes(recursive=True)
-        if res:
-            return res
-
-        # Next, look for usage notes that come after the word at the same level
-        after = False
-        for sibling in word._parent._parent.ifilter(recursive=False):
-            if sibling == word._parent:
+        for peer in section.parent.ifilter_sections(recursive=False):
+            if after:
+                if peer.title == title:
+                    return peer
+            elif peer == section:
                 after = True
-            if not after:
-                continue
-            if isinstance(sibling, UsageSection):
-                return sibling.filter_usagenotes(recursive=True)
 
-        return []
+
+    @staticmethod
+    def get_ancestor_or_preceeding_peer(section, title):
+        ancestor = section
+        while hasattr(ancestor, "parent"):
+            ancestor = ancestor.parent
+            if ancestor.title == title:
+                return ancestor
+
+        matched = None
+        for peer in section.parent.ifilter_sections(recursive=False):
+            if peer.title == title:
+                matched = peer
+            if peer == section:
+                return matched
+
+        raise ValueError("this should never happen", title, section.path)
+
+
+
+    @staticmethod
+    def get_indtr_qualifiers(t):
+        types = {
+            "intr": "intransitive",
+            "ditr": "ditransitive",
+            "cop": "copulative",
+            "aux": "auxiliary",
+        }
+        q = [ str(v) for k,v in types.items() if t.has(k) ]
+        if not q:
+            q = [ "transitive" ]
+
+        return q
+
+    _sense_ids = { "senseid", "sid" }
+    _anchors = { "anchor", "s", "senseid" }
+    _labels = { "label", "lb", "lbl", "term-label" }
+    _indtr = { "indtr" }
+    _categories = { "c", "C", "cat", "top", "topic", "topics", "categorize", "catlangname", "catlangcode", "cln", "DEFAULTSORT" }
+    _all_leading_templates = _anchors | _labels | _indtr | _categories
+    _re_templates = "|".join(map(re.escape, _all_leading_templates))
+    _leading_template_pattern = r'\s*{{\s*(' + _re_templates + r')\s*\|'
+
+    @staticmethod
+    def get_label_qualifiers(t):
+        return [ str(p) for p in t.params if p.name != "1" and str(p.name).isdigit() ]
+
+    def extract_qualifiers(self, text):
+        """Process leading anchor and label templates
+
+        Returns [[qualifiers]], remainder of line"""
+
+        if not text.lstrip().startswith("{{"):
+            return [], text
+
+        qualifiers = []
+
+        wiki = mwparser.parse(text)
+        templates = wiki.ifilter_templates()
+
+        to_remove = []
+        t = next(templates)
+        # while the gloss line starts with known qualifier templates, extract them one-by-one
+        while t and str(wiki).lstrip(": ").startswith(str(t)):
+            t_name = t.name.strip()
+
+            if t_name in self._labels:
+                qualifiers += self.get_label_qualifiers(t)
+
+            # Scrape basic verb qualifiers from indtr, but don't parse/strip them
+            elif t_name in self._indtr:
+                qualifiers += self.get_indtr_qualifiers(t)
+
+            elif t_name in self._all_leading_templates:
+                test = True
+
+            else:
+                break
+
+            wiki.remove(t)
+            t = next(templates, None)
+
+        return qualifiers, str(wiki).lstrip(": ")
+
+    def get_term_qualifiers(self, pos):
+        wiki = mwparser.parse("\n".join(pos.headlines))
+        qualifiers = []
+        for t in wiki.filter_templates(recursive=False, matches=lambda x: x.name.strip() in ["tlb", "term label", "term-label"]):
+             qualifiers += self.get_label_qualifiers(t)
+        return qualifiers
+
+    def gloss_to_text(self, wikitext, title):
+        text = self.expand_templates(wikitext, title)
+        text = text.strip().rstrip(".")
+        text = re.sub(r"\s\s+", " ", text)
+        text = re.sub("\n", r"\\n", text)
+        return text
+
+    def get_sense_id(self, text):
+        ids = []
+        if any(x in text for x in ["{{senseid|", "{{sid|"]):
+            wikt = mwparser.parse(text)
+            for t in wikt.ifilter_templates(matches=lambda x: x.name in ["senseid", "sid"]):
+                ids.append(str(t.get(2).value))
+        return "; ".join(ids)
+
+    def get_sense_data(self, sense, title):
+        sense_data = {}
+
+        qualifiers, gloss_wikitext = self.extract_qualifiers(sense.data)
+        sense_data["gloss"] = self.gloss_to_text(gloss_wikitext, title)
+        sense_id = self.get_sense_id(sense.data)
+        if sense_id:
+            sense_data["id"] = sense_id
+
+        if qualifiers:
+            qualifier = self.get_qualifier(title, qualifiers)
+            if qualifier:
+                qualifier = qualifier.rstrip(", ")
+                sense_data["q"] = qualifier
+
+        for nymtype in ["syn"]:
+            nyms = "; ".join(self.expand_templates(c.data, title) for c in sense._children if c._type == nymtype or (c._type == "unknown" and "{{" + nymtype in c.data))
+            if nyms:
+                sense_data[nymtype] = nyms
+
+        return sense_data
+
 
     def entry_to_text(self, text, title):
-        wikt = wtparser.parse_page(text, title, parent=self)
-
-        words = wikt.filter_words()
-        if not words:
-            return []
+        parsed = sectionparser.parse(text, title)
+        if not parsed:
+            print("unparsable page:", title, file=sys.stderr)
+            log = []
+            parsed = sectionparser.parse(text, title, log)
+            print(log, file=sys.stderr)
+            print(parsed._state, file=sys.stderr)
+            return
 
         entry = []
 
-        for word in wikt.ifilter_words():
+        for section in parsed.ifilter_sections(matches=lambda x: x.title in ALL_POS):
+            pos = sectionparser.parse_pos(section)
+            if not pos:
+                print("unparsable section:", section.path, file=sys.stderr)
+                continue
+
+            # TODO: get qualifiers from tlb
+            # {{tlb|es|siglum}}
+            term_qualifiers = self.get_qualifier(title, self.get_term_qualifiers(pos))
+
             senses = []
-            for sense in word.ifilter_wordsenses():
+            for sense in pos.senses:
+
                 # Skip senses that are just a request for a definition
-                if "{{rfdef" in sense.gloss:
+                if "{{rfdef" in sense.data:
                     continue
-                if "{{defn" in sense.gloss:
-                    continue
-
-                gloss_text = self.gloss_to_text(sense.gloss, title)
-                if gloss_text == "":
+                if "{{defn" in sense.data:
                     continue
 
-                sense_data = {}
-                sense_data["gloss"] = gloss_text
-                if sense.sense_ids:
-                    sense_data["id"] = "; ".join(sense.sense_ids)
-
-                if sense.gloss.qualifiers:
-                    qualifier = self.get_qualifier(title, sense.gloss.qualifiers)
-                    if qualifier:
-                        qualifier = qualifier.rstrip(", ")
-                        sense_data["q"] = qualifier
-
-                synonyms = []
-                for nymline in sense.ifilter_nymlines(matches = lambda x: x.type == "Synonyms"):
-                    synonyms += self.items_to_synonyms(nymline.items, title)
-                if synonyms:
-                    sense_data["syn"] = '; '.join(synonyms)
-
-                if sense_data not in senses:
+                sense_data = self.get_sense_data(sense, title)
+                if sense_data and sense_data.get("gloss") and sense_data not in senses:
                     senses.append(sense_data)
 
+                subsenses = [self.get_sense_data(c, title) for c in sense._children if c._type == "sense" or (c._type == "unknown" and c.prefix == "##")]
+                for subsense_data in subsenses:
+                    if subsense_data and subsense_data.get("gloss") and subsense_data not in senses:
+                        senses.append(subsense_data)
+
+
             usages = []
-            for usage in self.get_usage(word):
+            usage = self.get_child_or_later_peer(section, "Usage notes")
+            if usage:
                 usage_text = self.usage_to_text(usage, title)
                 if usage_text:
                     usages.append(usage_text)
 
-            etys = []
-            for ety in self.get_etymology(word):
-                for node in ety.ifilter_etymologies():
-                    ety_text = self.etymology_to_text(node, title)
-                    if ety_text:
-                        etys.append(ety_text)
-                word.ifilter_wordsenses()
 
-            qualifier = self.get_qualifier(title, word.qualifiers)
+            etys = []
+            ety = self.get_ancestor_or_preceeding_peer(section, "Etymology")
+            if ety:
+                ety_text = self.etymology_to_text(ety, title)
+                if ety_text:
+                    etys.append(ety_text)
+
+            meta = self.get_meta(pos)
+            genders = self.get_genders(pos)
+            short_pos = self.get_shortpos(pos)
+
+            #qualifier = self.get_qualifier(title, word.qualifiers)
             entry += self.make_word_entry(
-                pos = word.shortpos,
-                meta = " ".join(map(str,word.form_sources)).replace("\n", ""),
-                genders = "; ".join(word.genders) if word.genders else None,
-                qualifier = qualifier,
+                pos = short_pos,
+                meta = meta,
+                genders = "; ".join(genders) if genders else None,
+                qualifier = term_qualifiers,
                 usages = usages,
                 etys =  etys,
                 senses = senses,
@@ -240,11 +315,8 @@ class WordlistBuilder:
             return text.strip()
         return wiki_to_text(text, title, transclude_senses=self._transclude_senses).strip()
 
-    def gloss_to_text(self, gloss, title):
-        return re.sub(r"\s\s+", " ", self.expand_templates(gloss.data.rstrip("\r\n\t ."), title))
-
     def usage_to_text(self, usage, title):
-        text = self.expand_templates(usage, title)
+        text = self.expand_templates(usage.content_text, title)
         # Strip leading * if there are no newlines
         if "\n" not in text:
             text = re.sub("^[ *#]+", "", text)
@@ -253,27 +325,12 @@ class WordlistBuilder:
         return text
 
     def etymology_to_text(self, etymology, title):
-        text = self.expand_templates(etymology, title)
-        return re.sub("\n", r"\\n", text)
+        text = self.expand_templates(etymology.content_text, title).strip()
+        text = re.sub("\n", r"\\n", text)
+        if text == ".":
+            return ""
+        return text
 
-    def items_to_synonyms(self, items, title):
-        synonyms = []
-        for item in items:
-            synonym = None
-            if "alt" in item:
-                synonym = self.expand_templates(item["alt"], title).strip()
-            if not synonym:
-                synonym = self.expand_templates(item["target"], title).strip()
-            if synonym:
-                if "q" in item:
-                    synonym = f'({item["q"]}) {synonym}'
-                if "qq" in item:
-                    synonym = f'{synonym} ({item["qq"]})'
-
-                synonyms.append(synonym)
-#           [ { "target": "word", "q": "qual" }, { "target": "word2", "tr": "tr" } ]
-
-        return synonyms
 
     @classmethod
     def word_to_text(cls, word):
@@ -410,3 +467,123 @@ class WordlistBuilder:
 
         if entry:
             yield "\n".join(entry)
+
+
+    #### Language-specific stuff than should be abstracted/overridden
+
+    @staticmethod
+    def get_headline_templates(pos):
+        wiki = mwparser.parse("\n".join(pos.headlines))
+        return wiki.filter_templates(recursive=False, matches=lambda x: x.name not in ["es-card", "es-suffix form"] and (x.name.startswith("es-") or x.name in ["head", "head-lite"]))
+
+
+    def get_meta(self, pos):
+        templates = self.get_headline_templates(pos)
+
+        extra = []
+        if any("es-verb" in t.name for t in templates):
+            for child in pos.section.ifilter_sections(recursive=True, matches=lambda x: x.title == "Conjugation"):
+                extra += re.findall("{{es-conj.*?}}", child.content_text)
+
+            # If the word doesn't explicitly include a call to es-conj, generate one from the es-verb
+            if not extra:
+                for t in templates:
+                    if "es-verb" in t.name and all(p.name in [1, "1", "head"] for p in t.params):
+                        new_t = copy.deepcopy(t)
+                        new_t.name = "es-conj"
+                        extra.append(str(new_t))
+
+        res = []
+        for item in templates + extra:
+            item = str(item)
+            if item not in res:
+                res.append(item)
+
+        return " ".join(res)
+
+    @classmethod
+    def get_verb_form_sources(cls, word):
+        if not word or not word.headword:
+            return []
+        conj_templates = list(cls.get_conjugation_templates(word))
+
+        # If the word doesn't explicitly include a call to es-conj, generate one from the es-verb
+        if not conj_templates and word.headword.name == "es-verb":
+            if not all(p.name in ["1"] for p in word.headword.params):
+                print(word.headword, file=sys.stderr)
+                print(word.headword.params, file=sys.stderr)
+                print([p.name for p in word.headword.params], file=sys.stderr)
+            else:
+                conj_template = copy.deepcopy(word.headword)
+                conj_template.name = "es-conj"
+                conj_templates = [conj_template]
+        return [word.headword] + conj_templates
+
+    @classmethod
+    def get_conjugation_templates(cls, word):
+        """ Find all conjugation templates for word """
+
+        # Find the nearest ancestor with a Conjugation section
+        matcher = lambda x: callable(getattr(x, "filter_sections", None)) and \
+                any(x.filter_sections(matches=lambda y: y.name.strip().startswith("Conjugation")))
+        ancestor = word.get_matching_ancestor(matcher)
+        if not ancestor:
+            if " " not in word.page_title and not word.page_title.endswith("se"):
+                print("No conjugations", word.page_title, file=sys.stderr)
+            return []
+
+        for conjugation in ancestor.ifilter_sections(matches=lambda x: x.name.strip().startswith("Conjugation")):
+            for t in conjugation.ifilter_templates(matches=lambda x: x.name.strip().startswith("es-conj")):
+                yield t
+
+                #meta = " ".join(map(str,word.form_sources)).replace("\n", ""),
+        return
+
+    def get_shortpos(self, pos):
+        # TODO: separate to manual overrides
+        if pos.section.title == "Participle":
+            return "part"
+        return ALL_POS.get(pos.section.title, pos.section.title)
+
+    # TODO: make this generic / overrideable
+    def get_genders(self, section):
+        return self.spanish_get_genders(section)
+
+
+    spanish_gender_sources = {
+        "head": {
+            "g": ["g", "gen", "g1"],
+            "g2": ["g2"],
+            "g3": ["g3"],
+        },
+        "es-noun": {
+            "g": ["1", "g", "gen", "g1"],
+            "g2": ["g2"],
+            "g3": ["g3"],
+        },
+        "es-proper noun": {
+            "g": ["1", "g", "gen", "g1"],
+            "g2": ["g2"],
+            "g3": ["g3"],
+        },
+        "es-proper-noun": {
+            "g": ["1", "g", "gen", "g1"],
+            "g2": ["g2"],
+            "g3": ["g3"],
+        },
+    }
+
+    def spanish_get_genders(self, pos):
+        templates = self.get_headline_templates(pos)
+        res = {}
+        for template in templates:
+            sources = self.spanish_gender_sources.get(str(template.name))
+            if not sources:
+                continue
+
+            for k,params in sources.items():
+                for param in params:
+                    if template.has(param):
+                        res[k] = res.get(k, []) + [str(template.get(param).value)]
+
+        return [ v[0] for v in res.values() ]
