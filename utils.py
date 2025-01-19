@@ -69,10 +69,14 @@ def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
 
     # Reparse and expand links
     wikt = wtparser.parse(str(wikt))
+    replacements = []
     for wikilink in wikt.ifilter_wikilinks():
-        display = wikilink.text if wikilink.text else wikilink.title
-        wikt.replace(wikilink, display)
+        if any(wikilink.title.startswith(p) for p in ["File:", "Image:", "Category:"]):
+            display = ""
+        else:
+            display = wikilink.text if wikilink.text else wikilink.title
 
+        replacements.append((str(wikilink), str(display)))
 
     # Remove comments
     for comment in wikt.ifilter_comments():
@@ -80,12 +84,17 @@ def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
     # Also remove any unterminated comments
     res = re.sub(r"<!--.*", "", str(wikt))
 
+    for old, new in replacements:
+        res = res.replace(old, new)
+
     res = re.sub("''+", "", res)
-    res = re.sub(r"<sup>(.*?)</sup>", r"^\1", res)
-    res = re.sub(r"<sub>(.*?)</sub>", r"\1", res)
-    res = re.sub(r"<ref(.*?)</ref>", "", res)
-    res = re.sub(r"<ref [^>]*/>", "", res)
-    res = re.sub(r"<ref>.*", "", res)
+    res = re.sub(r"<sup>(.*?)</sup>", r"^\1", res, flags=re.DOTALL)
+    res = re.sub(r"<sub>(.*?)</sub>", r"\1", res, flags=re.DOTALL)
+    res = re.sub(r"<\s*blockquote.*?>(.*?)<\s*/\s*blockquote\s*>", r"\1", res, flags=re.DOTALL)
+    res = re.sub(r"<ref [^>]*/>", "", res, flags=re.DOTALL)
+    res = re.sub(r"<ref(.*?)</ref>", "", res, flags=re.DOTALL)
+    res = re.sub(r"<br\s*(/)?\s*>", "\n", res, flags=re.DOTALL)
+    res = re.sub(r"<ref>.*", "", res, flags=re.DOTALL)
     res = re.sub(r"&nbsp;", " ", res)
     res = re.sub(r"&ndash;", "-", res)
     return res
