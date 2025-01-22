@@ -124,6 +124,7 @@ def main():
     parser.add_argument('--exclude-generated-forms', action='store_true', help="Exclude forms entries that can be generate automatically")
     parser.add_argument('--exclude-empty', action='store_true', help="Exclude words with no senses")
     parser.add_argument('--expand-templates', action='store_true', help="Convert templates to text")
+    parser.add_argument('--generate-meta', action='store_true', help="Generate metadata when not included in entry")
     parser.add_argument('--low-mem', action='store_true', help="Use less memory (slower)")
     parser.add_argument('--debug', help="Debug a specific entry")
 
@@ -144,7 +145,7 @@ def main():
             raise ValueError(f"Unknown language id: {args.lang_id}")
 
         lang_section = ALL_LANG_IDS[args.lang_id]
-        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes, args.expand_templates)
+        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes, args.expand_templates, args.generate_meta)
 
         if args.langdata:
             iter_entry = iter_langdata(args.langdata, debug=args.debug)

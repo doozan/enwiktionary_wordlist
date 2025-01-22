@@ -33,10 +33,11 @@ import mwparserfromhell as mwparser
 from enwiktionary_wordlist.utils import wiki_to_text, make_qualification, make_pos_tag
 
 class WordlistBuilder:
-    def __init__(self, lang_name, lang_id, transcludes_filename=None, expand_templates=False):
+    def __init__(self, lang_name, lang_id, transcludes_filename=None, expand_templates=False, generate_meta=False):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
         self._expand_templates = expand_templates
+        self._generate_meta = generate_meta
 
         self._transclude_senses = {}
         if transcludes_filename:
@@ -486,7 +487,7 @@ class WordlistBuilder:
                 extra += re.findall("{{es-conj.*?}}", child.content_text)
 
             # If the word doesn't explicitly include a call to es-conj, generate one from the es-verb
-            if not extra:
+            if not extra and self._generate_meta:
                 for t in templates:
                     if "es-verb" in t.name and all(p.name in [1, "1", "head"] for p in t.params):
                         new_t = copy.deepcopy(t)
