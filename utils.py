@@ -1,7 +1,7 @@
 import re
 
 from enwiktionary_templates import expand_templates
-import enwiktionary_parser as wtparser
+import mwparserfromhell as mwparser
 
 verb_qualifiers = {
     "transitive": "t",
@@ -63,14 +63,14 @@ def make_pos_tag(word, qualifiers):
     return "{" + pos + "}"
 
 def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
-    wikt = wtparser.parse(wikitext)
+    wiki = mwparser.parse(wikitext)
 
-    expand_templates(wikt, title, transclude_senses, template_cachedb)
+    expand_templates(wiki, title, transclude_senses, template_cachedb)
 
     # Reparse and expand links
-    wikt = wtparser.parse(str(wikt))
+    wiki = mwparser.parse(str(wiki))
     replacements = []
-    for wikilink in wikt.ifilter_wikilinks():
+    for wikilink in wiki.ifilter_wikilinks():
         if any(wikilink.title.startswith(p) for p in ["File:", "Image:", "Category:"]):
             display = ""
         else:
@@ -79,10 +79,10 @@ def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
         replacements.append((str(wikilink), str(display)))
 
     # Remove comments
-    for comment in wikt.ifilter_comments():
-        wikt.remove(comment)
+    for comment in wiki.ifilter_comments():
+        wiki.remove(comment)
     # Also remove any unterminated comments
-    res = re.sub(r"<!--.*", "", str(wikt))
+    res = re.sub(r"<!--.*", "", str(wiki))
 
     for old, new in replacements:
         res = res.replace(old, new)

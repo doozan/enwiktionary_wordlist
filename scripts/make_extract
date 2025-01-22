@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020 Jeff Doozan
+# Copyright (c) 2020-2025 Jeff Doozan
 #
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import re
 import sys
 
 from collections import defaultdict
-from enwiktionary_parser.languages.all_ids import ALL_LANG_IDS
+from autodooz.lang_ids import ALL_LANG_IDS
 from enwiktionary_wordlist.utils import make_language_pattern
 from pywikibot import xmlreader
 
