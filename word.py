@@ -45,21 +45,21 @@ class Word():
                 # Everything starting from the first gloss will be lazy-loaded as .senses
                 break
             elif key == "meta":
-                self.meta = value
+                self.meta = value.strip().replace("\n", "")
             elif key == "usage":
-                self.use_notes = value
+                self.use_notes = value.strip()
             elif key == "etymology":
-                self.etymology = value
+                self.etymology = value.strip()
             elif key == "pos":
-                self._pos = value
+                self._pos = value.strip()
             elif key == "g":
 #                if self._pos in ["n", "prop"]:
-                self.genders = value
+                self.genders = value.strip()
             # Term labels
             elif key == "q":
-                self.qualifier = value
+                self.qualifier = value.strip()
             elif key == "headline":
-                self.headline = value
+                self.headline = value.strip()
             else:
                 raise ValueError("Unknown key/value pair", key, value, data)
 
