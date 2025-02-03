@@ -17,13 +17,13 @@ class AllForms:
 
         if dbfilename:
             existing = os.path.exists(dbfilename)
-            self.dbcon = sqlite3.connect(dbfilename)
+            self.dbcon = sqlite3.connect(dbfilename, check_same_thread=False)
             self.dbcon.execute('PRAGMA synchronous=OFF;')
 
             if not existing:
                 self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
         else:
-            self.dbcon = sqlite3.connect(":memory:")
+            self.dbcon = sqlite3.connect(":memory:", check_same_thread=False)
             self.dbcon.execute('''CREATE TABLE forms (form text, pos text, lemma text, UNIQUE(form,pos,lemma))''')
 
     def get_lemmas(self, word, filter_pos=None):
