@@ -49,10 +49,7 @@ Borrowed from {{bor|es|fr|chapeau}}, from {{der|es|VL.|*cappellus}}. Doublet of 
 #: '''''Chapó''', señor.''
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "chapó")
+    entry = builder.entry_to_text(orig_text, "chapó")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -68,15 +65,6 @@ pos: interj
 def test_bolivariano():
 
     orig_text="""\
-==Portuguese==
-
-===Adjective===
-{{pt-adj|bolivarian|o}}
-
-# [[Bolivarian]] {{gloss|Of or pertaining to [[w:Simón Bolívar|Simón Bolívar]].}}
-
-----
-
 ==Spanish==
 
 ===Adjective===
@@ -85,10 +73,7 @@ def test_bolivariano():
 # [[Bolivarian]] {{gloss|Of or pertaining to [[w:Simón Bolívar|Simón Bolívar]].}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "bolivariano")
+    entry = builder.entry_to_text(orig_text, "bolivariano")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -98,27 +83,6 @@ pos: adj
 
 def test_completada():
     orig_text="""\
-==Catalan==
-
-===Pronunciation===
-* {{ca-IPA}}
-
-===Verb===
-{{head|ca|past participle|g=f-s}}
-
-# {{ca-verb form of|g=f|m=ptc|t=past|completar}}
-
-----
-
-==Portuguese==
-
-===Verb===
-{{pt-pp|completad|completar}}
-
-# {{pt-verb-form-of|completar}}
-
-----
-
 ==Spanish==
 
 ===Pronunciation===
@@ -140,10 +104,7 @@ def test_completada():
 # {{lb|es|Chile}} [[party]] or meeting where they eat [[completo]]s ([[hot-dog]]s)
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "completada")
+    entry = builder.entry_to_text(orig_text, "completada")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -180,18 +141,15 @@ def test_yero():
 
 # {{es-verb form of|yerar|ending=-ar|mood=indicative|tense=present|number=s|person=1}}
 
-----
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "yero")
+    entry = builder.entry_to_text(orig_text, "yero")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
   meta: {{es-noun|m}}
   g: m
+  etymology: Syncopated from yervo, from Latin "ervum".
   gloss: any variety of bitter vetch (Vicia ervilia)
     syn: alcarceña
 pos: v
@@ -210,10 +168,7 @@ def test_repanoche():
 # {{lb|es|Spain}} {{only used in|es|ser la repanocha}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "repanoche")
+    entry = builder.entry_to_text(orig_text, "repanoche")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -230,22 +185,19 @@ def test_fullentry():
 ===Verb===
 {{es-verb|descans|ar}}
 
-# {{indtr|es|en|.also|.figurative}} to [[sit]], to [[rest]] on
+# {{lb|es|intransitive|also|figurative}} to [[sit]], to [[rest]] on
 
 ====Conjugation====
 {{es-conj-ar|descans|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
   meta: {{es-verb|descans|ar}} {{es-conj-ar|descans|combined=1}}
-  gloss: (also figuratively, transitive with en) to sit, to rest on
-    q: transitive\
+  gloss: to sit, to rest on
+    q: intransitive, also figuratively\
 """
 
 def test_noun_forms():
@@ -258,10 +210,7 @@ def test_noun_forms():
 # A person or a member of a group of people regarded as undesirable
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "youtuber")
+    entry = builder.entry_to_text(orig_text, "youtuber")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -280,10 +229,7 @@ def test_adj_forms():
 # A person or a member of a group of people regarded as undesirable
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "youtuber")
+    entry = builder.entry_to_text(orig_text, "youtuber")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -304,10 +250,7 @@ def test_verb_forms():
 {{es-conj-er|abs|p=-tener|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "abstener")
+    entry = builder.entry_to_text(orig_text, "abstener")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -331,10 +274,7 @@ def test_multi_form_verb():
 {{es-conj-ar|adecu|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "adecuar")
+    entry = builder.entry_to_text(orig_text, "adecuar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -357,15 +297,13 @@ def test_protector():
 
 # {{l|en|protector}} {{gloss|someone who protects or guards}}
 
+===Noun===
 {{es-noun|m}}
 
 # {{l|en|protector}} {{gloss|a device or mechanism which is designed to protect}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "protector")
+    entry = builder.entry_to_text(orig_text, "protector")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -408,10 +346,7 @@ From {{af|es|a-|terreō|lang2=la}}.
 {{es-conj-ar|aterr|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "aterrar")
+    entry = builder.entry_to_text(orig_text, "aterrar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -438,6 +373,9 @@ From {{der|es|la|attentō}}.
 
 # {{lb|es|intransitive}} to commit a violent or criminal [[attack]], to [[strike]]
 
+=====Conjugation=====
+{{es-conj-ar|at|nt|p=e-ie|combined=1}}
+
 ===Etymology 2===
 {{rfe|es}}
 
@@ -447,14 +385,11 @@ From {{der|es|la|attentō}}.
 # {{lb|es|transitive|obsolete}} to [[touch]]
 # {{synonym of|es|tentar}}
 
-===Conjugation===
+=====Conjugation=====
 {{es-conj-ar|at|nt|p=e-ie|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "atentar")
+    entry = builder.entry_to_text(orig_text, "atentar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -481,10 +416,7 @@ def test_billon():
 # {{lb|es|obsolete}} 10<sup>9</sup>: a [[billion]] (''long system'')
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "billón")
+    entry = builder.entry_to_text(orig_text, "billón")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: num
@@ -514,10 +446,7 @@ def test_aquestos():
 """
 
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "aquestos")
+    entry = builder.entry_to_text(orig_text, "aquestos")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: determiner
@@ -538,10 +467,7 @@ def test_robot():
 # {{l|en|robot}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "robot")
+    entry = builder.entry_to_text(orig_text, "robot")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -568,10 +494,7 @@ def test_angla():
 # {{female equivalent of|es|anglo}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "angla")
+    entry = builder.entry_to_text(orig_text, "angla")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -594,10 +517,7 @@ def test_cherry():
 # {{l|en|cherry tomato}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "cherry")
+    entry = builder.entry_to_text(orig_text, "cherry")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -616,10 +536,7 @@ def test_torpon():
 # [[clumsy]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "torpón")
+    entry = builder.entry_to_text(orig_text, "torpón")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -639,10 +556,7 @@ def test_trailing_periods():
 # [[test]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "Mejico")
+    entry = builder.entry_to_text(orig_text, "Mejico")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: prop
@@ -665,10 +579,7 @@ def test_headword():
 # {{lb|es|before the noun}} {{apocopic form of|es|alguno}}; [[some]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "algún")
+    entry = builder.entry_to_text(orig_text, "algún")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adj
@@ -685,19 +596,16 @@ def test_noconj():
 ===Verb===
 {{es-verb|descans|ar}}
 
-# {{indtr|es|en|.also|.figurative}} to [[sit]], to [[rest]] on
+# {{lb|es|intransitive|also|figurative}} to [[sit]], to [[rest]] on
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
   meta: {{es-verb|descans|ar}}
-  gloss: (also figuratively, transitive with en) to sit, to rest on
-    q: transitive\
+  gloss: to sit, to rest on
+    q: intransitive, also figuratively\
 """
 
 def test_bad_conjugation():
@@ -713,10 +621,7 @@ def test_bad_conjugation():
 {{es-conj-er|p=caer|de|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "decaer")
+    entry = builder.entry_to_text(orig_text, "decaer")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -749,10 +654,7 @@ From {{bor|es|fr|abandonner}}, from {{der|es|gem-pro|*bannaną}}.
 
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "abandonar")
+    entry = builder.entry_to_text(orig_text, "abandonar")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -776,10 +678,7 @@ def test_bad_conjugation():
 {{es-conj-er|p=caer|de|combined=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "decaer")
+    entry = builder.entry_to_text(orig_text, "decaer")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -803,10 +702,7 @@ def test_f():
 # {{Latn-def|es|letter|6|ef}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "f")
+    entry = builder.entry_to_text(orig_text, "f")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: letter
@@ -827,10 +723,7 @@ def test_ingo():
 #: ''{{l|es|señorito}}'' → (''master'') ''{{l|es|señoritingo}}'' (''little brat'')
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "-ingo")
+    entry = builder.entry_to_text(orig_text, "-ingo")
 
     print("\n".join(entry))
     assert "\n".join(entry) == """\
@@ -849,17 +742,14 @@ def test_usage():
 
 # test
 
-====Usage Notes====
+====Usage notes====
 
 # test {{gloss|test}}
 
 ----
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -891,10 +781,7 @@ Form of {{m|es|-cilla}}, rebracketed from words ending in ''-e''.
 ----
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "-ecilla")
+    entry = builder.entry_to_text(orig_text, "-ecilla")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: suffix
@@ -915,10 +802,7 @@ def test_hubert():
 # [[Hubert]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "Hubert")
+    entry = builder.entry_to_text(orig_text, "Hubert")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: prop
@@ -989,10 +873,7 @@ def test_abajo():
 * {{R:DRAE}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "abajo")
+    entry = builder.entry_to_text(orig_text, "abajo")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: adv
@@ -1031,10 +912,7 @@ Since 1994, this letter is treated as two separate ''[[L]]'' letters for collati
 [[Category:mul:Hundred]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "LL")
+    entry = builder.entry_to_text(orig_text, "LL")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: letter
@@ -1066,10 +944,7 @@ def test_malinchista():
 * {{R:DRAE}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "malinchista")
+    entry = builder.entry_to_text(orig_text, "malinchista")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1129,10 +1004,7 @@ Probably from the verb {{m|es|guiar}}. Cf. also {{cog|fr|guide}} ({{cog|fro|guie
 {{cln|es|nouns with irregular gender}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1175,10 +1047,7 @@ test usage notes
 # [[guidebook]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1211,10 +1080,7 @@ test usage notes
 # [[guidebook]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1247,10 +1113,7 @@ def test_usagenotes_l3_multi():
 test usage notes
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1283,10 +1146,7 @@ def test_usagenotes_l3_multi_nested():
 test usage notes
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1321,10 +1181,7 @@ From {{inh|es|la|est}}, from {{inh|es|itc-pro|*est}}, from {{inh|es|ine-pro|*h�
 # {{plural of|es|e}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -1353,10 +1210,7 @@ def test_noun_multi():
 # {{female equivalent of|es|chivo}}; young female [[goat]], [[kid]]
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "test")
+    entry = builder.entry_to_text(orig_text, "test")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
@@ -1601,10 +1455,7 @@ def test_empty_verb():
 * {{R:DRAE}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "bolivariano")
+    entry = builder.entry_to_text(orig_text, "bolivariano")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
@@ -1622,10 +1473,7 @@ def test_senseid():
 # {{senseid|es|taxonomy}} {{lb|es|countable|biology|taxonomy}} A [[category]] in the [[classification]] of [[organism]]s, ranking below [[order]] and above [[genus]]; a [[taxon]] at that rank.
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "family")
+    entry = builder.entry_to_text(orig_text, "family")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: n
