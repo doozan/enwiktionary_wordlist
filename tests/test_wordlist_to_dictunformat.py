@@ -146,3 +146,42 @@ lentes
     exporter = WordlistToDictunformat(wordlist)
     res = "\n".join(exporter.export())
     assert res == expected
+
+
+def test_subsense():
+
+    data = """\
+_____
+test
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  gloss: sense 1
+    _gloss: subsense 1
+      q: qualifier
+    _gloss: subsense 2
+  gloss: sense 2
+"""
+
+    expected = """\
+##:pagecount:1
+##:formcount:2
+_____
+test;   tests
+<b>test</b> <i>noun, m</i> (<i>pl</i> tests)
+<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
+<li>sense 1</li>
+<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">
+<li>[<i>qualifier</i>] subsense 1</li>
+<li>subsense 2</li>
+</ol>
+<li>sense 2</li>
+</ol>\
+"""
+
+    wordlist = Wordlist(data.splitlines(), template_cachedb=cachedb)
+    exporter = WordlistToDictunformat(wordlist)
+    print( "\n".join(exporter.export()))
+    res = "\n".join(exporter.export())
+    assert res == expected
+

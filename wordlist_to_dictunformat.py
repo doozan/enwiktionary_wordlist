@@ -69,10 +69,7 @@ class WordlistToDictunformat():
         items = []
         items += self.format_header(word_obj)
 
-        items.append('<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
-        for i,sense in enumerate(word_obj.senses, 1):
-            items += self.format_sense_data(i, sense)
-        items.append('</ol>\n')
+        items += self.format_senses(word_obj.senses)
 
         if word_obj.use_notes:
             items += self.format_use_notes(word_obj.use_notes)
@@ -115,6 +112,17 @@ class WordlistToDictunformat():
 
         return line
 
+
+    @staticmethod
+    def format_senses(senses):
+        res = []
+        res.append('<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
+        for i,sense in enumerate(senses, 1):
+            res += WordlistToDictunformat.format_sense_data(i, sense)
+        res.append('</ol>\n')
+        return res
+
+
     @staticmethod
     def format_sense_data(idx, sense):
 
@@ -152,6 +160,10 @@ class WordlistToDictunformat():
             line.append(f"{nym}:{qualifier} " + "; ".join(nyms))
             line.append('</div>')
         line.append('</li>\n')
+
+
+        if sense.subsenses:
+            line += WordlistToDictunformat.format_senses(sense.subsenses)
 
         return line
 

@@ -180,4 +180,3 @@ aquellos {pron} :: Those ones. (over there; implying some distance)
 #        print(sense.gloss)
     assert word.form_of == {'aquéllos': ['alt']}
     assert word.forms == {}
-

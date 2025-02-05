@@ -4,8 +4,10 @@ import sys
 from .example import Example
 
 class Sense():
-    def __init__(self, data): # pos, qualifier, gloss, syndata):
+    def __init__(self, data, depth=1): # pos, qualifier, gloss, syndata):
 
+        assert depth > 0
+        self.depth = depth
         self.gloss = None
         self.qualifier = None
         self.id = None
@@ -14,14 +16,35 @@ class Sense():
         self._nymdata = []
         self._nyms = []
         self.examples = []
+        self.subsenses = []
 
-        for i, item in enumerate(data):
+        gloss = "_" * (depth-1) + "gloss"
+        subsense = "_" + gloss
+        prev = None if depth == 1 else "_" * (depth-2) + "gloss"
+
+        while(data):
+            item = data.pop(0)
             key, value = item
-            if key == "ex":
-                self.parse_examples(data[i:])
+            if key == gloss:
+                if depth == 1:
+                    assert self.gloss == None
+                    self.gloss = value
+                else:
+                    if self.gloss == None:
+                        self.gloss = value
+                    # Start of a new subsense, repair the stack and return
+                    else:
+                        data.insert(0, item)
+                        break
+            elif key == subsense:
+                # new subsense, repair the stack
+                data.insert(0, item)
+                self.subsenses.append(Sense(data, depth+1))
+            elif key == prev: # start of a new sense, repair the stack and return
+                data.insert(0, item)
                 break
-            if key == "gloss":
-                self.gloss = value
+            elif key == "ex":
+                self.parse_examples(data[i:])
             elif key == "id":
                 self.id = value
             elif key in ["syn", "ant"]:

@@ -86,3 +86,21 @@ def test_word():
         ('gloss', 'alternative form of "asca"'),
         ])
     assert len(word.senses) == 1
+
+
+def test_subsenses():
+    data=[line.strip().split(": ") for line in """\
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  gloss: sense 1
+    _gloss: subsense 1
+      q: Chile
+    _gloss: subsense 2
+  gloss: sense 2\
+          """.splitlines()]
+
+    wordlist = Wordlist(template_cachedb=cachedb)
+    word = Word(wordlist, "test", data)
+
+    print(word.senses)

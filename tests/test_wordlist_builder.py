@@ -1498,13 +1498,49 @@ def test_multi_past_participle():
 {{es-conj|nocomb=1}}
 """
 
-    lang_entry = builder.get_language_entry(orig_text)
-    assert lang_entry != ""
-
-    entry = builder.entry_to_text(lang_entry, "refreír")
+    entry = builder.entry_to_text(orig_text, "refreír")
     print("\n".join(entry))
     assert "\n".join(entry) == """\
 pos: v
   meta: {{es-verb}} {{es-conj|nocomb=1}}
   gloss: to refry\
 """
+
+def test_subsense():
+    orig_text="""\
+==Spanish==
+
+===Noun===
+{{es-noun|m}}
+
+# sense 1
+## {{lb|es|Chile}} subsense 1
+## subsense 2
+# sense 2
+"""
+
+
+    wordlist_data = """\
+_____
+test
+pos: n
+  meta: {{es-noun|m}}
+  g: m
+  gloss: sense 1
+    _gloss: subsense 1
+      q: Chile
+    _gloss: subsense 2
+  gloss: sense 2\
+"""
+
+    entry = builder.entry_to_text(orig_text, "refreír")
+    print("\n".join(entry))
+    entry = ["_____", "test"] + entry
+    assert "\n".join(entry) == wordlist_data
+
+
+    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
+
+    new_entry = next(WordlistBuilder.from_wordlist(wordlist, exclude_generated=False, exclude_empty=False))
+    print(new_entry)
+    assert new_entry == wordlist_data

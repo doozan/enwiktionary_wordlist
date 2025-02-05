@@ -196,6 +196,10 @@ class WordlistBuilder:
             if nyms:
                 sense_data[nymtype] = nyms
 
+        subsenses = [self.get_sense_data(c, title) for c in sense._children if c._type == "sense" or (c._type == "unknown" and c.prefix == "##")]
+        if subsenses:
+            sense_data["subsenses"] = subsenses
+
         return sense_data
 
 
@@ -233,11 +237,6 @@ class WordlistBuilder:
                 sense_data = self.get_sense_data(sense, title)
                 if sense_data and sense_data.get("gloss") and sense_data not in senses:
                     senses.append(sense_data)
-
-                subsenses = [self.get_sense_data(c, title) for c in sense._children if c._type == "sense" or (c._type == "unknown" and c.prefix == "##")]
-                for subsense_data in subsenses:
-                    if subsense_data and subsense_data.get("gloss") and subsense_data not in senses:
-                        senses.append(subsense_data)
 
 
             usages = []
@@ -300,14 +299,22 @@ class WordlistBuilder:
             if ety:
                 word_entry.append(f"  etymology: {ety}")
 
-        for sense_data in senses:
+        def add_sense_data(sense_data, depth=1):
+            padding = "  " * depth
+            prefix = "_" * (depth-1)
             for k,v in sense_data.items():
                 if not v:
                     continue
-                if k == "gloss":
-                    word_entry.append(f"  {k}: {v}")
+                if k == "subsenses":
+                    for subsense in v:
+                        add_sense_data(subsense, depth+1)
+                elif k.lstrip("_") == "gloss":
+                    word_entry.append(f"{padding}{prefix}gloss: {v}")
                 else:
-                    word_entry.append(f"    {k}: {v}")
+                    word_entry.append(f"{padding}  {k}: {v}")
+
+        for sense_data in senses:
+            add_sense_data(sense_data)
 
         return word_entry
 
@@ -336,12 +343,16 @@ class WordlistBuilder:
     @classmethod
     def word_to_text(cls, word):
 
-        senses = []
         non_verbform_sense = False
-        for sense in word.senses:
-            if not sense.gloss:
-                continue
 
+        word_entry = {}
+
+        def make_sense_data(sense):
+
+            if not sense.gloss:
+                raise ValueError("Bad gloss")
+
+            # TODO: mark subsenses
             s = {}
             s["gloss"] = sense.gloss
             s["id"] = sense.id
@@ -354,9 +365,19 @@ class WordlistBuilder:
                 # TODO: add qualifier, or just skip this if not used by make_word_entry?
                 s[nym] = "; ".join(nyms) if nyms else None
             s["regional"] = "; ".join(sense.regions) if sense.regions else None
-            senses.append(s)
 
-        word_lines = WordlistBuilder.make_word_entry(
+            subsenses = []
+            for subsense in sense.subsenses:
+                subsenses.append(make_sense_data(subsense))
+            s["subsenses"] = subsenses if subsenses else None
+
+            return s
+
+        senses = []
+        for sense in word.senses:
+            senses.append(make_sense_data(sense))
+
+        word_lines = cls.make_word_entry(
             pos = word.pos,
             meta = word.meta,
             qualifier = word.qualifier,
