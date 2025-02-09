@@ -151,6 +151,13 @@ class WordlistToDictunformat():
                         line.append(f" &nbsp; {example.english}")
                 line.append('</div>')
 
+        if sense.usage:
+            for usage in sense.usage:
+                line.append('<div style="font-size: 80%">')
+                line.append(f"{usage}")
+                line.append('</div>')
+
+
         for nymtype, qualifier, nyms in sense.nyms:
             line.append('<div style="font-size: 80%">')
 

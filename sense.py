@@ -10,6 +10,7 @@ class Sense():
         self.depth = depth
         self.gloss = None
         self.qualifier = None
+        self.usage = []
         self.id = None
         self._regiondata = None
         self._regions = None
@@ -44,9 +45,11 @@ class Sense():
                 data.insert(0, item)
                 break
             elif key == "ex":
-                self.parse_examples(data[i:])
+                self.parse_examples(data)
             elif key == "id":
                 self.id = value
+            elif key == "usage":
+                self.usage.append(value)
             elif key in ["syn", "ant"]:
                 self._nymdata.append((key, value))
             elif key == "q":
@@ -67,20 +70,23 @@ class Sense():
 
     def parse_examples(self, data):
         ex_data = []
-        for kv in data:
-            key, value = kv
+        while data:
+            item = data.pop(0)
+            key, value = item
             if key == "ex":
                 if ex_data:
                     self.add_example(ex_data)
-                ex_data = [kv]
-            else:
+                ex_data = [item]
+            elif key in ["eng", "src"]:
                 ex_data.append(kv)
+            else:
+                data.insert(0, item)
+                break
         if ex_data:
             self.add_example(ex_data)
 
     def add_example(self, ex_data):
         self.examples.append(Example(ex_data))
-
 
     @property
     def nyms(self):
