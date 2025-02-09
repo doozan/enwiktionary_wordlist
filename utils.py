@@ -27,20 +27,6 @@ def extract_verb_qualifiers(all_qualifiers):
 
     return (usage, qualifiers)
 
-def make_qualification(lang_id, title, qualifiers, strip_verb_qualifiers=False):
-    """ Convert a list of qualifiers to label """
-
-    if strip_verb_qualifiers:
-        pos, qualifiers = extract_verb_qualifiers(qualifiers)
-
-    template_str = "{{lb|" + lang_id + "|" + "|".join(qualifiers) + "}}"
-    qualified = wiki_to_text(template_str, title)
-    if not qualified:
-        return ""
-
-    # Strip ()
-    return qualified[1:-1]
-
 def make_gendertag(all_genders):
     genders = []
     for gender in all_genders:
@@ -62,10 +48,10 @@ def make_pos_tag(word, qualifiers):
 
     return "{" + pos + "}"
 
-def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
+def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None, redirects={}):
     wiki = mwparser.parse(wikitext)
 
-    expand_templates(wiki, title, transclude_senses, template_cachedb)
+    expand_templates(wiki, title, transclude_senses, template_cachedb, redirects)
 
     # Reparse and expand links
     wiki = mwparser.parse(str(wiki))

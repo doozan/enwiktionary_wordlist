@@ -19,6 +19,7 @@
 This will build a dictionary from an english wiktionary dump
 """
 
+import csv
 import os
 import re
 import sys
@@ -127,9 +128,19 @@ def main():
     parser.add_argument('--generate-meta', action='store_true', help="Generate metadata when not included in entry")
     parser.add_argument('--low-mem', action='store_true', help="Use less memory (slower)")
     parser.add_argument('--debug', help="Debug a specific entry")
+    parser.add_argument("--redirects", help="redirects.tsv")
 
     args = parser.parse_args()
     use_cache = not args.low_mem
+
+    if args.expand_templates and not args.redirects:
+        raise ValueError("--redirects is required when using --expand-templates")
+
+    if args.redirects:
+        with open(args.redirects) as infile:
+            redirects = {x[0].removeprefix("Template:").removeprefix("template:").removeprefix("T:"):x[1].removeprefix("template:").removeprefix("Template:").removeprefix("T:") for x in csv.reader(infile, delimiter="\t") if x[0].startswith("Template:") or x[0].startswith("template:") or x[0].startswith("T:")}
+    else:
+        redirects = {}
 
     if not args.j:
         args.j = multiprocessing.cpu_count()-1
@@ -145,14 +156,14 @@ def main():
             raise ValueError(f"Unknown language id: {args.lang_id}")
 
         lang_section = ALL_LANG_IDS[args.lang_id]
-        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes, args.expand_templates, args.generate_meta)
+        _builder = WordlistBuilder(lang_section, args.lang_id, args.transcludes, args.expand_templates, args.generate_meta, redirects)
 
         if args.langdata:
             iter_entry = iter_langdata(args.langdata, debug=args.debug)
         else:
             iter_entry = iter_xml(args.xml, lang_section, debug=args.debug)
 
-        wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache)
+        wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache, redirects=redirects)
         count = 0
 
         if args.j > 1:
@@ -175,7 +186,7 @@ def main():
                 break
 
     elif args.wordlist:
-        wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache)
+        wordlist = Wordlist(template_cachedb=cachedb, cache_words=use_cache, redirects=redirects)
         with open(args.wordlist) as infile:
             for title, entry in Wordlist._iter_entries(infile):
                 count += 1
