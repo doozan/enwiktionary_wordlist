@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ..utils import wiki_to_text, make_language_pattern
+from enwiktionary_wordlist.utils import wiki_to_text, make_language_pattern
 import mwparserfromhell
 import re
 

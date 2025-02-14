@@ -1,4 +1,4 @@
-from ..wordlist import Wordlist
+from enwiktionary_wordlist.wordlist import Wordlist
 
 def test_simple():
     data="""\

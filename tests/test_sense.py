@@ -1,4 +1,4 @@
-from ..sense import Sense
+from enwiktionary_wordlist.sense import Sense
 
 def run_test_sense_form(gloss, formtype, lemma, nonform):
     print("testing: ", gloss)
