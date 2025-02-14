@@ -420,6 +420,10 @@ class WordlistToDictunformat():
                     if self.wordlist.has_word(lemma, pos):
                         form_targets.append(target)
                     else:
+                        if pos == "v" and self.wordlist.has_word(lemma + "se"):
+                            target = (lemma + "se", pos)
+                            form_targets.append(target)
+
                         # missing entries are usually generated forms that have been removed
                         continue
 
