@@ -45,6 +45,7 @@ class Sense():
                 data.insert(0, item)
                 break
             elif key == "ex":
+                data.insert(0, item)
                 self.parse_examples(data)
             elif key == "id":
                 self.id = value
