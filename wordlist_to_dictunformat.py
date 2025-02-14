@@ -41,6 +41,7 @@ class WordlistToDictunformat():
         'f-p': 'f pl',
         'm-p; f-p': 'm pl or f pl',
         'f-p; m-p': 'f pl or m pl',
+        'gneut': 'gender neutral',
         '?': '?',
     }
 
