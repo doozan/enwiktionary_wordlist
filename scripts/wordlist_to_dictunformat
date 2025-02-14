@@ -21,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description="Convert wordlist to dictunformat")
     parser.add_argument("wordlist", help="wordlist")
     parser.add_argument("allforms", help="all_forms csv file")
+    parser.add_argument("--ul", help="display list of senses as an unordered list", action='store_true')
     parser.add_argument("--name", help="dictionary name", required=True)
     parser.add_argument("--description", help="description", default="", required=True)
     parser.add_argument("--url", help="source url")
@@ -29,7 +30,7 @@ def main():
     wordlist = Wordlist.from_file(args.wordlist, cachedb, template_cachedb=cachedb)
     allforms = AllForms.from_file(args.allforms)
 
-    converter = WordlistToDictunformat(wordlist, allforms)
+    converter = WordlistToDictunformat(wordlist, allforms, args.ul)
 
     name = args.name
 

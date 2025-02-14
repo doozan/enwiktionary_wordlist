@@ -12,9 +12,10 @@ from enwiktionary_wordlist.all_forms import AllForms
 
 class WordlistToDictunformat():
 
-    def __init__(self, wordlist, allforms=None):
+    def __init__(self, wordlist, allforms=None, unordered=False):
         self.wordlist = wordlist
         self.allforms = allforms if allforms else AllForms.from_wordlist(wordlist)
+        self.unordered = unordered
 
     formtypes = {
         "pl": "pl",
@@ -113,18 +114,18 @@ class WordlistToDictunformat():
         return line
 
 
-    @staticmethod
-    def format_senses(senses):
+    def format_senses(self, senses):
         res = []
-        res.append('<ol style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
+
+        tag = "ul" if self.unordered else "ol"
+        res.append(f'<{tag} style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
         for i,sense in enumerate(senses, 1):
-            res += WordlistToDictunformat.format_sense_data(i, sense)
-        res.append('</ol>\n')
+            res += self.format_sense_data(i, sense)
+        res.append(f'</{tag}>\n')
         return res
 
 
-    @staticmethod
-    def format_sense_data(idx, sense):
+    def format_sense_data(self, idx, sense):
 
         line = [f"<li>"]
         if sense.qualifier:
@@ -170,7 +171,7 @@ class WordlistToDictunformat():
 
 
         if sense.subsenses:
-            line += WordlistToDictunformat.format_senses(sense.subsenses)
+            line += self.format_senses(sense.subsenses)
 
         return line
 
@@ -270,7 +271,6 @@ class WordlistToDictunformat():
 
 
     def get_word_page(self, word_obj, seen, follow_lemmas=True):
-
         items = []
         if not word_obj.senses:
             return []
