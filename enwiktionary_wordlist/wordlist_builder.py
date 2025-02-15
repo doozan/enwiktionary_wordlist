@@ -22,13 +22,11 @@ Convert a wiktionary entries into wordlist entries
 from collections import defaultdict
 import copy
 import os
+import mwparserfromhell as mwparser
 import re
 import sys
 
 import enwiktionary_sectionparser as sectionparser
-from autodooz.sections import ALL_POS, COUNTABLE_SECTIONS, ALL_LANGS
-
-import mwparserfromhell as mwparser
 
 from enwiktionary_wordlist.utils import wiki_to_text, make_pos_tag
 
@@ -215,7 +213,7 @@ class WordlistBuilder:
 
         entry = []
 
-        for section in parsed.ifilter_sections(matches=lambda x: x.title in ALL_POS):
+        for section in parsed.ifilter_sections(matches=lambda x: x.title in sectionparser.ALL_POS):
             pos = sectionparser.parse_pos(section)
             if not pos:
                 print("unparsable section:", section.path, file=sys.stderr)
@@ -581,7 +579,7 @@ class WordlistBuilder:
         # TODO: separate to manual overrides
         if pos.section.title == "Participle":
             return "part"
-        return ALL_POS.get(pos.section.title, pos.section.title)
+        return sectionparser.ALL_POS.get(pos.section.title, pos.section.title)
 
     # TODO: make this generic / overrideable
     def get_genders(self, section):
