@@ -20,7 +20,6 @@ from enwiktionary_wordlist.wordlist import Wordlist
 import mwparserfromhell
 
 import enwiktionary_templates
-cachedb = enwiktionary_templates.cache.get_default_cachedb()
 
 builder = WordlistBuilder("Spanish", "es", expand_templates=True)
 
@@ -1307,7 +1306,7 @@ pos: n
   gloss: a person with dark-hair\
 """
 
-    wordlist_full = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
+    wordlist_full = Wordlist(wordlist_data.splitlines())
 
     res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False, exclude_empty=False))
     assert res == wordlist_data
@@ -1418,7 +1417,7 @@ _____
 hablar
 {hablar_data}\
 """
-    wordlist_full = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
+    wordlist_full = Wordlist(wordlist_data.splitlines())
 
     res = "\n".join(WordlistBuilder.from_wordlist(wordlist_full, exclude_generated=False, exclude_empty=False))
     print(wordlist_data)
@@ -1539,7 +1538,7 @@ pos: n
     assert "\n".join(entry) == wordlist_data
 
 
-    wordlist = Wordlist(wordlist_data.splitlines(), template_cachedb=cachedb)
+    wordlist = Wordlist(wordlist_data.splitlines())
 
     new_entry = next(WordlistBuilder.from_wordlist(wordlist, exclude_generated=False, exclude_empty=False))
     print(new_entry)

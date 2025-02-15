@@ -1,12 +1,8 @@
 from enwiktionary_wordlist.wordlist import Wordlist
-
-import enwiktionary_templates
-cachedb = enwiktionary_templates.cache.get_default_cachedb()
-
-from ..word import Word
+from enwiktionary_wordlist.word import Word
 
 def test_word():
-    wordlist = Wordlist(template_cachedb=cachedb)
+    wordlist = Wordlist()
 
 
     word = Word(wordlist, "test", [ ("pos", "n"), ("g","m") ])
@@ -100,7 +96,7 @@ pos: n
   gloss: sense 2\
           """.splitlines()]
 
-    wordlist = Wordlist(template_cachedb=cachedb)
+    wordlist = Wordlist()
     word = Word(wordlist, "test", data)
 
     print(word.senses)

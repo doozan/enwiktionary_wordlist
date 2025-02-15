@@ -17,10 +17,7 @@ verb_types = {
 }
 
 class Wordlist():
-    def __init__(self, wordlist_data=None, cache_words=True, template_cachedb=None):
-        # cache here refers to the database used to cache mediawiki queries used to expand templates
-        self.template_cachedb = template_cachedb
-
+    def __init__(self, wordlist_data=None, cache_words=True):
         # cache here refers to caching word objects in memory to speed up repeat access
         self.cache_words = cache_words
         self._cached = {}
@@ -39,7 +36,7 @@ class Wordlist():
             self.all_entries = {title: entry for title, entry in self._iter_entries(iter_data)}
 
     @classmethod
-    def from_file(cls, filename, cache_words=True, template_cachedb=None):
+    def from_file(cls, filename, cache_words=True):
         # check for cached version
         cached = filename + ".~db"
         if os.path.exists(cached) and os.path.getctime(cached) > os.path.getctime(filename):
@@ -48,7 +45,7 @@ class Wordlist():
             return res
 
         with open(filename) as infile:
-            res = cls(infile, cache_words, template_cachedb=template_cachedb)
+            res = cls(infile, cache_words)
             with open(cached, "wb") as outfile:
                 pickle.dump(res, outfile)
             return res
@@ -212,7 +209,7 @@ class Wordlist():
             yield from word.get_formtypes(form)
 
     def expand_templates(self, text, title):
-        return wiki_to_text(text, title, template_cachedb=self.template_cachedb).strip()
+        return wiki_to_text(text, title).strip()
 
     @staticmethod
     def parse_line(line):

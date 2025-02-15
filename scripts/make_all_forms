@@ -7,7 +7,6 @@ from enwiktionary_wordlist.wordlist import Wordlist
 from enwiktionary_wordlist.all_forms import AllForms
 
 import enwiktionary_templates
-cachedb = enwiktionary_templates.cache.get_default_cachedb()
 
 if __name__ == "__main__":
 
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     cache_words = not args.low_mem
 
     with open(args.wordlist) as wordlist_data:
-        wordlist = Wordlist(wordlist_data, cache_words=cache_words, template_cachedb=cachedb)
+        wordlist = Wordlist(wordlist_data, cache_words=cache_words)
 
         allforms = AllForms.from_wordlist(wordlist)
         for line in allforms.all_csv:
