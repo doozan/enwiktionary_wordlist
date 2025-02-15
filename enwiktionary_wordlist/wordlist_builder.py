@@ -33,12 +33,11 @@ import mwparserfromhell as mwparser
 from enwiktionary_wordlist.utils import wiki_to_text, make_pos_tag
 
 class WordlistBuilder:
-    def __init__(self, lang_name, lang_id, transcludes_filename=None, expand_templates=False, generate_meta=False, redirects={}):
+    def __init__(self, lang_name, lang_id, transcludes_filename=None, expand_templates=False, generate_meta=False):
         self.LANG_SECTION = lang_name
         self.LANG_ID = lang_id
         self._expand_templates = expand_templates
         self._generate_meta = generate_meta
-        self.redirects = redirects
 
         self._transclude_senses = {}
         if transcludes_filename:
@@ -285,7 +284,7 @@ class WordlistBuilder:
             pos, qualifiers = extract_verb_qualifiers(qualifiers)
 
         template_str = "{{label|" + self.LANG_ID + "|" + "|".join(qualifiers) + "}}"
-        qualified = wiki_to_text(template_str, title, redirects=self.redirects)
+        qualified = wiki_to_text(template_str, title)
         if not qualified:
             return ""
 
@@ -336,7 +335,7 @@ class WordlistBuilder:
     def expand_templates(self, text, title):
         if not self._expand_templates:
             return text.strip()
-        return wiki_to_text(text, title, transclude_senses=self._transclude_senses, redirects=self.redirects).strip()
+        return wiki_to_text(text, title, transclude_senses=self._transclude_senses).strip()
 
     def usage_to_text(self, usage, title):
         text = self.expand_templates(usage.content_text, title)

@@ -17,10 +17,9 @@ verb_types = {
 }
 
 class Wordlist():
-    def __init__(self, wordlist_data=None, cache_words=True, template_cachedb=None, redirects={}):
+    def __init__(self, wordlist_data=None, cache_words=True, template_cachedb=None):
         # cache here refers to the database used to cache mediawiki queries used to expand templates
         self.template_cachedb = template_cachedb
-        self.redirects = redirects
 
         # cache here refers to caching word objects in memory to speed up repeat access
         self.cache_words = cache_words
@@ -213,7 +212,7 @@ class Wordlist():
             yield from word.get_formtypes(form)
 
     def expand_templates(self, text, title):
-        return wiki_to_text(text, title, template_cachedb=self.template_cachedb, redirects=self.redirects).strip()
+        return wiki_to_text(text, title, template_cachedb=self.template_cachedb).strip()
 
     @staticmethod
     def parse_line(line):

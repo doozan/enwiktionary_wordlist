@@ -48,10 +48,10 @@ def make_pos_tag(word, qualifiers):
 
     return "{" + pos + "}"
 
-def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None, redirects={}):
+def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
     wiki = mwparser.parse(wikitext)
 
-    expand_templates(wiki, title, transclude_senses, template_cachedb, redirects)
+    expand_templates(wiki, title, transclude_senses, template_cachedb)
 
     # Reparse and expand links
     wiki = mwparser.parse(str(wiki))
