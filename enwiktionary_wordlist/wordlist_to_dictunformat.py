@@ -71,7 +71,7 @@ class WordlistToDictunformat():
         items = []
         items += self.format_header(word_obj)
 
-        items += self.format_senses(word_obj.senses)
+        items += self.format_senses(word_obj, word_obj.senses)
 
         if word_obj.use_notes:
             items += self.format_use_notes(word_obj.use_notes)
@@ -115,18 +115,33 @@ class WordlistToDictunformat():
         return line
 
 
-    def format_senses(self, senses):
+    def format_senses(self, word_obj, senses):
         res = []
 
         tag = "ul" if self.unordered else "ol"
         res.append(f'<{tag} style="padding:0; margin-left: 1em; margin-top: .2em; margin-bottom: 1em">\n')
-        for i,sense in enumerate(senses, 1):
-            res += self.format_sense_data(i, sense)
+        for sense in senses:
+            res += self.format_sense_data(word_obj, sense)
         res.append(f'</{tag}>\n')
         return res
 
 
-    def format_sense_data(self, idx, sense):
+    def format_sense_data(self, word_obj, sense):
+
+        word = word_obj.word
+        # use -r verb forms if there are no forms for -rse verb
+        if word_obj.pos == "v" and word_obj.word.endswith("rse") and not self.allforms.has_lemma(word):
+            highlight_targets = self.allforms.get_lemma_forms(word[:-2], "v")
+        else:
+            highlight_targets = self.allforms.get_lemma_forms(word, word_obj.pos)
+
+        pattern = r"\b(" + "|".join(sorted(highlight_targets, key=lambda x: (len(x)*-1,x))) + r")\b"
+        def highlight(text):
+            new_text = re.sub(pattern, r"<b>\1</b>", text, flags=re.IGNORECASE)
+
+            if new_text == text and word not in ["bueno"]:
+                print("no highlighting", [word, word_obj.pos, text, highlight_targets], file=sys.stderr)
+            return new_text
 
         line = [f"<li>"]
         if sense.qualifier:
@@ -139,18 +154,24 @@ class WordlistToDictunformat():
             # Only use inline formatting if it can apply to all examples
             use_inline = all((not ex.english or len(ex.english) < 40) and len(ex.text) < 40 for ex in sense.examples)
             for example in sense.examples:
+                assert example.text
+
                 line.append('<div style="font-size: 80%">')
                 if example.source:
-                    line.append(example.source)
+                    line.append(html.escape(example.source))
+
+                text = highlight(html.escape(example.text))
+                english = html.escape(example.english) if example.english else None
+
                 if use_inline:
-                    if example.english:
-                        line.append(f"<i>{example.text}</i> ― {example.english}")
+                    if english:
+                        line.append(f"<i>{text}</i> ― {english}")
                     else:
-                        line.append(f"<i>{example.text}</i>")
+                        line.append(f"<i>{text}</i>")
                 else:
-                    line.append(f"<i>{example.text}</i>")
+                    line.append(f"<i>{text}</i>")
                     if example.english:
-                        line.append(f" &nbsp; {example.english}")
+                        line.append(f" &nbsp; {english}")
                 line.append('</div>')
 
         if sense.usage:
@@ -172,7 +193,7 @@ class WordlistToDictunformat():
 
 
         if sense.subsenses:
-            line += self.format_senses(sense.subsenses)
+            line += self.format_senses(word_obj, sense.subsenses)
 
         return line
 
