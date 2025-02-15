@@ -25,7 +25,7 @@ import re
 import sys
 
 from collections import defaultdict
-from autodooz.lang_ids import ALL_LANG_IDS
+from enwiktionary_templates import ALL_LANG_IDS
 from enwiktionary_wordlist.utils import make_language_pattern
 from pywikibot import xmlreader
 
