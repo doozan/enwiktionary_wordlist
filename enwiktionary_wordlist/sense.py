@@ -21,7 +21,7 @@ class Sense():
 
         gloss = "_" * (depth-1) + "gloss"
         subsense = "_" + gloss
-        prev = None if depth == 1 else "_" * (depth-2) + "gloss"
+        prev = ["_" * p + "gloss"  for p in range(depth-1)]
 
         while(data):
             item = data.pop(0)
@@ -41,7 +41,7 @@ class Sense():
                 # new subsense, repair the stack
                 data.insert(0, item)
                 self.subsenses.append(Sense(data, depth+1))
-            elif key == prev: # start of a new sense, repair the stack and return
+            elif key in prev: # start of a new sense, repair the stack and return
                 data.insert(0, item)
                 break
             elif key == "ex":
