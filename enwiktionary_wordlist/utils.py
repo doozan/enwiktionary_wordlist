@@ -51,6 +51,10 @@ def make_pos_tag(word, qualifiers):
 def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
     wiki = mwparser.parse(wikitext)
 
+    # Remove comments
+    for comment in wiki.ifilter_comments():
+        wiki.remove(comment)
+
     expand_templates(wiki, title, transclude_senses, template_cachedb)
 
     # Reparse and expand links
