@@ -219,10 +219,10 @@ class Word():
 
         res = {}
         offset=3
-        while str(offset+1) in params:
-            formtype = params[str(offset)]
+        while offset+1 in params:
+            formtype = params[offset]
             formtype = re.sub("[^a-zA-Z0-9]", "_", formtype)
-            form = params[str(offset+1)]
+            form = params[offset+1]
             offset += 2
 
             if not form.strip():
