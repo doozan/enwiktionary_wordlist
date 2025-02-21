@@ -607,6 +607,11 @@ class WordlistBuilder:
             "g2": ["g2"],
             "g3": ["g3"],
         },
+        "es-prop": {
+            "g": ["1", "g", "gen", "g1"],
+            "g2": ["g2"],
+            "g3": ["g3"],
+        },
     }
 
     def spanish_get_genders(self, pos):
