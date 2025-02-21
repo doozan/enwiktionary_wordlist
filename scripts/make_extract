@@ -29,6 +29,10 @@ from enwiktionary_templates import ALL_LANG_IDS
 from enwiktionary_wordlist.utils import make_language_pattern
 from pywikibot import xmlreader
 
+def is_namespace(prefix):
+    return prefix in ( "Category", "Citations", "Template", "Thesaurus", "Appendix", "Module",
+                      "Wiktionary", "MediaWiki", "Sign gloss", "Help", "Rhymes", "File",)
+
 def main():
 
     import argparse
@@ -94,6 +98,7 @@ def main():
     parser = dump.parse()
 
     count = 0
+    namespaces = defaultdict(int)
 
     for entry in parser:
         if not count % 1000 and args.verbose:
@@ -127,14 +132,21 @@ def main():
             lang_name = "templates"
             lang_count[lang_name] += 1
             file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+            continue
 
         elif args.templates and entry.title.startswith("Module:"):
             lang_name = "modules"
             lang_count[lang_name] += 1
             file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+            continue
 
-        # TODO: split ":" and validate namespace
-        if ":" in entry.title or "/" in entry.title:
+        # ignore subpages
+        if "/" in entry.title:
+            continue
+
+        # ignore pages outside of the mainspace
+        if ":" in entry.title and is_namespace(entry.title.partition(":")[0].strip()):
+            namespaces[entry.title.partition(":")[0].strip()] += 1
             continue
 
         if "all" in args.lang:
@@ -156,7 +168,6 @@ def main():
     for lang_name in file_handles:
         file_handles[lang_name].close
         print(f"Total in {lang_name}: {lang_count[lang_name]}")
-
 
 if __name__ == "__main__":
     main()
