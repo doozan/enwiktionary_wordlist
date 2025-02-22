@@ -312,10 +312,14 @@ class WordlistBuilder:
                 word_entry.append(f"  etymology: {ety}")
 
         def add_sense_data(sense_data, depth=1):
+            # skip entirely empty entries
+            if not any(v for k,v in sense_data.items() if k != "subsenses"):
+                return
+
             padding = "  " * depth
             prefix = "_" * (depth-1)
             for k,v in sense_data.items():
-                if not v:
+                if not v and k.lstrip("_") != "gloss":
                     continue
                 if k == "subsenses":
                     for subsense in v:
@@ -361,8 +365,8 @@ class WordlistBuilder:
 
         def make_sense_data(sense):
 
-            if not sense.gloss:
-                raise ValueError("Bad gloss")
+#            if not sense.gloss:
+#                raise ValueError("Bad gloss")
 
             s = {}
             s["gloss"] = sense.gloss
@@ -490,7 +494,9 @@ class WordlistBuilder:
                 queue = skipped[word_obj.pos] + [word_obj]
                 skipped[word_obj.pos] = []
                 for word_obj in queue:
+
                     word_lines = WordlistBuilder.word_to_text(word_obj)
+
                     if not word_lines:
                         continue
                     if not header:
