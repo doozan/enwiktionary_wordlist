@@ -9,6 +9,7 @@ setup(
     license='GPL 3',
     packages=['enwiktionary_wordlist'],
     scripts=[
+        'scripts/dump_lemmas',
         'scripts/make_extract',
         'scripts/make_wordlist',
         'scripts/make_all_forms',
