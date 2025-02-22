@@ -141,7 +141,11 @@ class Wordlist():
 
         first = False
         for line in lines:
-            key, _junk, value = line.partition(": ")
+            key, _, value = line.partition(": ")
+
+            # fix for empty keys
+            if "_" != ": " and key.endswith(":"):
+                key = key[:-1]
 
             if first:
                 if key != "pos":
