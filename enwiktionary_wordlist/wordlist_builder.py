@@ -201,7 +201,49 @@ class WordlistBuilder:
         return sense_data
 
 
+    @staticmethod
+    def expand_transclude_templates(text):
+        """ replaces
+        # {{tcl|en|page|1,2,3}}.
+        with
+        # {{tcl|en|page|1}}.
+        # {{tcl|en|page|2}}.
+        # {{tcl|en|page|3}}.
+        """
+
+        subs = []
+
+        # If there are multiple transcludes, expand the line
+        if "{{transclude" in text or "{{tcl" in text:
+            for old in re.findall(".*{{(?:transclude|tcl).*", text):
+                wiki = mwparser.parse(old)
+                templates = wiki.filter_templates(matches=lambda x: x.name in ["transclude", "transclude sense", "tcl"])
+                assert len(templates) == 1, [old, templates]
+                t = templates[0]
+                id_params = [p for p in ["id", 3] if t.has(p)]
+                if len(id_params) != 1:
+                    print("UNHANDLED TRANSCLUDE", old, file=sys.stderr)
+                    continue
+
+                p = t.get(id_params[0])
+                values = p.value.split(",")
+                if len(values) > 1:
+                    new = []
+                    for v in values:
+                        v = v.strip()
+                        p.value = v
+                        new.append(str(wiki))
+                    subs.append((old, "\n".join(new)))
+
+        for old, new in subs:
+            text=text.replace(old, new)
+
+        return text
+
     def entry_to_text(self, text, title):
+
+        text = self.expand_transclude_templates(text)
+
         parsed = sectionparser.parse(text, title)
         if not parsed:
             print("unparsable page:", title, file=sys.stderr)
