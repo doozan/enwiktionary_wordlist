@@ -118,7 +118,7 @@ def main():
 
                 m = re.match(r"^\s*(?:#REDIRECT|return\s+require)[:]?\s*\[\[\s*(.+?)\s*\]\]", entry.text, re.IGNORECASE)
                 if not m:
-                    print("BAD REDIRECT:", [entry_title, entry_text], file=sys.stderr)
+                    print("BAD REDIRECT:", [entry.title, entry.text], file=sys.stderr)
                     return
 
                 target = m.group(1)
