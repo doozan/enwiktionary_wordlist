@@ -673,6 +673,11 @@ class WordlistBuilder:
             for k,params in sources.items():
                 for param in params:
                     if template.has(param):
-                        res[k] = res.get(k, []) + [str(template.get(param).value)]
+                        v = str(template.get(param).value)
+                        genders = [g.strip() for g in v.split(",")]
+                        res[k] = res.get(k, []) + genders
 
-        return [ v[0] for v in res.values() ]
+        all_genders = []
+        for genders in res.values():
+            all_genders += genders
+        return all_genders
