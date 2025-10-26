@@ -140,10 +140,6 @@ def main():
             file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
             continue
 
-        # ignore subpages
-        if "/" in entry.title:
-            continue
-
         # ignore pages outside of the mainspace
         if ":" in entry.title and is_namespace(entry.title.partition(":")[0].strip()):
             namespaces[entry.title.partition(":")[0].strip()] += 1
@@ -153,6 +149,10 @@ def main():
             lang_name = "all"
             lang_count[lang_name] += 1
             file_handles[lang_name].write(f"_____{entry.title}:@{entry.revisionid}_____\n{entry.text}\n")
+
+        # ignore subpages
+        if "/" in entry.title:
+            continue
 
         if not match_pattern:
             continue
