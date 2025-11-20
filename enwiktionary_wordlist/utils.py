@@ -78,8 +78,7 @@ def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
         res = res.replace(old, new)
 
     res = re.sub("''+", "", res)
-    res = re.sub(r"<sup>(.*?)</sup>", r"^\1", res, flags=re.DOTALL)
-    res = re.sub(r"<sub>(.*?)</sub>", r"\1", res, flags=re.DOTALL)
+    res = re.sub(r"<\s*(code|sub|sup)\s*>(.*?)<\s*/\s*\1\s*>", r"\2", res, flags=re.DOTALL)
     res = re.sub(r"<\s*blockquote.*?>(.*?)<\s*/\s*blockquote\s*>", r"\1", res, flags=re.DOTALL)
     res = re.sub(r"<ref [^>]*/>", "", res, flags=re.DOTALL)
     res = re.sub(r"<ref(.*?)</ref>", "", res, flags=re.DOTALL)
