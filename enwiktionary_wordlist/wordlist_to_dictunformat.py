@@ -135,7 +135,7 @@ class WordlistToDictunformat():
         else:
             highlight_targets = self.allforms.get_lemma_forms(word, word_obj.pos)
 
-        pattern = r"\b(" + "|".join(sorted(highlight_targets, key=lambda x: (len(x)*-1,x))) + r")\b"
+        pattern = r"\b(" + "|".join(map(re.escape, sorted(highlight_targets, key=lambda x: (len(x)*-1,x)))) + r")\b"
         def highlight(text):
             new_text = re.sub(pattern, r"<b>\1</b>", text, flags=re.IGNORECASE)
 
