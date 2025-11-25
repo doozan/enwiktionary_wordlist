@@ -77,8 +77,13 @@ def wiki_to_text( wikitext, title, transclude_senses={}, template_cachedb=None):
     for old, new in replacements:
         res = res.replace(old, new)
 
-    res = re.sub("''+", "", res)
-    res = re.sub(r"<\s*(code|sub|sup)\s*>(.*?)<\s*/\s*\1\s*>", r"\2", res, flags=re.DOTALL)
+    res = re.sub(r"(''''')(.*?)\1", r"\2", res, flags=re.DOTALL)
+    res = re.sub(r"(''')(.*?)\1", r"\2", res, flags=re.DOTALL)
+    res = re.sub(r"('')(.*?)\1", r"\2", res, flags=re.DOTALL)
+
+    # convert numbers like 10<sup>-8</sup> to 10^-8
+    res = re.sub(r"<sup>([-\d.\s]*)</sup>", r"^\1", res, flags=re.DOTALL)
+    res = re.sub(r"<\s*(code|div|i|nowiki|sub|sup|small)\s*>(.*?)<\s*/\s*\1\s*>", r"\2", res, flags=re.DOTALL)
     res = re.sub(r"<\s*blockquote.*?>(.*?)<\s*/\s*blockquote\s*>", r"\1", res, flags=re.DOTALL)
     res = re.sub(r"<ref [^>]*/>", "", res, flags=re.DOTALL)
     res = re.sub(r"<ref(.*?)</ref>", "", res, flags=re.DOTALL)
