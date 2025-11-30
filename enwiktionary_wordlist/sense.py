@@ -79,7 +79,7 @@ class Sense():
                     self.add_example(ex_data)
                 ex_data = [item]
             elif key in ["eng", "src"]:
-                ex_data.append(kv)
+                ex_data.append(item)
             else:
                 data.insert(0, item)
                 break
