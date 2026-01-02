@@ -200,10 +200,11 @@ class AllForms:
                 # it will be impossible to guess which plural(s) match to which lemmas
                 # Luckily, there's nothing like that in the dataset. Yet.
                 if len(fems) > 1:
-                    raise ValueError("multiple female lemmas with multiple plurals",
+                    print("WARNING: multiple female lemmas with multiple plurals",
                             word.word, word.pos, fems, fpl, file=sys.stderr)
-                for pl in fpl:
-                    self._add_form(pl, word.pos, form)
+                else:
+                    for pl in fpl:
+                        self._add_form(pl, word.pos, form)
 
 
     #opposite_genders = {"m": "f", "f": "m", "m-p": "fpl", "f-p": "mpl"}
