@@ -242,6 +242,8 @@ class WordlistBuilder:
 
     def entry_to_text(self, text, title):
 
+        # strip comments
+        text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
         text = self.expand_transclude_templates(text)
 
         parsed = sectionparser.parse(text, title)
