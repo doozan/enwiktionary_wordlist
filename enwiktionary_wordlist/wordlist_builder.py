@@ -171,7 +171,10 @@ class WordlistBuilder:
         if any(x in text for x in ["{{senseid|", "{{sid|"]):
             wikt = mwparser.parse(text)
             for t in wikt.ifilter_templates(matches=lambda x: x.name in ["senseid", "sid"]):
-                ids.append(str(t.get(2).value))
+                if t.has(2):
+                    ids.append(str(t.get(2).value))
+                elif t.has("id"):
+                    ids.append(str(t.get("id").value))
         return "; ".join(ids)
 
     def get_sense_data(self, sense, title):
@@ -531,9 +534,13 @@ class WordlistBuilder:
                 # For these rare cases, it's important to preserve the "form of", even if it's a
                 # generated form of
 
-                if exclude_generated and WordlistBuilder.is_generated(word_obj, wordlist):
-                    skipped[word_obj.pos].append(word_obj)
-                    continue
+                try:
+                    if exclude_generated and WordlistBuilder.is_generated(word_obj, wordlist):
+                        skipped[word_obj.pos].append(word_obj)
+                        continue
+                except Exception as e:
+                    print("failed processing", word, file=sys.stderr)
+                    raise e
 
                 queue = skipped[word_obj.pos] + [word_obj]
                 skipped[word_obj.pos] = []
