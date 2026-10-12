@@ -139,8 +139,8 @@ class WordlistToDictunformat():
         def highlight(text):
             new_text = re.sub(pattern, r"<b>\1</b>", text, flags=re.IGNORECASE)
 
-            if new_text == text and word not in ["bueno"]:
-                print("no highlighting", [word, word_obj.pos, text, highlight_targets], file=sys.stderr)
+#            if new_text == text and word not in ["bueno"]:
+#                print("no highlighting", [word, word_obj.pos, text, highlight_targets], file=sys.stderr)
             return new_text
 
         line = [f"<li>"]
@@ -319,9 +319,9 @@ class WordlistToDictunformat():
     def sort_ety(primary, options):
         for option in options:
             if option.word == primary:
-                return option.pos + "::" + (option.etymology or "")
+                return option.pos + "::"
 
-        return 'zzz' + "::" + (options[0].etymology or "")
+        return 'zzz' + "::"
 
     def group_ety(self, primary, words):
         groups = collections.defaultdict(list)
